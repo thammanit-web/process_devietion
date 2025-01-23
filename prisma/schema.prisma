@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Employee {
+  id             Int      @id @default(autoincrement())
+  employee_name  String
+  employee_email String   @unique
+  password       String
+  department     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model IncidentReport {
+  id                   Int       @id @default(autoincrement())
+  ref_no               String
+  priority             String?
+  topic                String?
+  category_report      String?
+  machine_code         String?
+  machine_name         String?
+  incident_date        DateTime?
+  incident_description String?
+  summary_incident     String?
+  reporter_name        String?
+  report_date          DateTime?
+  status_report        String?
+  head_approve         String?
+
+  referenceImages       ReferenceImage[]
+  investigationMeetings InvestigationMeeting[]
+}
+
+model ReferenceImage {
+  id                 Int             @id @default(autoincrement())
+  file_url          String?
+  incident_report_id Int?
+  incidentReport     IncidentReport? @relation(fields: [incident_report_id], references: [id], onDelete: Cascade)
+}
+
+model InvestigationMeeting {
+  id                      Int               @id @default(autoincrement())
+  incident_report_id      Int?
+  topic_meeting           String?
+  scheduled_date          DateTime?
+  meeting_date            DateTime?
+  summary_meeting         String?
+  investigation_signature String?
+  manager_approve         Boolean?
+  file_meeting            String?
+  incidentReport          IncidentReport?   @relation(fields: [incident_report_id], references: [id], onDelete: Cascade)
+  problemResolutions      ProblemSolution[]
+  managerApproves         ManagerApprove[]
+}
+
+model ProblemSolution {
+  id                    Int                    @id @default(autoincrement())
+  meeting_id            Int?
+  topic_solution        String
+  assign_to             String?
+  target_finish         String?
+  status_solution       String?
+  manager_approve       Boolean?
+  investigationMeeting  InvestigationMeeting?  @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
+  troubleshootSolutions TroubleshootSolution[]
+  managerApproves       ManagerApprove[]
+}
+
+model TroubleshootSolution {
+  id                  Int              @id @default(autoincrement())
+  solution_id         Int
+  result_troubleshoot String?
+  file_summary        String?
+  finish_date         DateTime?
+  problemSolution     ProblemSolution? @relation(fields: [solution_id], references: [id], onDelete: Cascade)
+}
+
+model ManagerApprove {
+  id                   Int                   @id @default(autoincrement())
+  meeting_id           Int?
+  solution_id          Int?
+  comment_solution     String?
+  comment_troubleshoot String?
+  investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
+  problemSolution      ProblemSolution?      @relation(fields: [solution_id], references: [id], onDelete: Cascade)
+}
