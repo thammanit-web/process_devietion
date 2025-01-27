@@ -35,12 +35,10 @@ export default function createReport() {
         priority: '',
         ReportFiles: []
     });
-    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [open, setOpen] = useState<boolean>(false);
     const [incidentReportId, setIncidentReportId] = useState<number | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-
     const router = useRouter();
 
     useEffect(() => {
@@ -51,23 +49,6 @@ export default function createReport() {
         }));
 
     }, []);
-
-    const fetchReports = async () => {
-        try {
-
-            const response = await fetch(`/api/incident_report/${incidentReportId}`);
-
-            if (!response.ok) {
-                throw new Error('Incident not found');
-            }
-
-            const data = await response.json();
-            setFormData(data);
-        } catch (err) {
-            console.log(err instanceof Error ? err.message : 'An unexpected error occurred');
-        }
-    };
-
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedCategory = e.target.value;
@@ -86,64 +67,56 @@ export default function createReport() {
         }));
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            setSelectedFiles((prevFiles) => [
+                ...prevFiles,
+                ...Array.from(files),
+            ]);  
+        } 
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSelectedOption(formData.category_report);
 
         const incidentSummary = formData.summary_incident?.trim() === '' ? 'ไม่มีสาเหตุเบื้องต้น' : formData.summary_incident;
 
+        const formDataWithFiles = new FormData();
+        formDataWithFiles.append('topic', formData.topic);
+        formDataWithFiles.append('machine_code', formData.machine_code);
+        formDataWithFiles.append('machine_name', formData.machine_name);
+        formDataWithFiles.append('incident_date', formData.incident_date);
+        formDataWithFiles.append('incident_description', formData.incident_description);
+        formDataWithFiles.append('category_report', formData.category_report);
+        formDataWithFiles.append('summary_incident', incidentSummary);
+        formDataWithFiles.append('reporter_name', formData.reporter_name);
+        formDataWithFiles.append('report_date', formData.report_date);
+        formDataWithFiles.append('priority', formData.priority);
+        selectedFiles.forEach((file, index) => {
+            formDataWithFiles.append('files', file);
+        });
+
         try {
-            const response = await axios.post('/api/incident_report', {
-                ...formData,
-                summary_incident: incidentSummary
+            const response = await axios.post('/api/incident_report', formDataWithFiles, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
             });
 
             setIncidentReportId(response.data.incidentReport.id);
-            setOpen(true);
-
-        } catch (error) {
-            console.error(error);
+            router.back();
+        } catch (error: any) {
+            alert(error);
         }
     };
-
-    const handleFileUpload = async () => {
-        if (!selectedFile || !incidentReportId) {
-            alert("กรุณาเลือกไฟล์และยืนยันการรายงาน");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('incidentReportId', incidentReportId.toString());
-
-        try {
-
-            const response = await axios.post('/api/upload_reference', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            fetchReports();
-            alert("อัพโหลดไฟล์สำเร็จ");
-        } catch (error) {
-            console.error("Error uploading file:", error);
-            alert("อัพโหลดไฟล์ไม่สำเร็จ");
-        }
+    const handleRemoveFile = (fileToRemove: File) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter((file) => file !== fileToRemove));
     };
-
 
     const handleBack = () => {
         router.push('/dashboard_submit');
     };
-    const handleCancel = async (e: React.FormEvent) => {
-        e.preventDefault()
-        try {
-            await axios.delete(`/api/incident_report/${incidentReportId}`)
-            router.push('/dashboard_submit')
-        } catch (error) {
-            console.error("Error rejecting report:", error)
-        }
-    }
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -297,17 +270,57 @@ export default function createReport() {
                         ></input>
                     </div>
                 </div>
+
+                <p>อัพโหลดไฟล์ที่เกี่ยวข้อง</p>
+                <hr className="border-t-solid border-1 border-grey" />
+                <div>
+                    <label htmlFor="file" className="block text-sm font-medium text-gray-400">เลือกไฟล์ (สูงสุด 5MB)</label>
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
+                        multiple
+                        onChange={handleFileChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                </div>
+
+                {selectedFiles.length > 0 && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold">Selected Files:</h3>
+                        <ul className="space-y-2">
+                            {selectedFiles.map((file, index) => (
+                                <li key={index} className="flex items-center gap-4">
+                                    <span>{file.name}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveFile(file)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {errorMessage && (
+                    <div className="text-red-600">{errorMessage}</div>
+                )}
             </form>
-            <div className='gap-4 flex justify-end mt-4'>
-                <button onClick={handleBack}
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            <div className="flex gap-4 justify-end mt-4">
+                <button
+                    onClick={handleBack}
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700"
                 >
                     ยกเลิก
                 </button>
                 <button
-                    onClick={handleSubmit}
+                    onClick={() => setOpen(true)}
                     type="submit"
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                     ส่งรายงาน
                 </button>
@@ -315,63 +328,22 @@ export default function createReport() {
 
             <Modal open={open} onClose={() => setOpen(false)}>
                 <div className="flex flex-col gap-4">
-                    <h1 className="text-2xl justify-center">ยืนยันการรายงานปัญหา</h1>
-                    <p>อัพโหลดไฟล์ที่เกี่ยวข้อง</p>
+                    <h1 className="text-2xl justify-center">ยืนยันการรายงาน</h1>
+                    <p>
+                    </p>
                     <hr className="border-t-solid border-1 border-grey" />
-                    <div>
-                        <div className='flex gap-4'>
-                            <p>ชื่อผู้รายงาน</p>
-                            <p className='underline'>{formData.reporter_name}</p>
-                            <p>วันที่รายงาน</p>
-                            <p className='underline'>{formData.report_date ? new Date(formData.report_date.toString()).toLocaleString() : ''}</p>
-                        </div>
-                        <ul className='mb-4 text-lg underline'>
-                            {formData.ReportFiles.map((file) => (
-                                <li key={file.id} className="mt-1">
-                                    <a href={file.file_url} className="text-blue-500" target="_blank" rel="noopener noreferrer">
-                                        {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                        <label htmlFor="file" className="block text-sm font-medium text-gray-700">
-                            เลือกไฟล์ (สูงสุด 5MB)
-                        </label>
-                        <div className='flex gap-2'>
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
-                                onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            />
-                            <button
-                                className="flex border hover:shadow-md rounded-lg py-1.5 px-4"
-                                onClick={handleFileUpload}
-                            >
-                                <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fillRule="evenodd" d="M12 3a1 1 0 0 1 .78.375l4 5a1 1 0 1 1-1.56 1.25L13 6.85V14a1 1 0 1 1-2 0V6.85L8.78 9.626a1 1 0 1 1-1.56-1.25l4-5A1 1 0 0 1 12 3ZM9 14v-1H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-4v1a3 3 0 1 1-6 0Zm8 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z" clipRule="evenodd" />
-                                </svg>
-
-                            </button>
-                        </div>
-                    </div>
-
                     <div className="flex flex-row justify-center gap-2">
                         <button
-                            className="border border-neutral-300 rounded-lg py-1.5 px-10 bg-red-500 hover:bg-red-600 text-white"
-                            onClick={handleCancel}
+                            className="border border-neutral-300 rounded-lg py-1.5 px-10
+                         bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => setOpen(false)}
                         >
-                            ยกเลิกส่งรายงาน
+                            ยกเลิก
                         </button>
-                        <button
-                            className="border border-neutral-300 rounded-lg py-1.5 px-10 bg-blue-500 hover:bg-blue-600 text-white"
-                            onClick={handleBack}
-                        >
-                            ยืนยันส่งรายงาน
+                        <button onClick={handleSubmit} className="border border-green-300 rounded-lg py-1.5 px-10
+                         bg-green-400 hover:bg-green-600 text-white">
+                            ยืนยัน
                         </button>
-
                     </div>
                 </div>
             </Modal>

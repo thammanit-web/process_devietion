@@ -105,8 +105,7 @@ export default function dashboardTechnical() {
           <tbody>
             {
               Incidentreports.filter((incident) =>
-                incident.status_report === "รอยืนยันการตรวจสอบ"||
-               incident.status_report === "รออนุมัติกำหนดการแก้ไข"
+                incident.status_report === "รอยืนยันการตรวจสอบ"
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
@@ -182,9 +181,10 @@ export default function dashboardTechnical() {
             {
               Incidentreports.filter((incident) =>
                 incident.status_report !== "แก้ไขแล้ว"
-              && incident.status_report !== "รอยืนยันการตรวจสอบ"
-              && incident.status_report !== "แก้ไขแล้ว"
-              && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
+                && incident.status_report !== "รอยืนยันการตรวจสอบ"
+                && incident.status_report !== "แก้ไขแล้ว"
+                && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
+             
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
@@ -195,7 +195,7 @@ export default function dashboardTechnical() {
                   && incident.status_report !== "รอยืนยันการตรวจสอบ"
                   && incident.status_report !== "แก้ไขแล้ว"
                   && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
-                  && incident.status_report !== "รออนุมัติกำหนดการแก้ไข")
+              )
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>

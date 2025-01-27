@@ -140,17 +140,12 @@ export default function headVerify() {
                             report.ReportFiles?.map((file) => (
                                 <li key={file.id} className="mt-1 border px-4 py-2">
                                     <a
-                                        href={file.file_url}
+                                        href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
                                         className="text-blue-500"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {file.file_url
-                                            ?.split("/")
-                                            .pop()
-                                            ?.split("-")
-                                            .slice(1)
-                                            .join("-") ?? ""}
+                                        {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                     </a>
                                 </li>
                             )

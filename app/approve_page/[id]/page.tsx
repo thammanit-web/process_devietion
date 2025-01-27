@@ -101,10 +101,10 @@ export default function setSolution() {
         try {
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
-                manager_approve: "รอการอนุมัติ",
+                manager_approve: "รอการแก้ไข",
             });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
-                status_report: "รออนุมัติกำหนดการแก้ไข"
+                status_report: "รอการแก้ไช"
             })
             router.push('/technical')
         } catch (error) {
@@ -248,6 +248,11 @@ export default function setSolution() {
 
                     <hr className="border-t-solid border-1 border-grey" />
                     <div className="flex flex-row justify-center gap-2">
+                        <div>
+                            <h1>ความคิดเห็นการแก้ไขปัญหา</h1>
+                            <input type="text"  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            </input>
+                        </div>
                         <button
                             className="border border-neutral-300 rounded-lg py-1.5 px-10
                            bg-blue-500 hover:bg-blue-600 text-white"
@@ -257,7 +262,7 @@ export default function setSolution() {
                         </button>
                         <button className="border border-green-300 rounded-lg py-1.5 px-10
                            bg-green-400 hover:bg-green-600 text-white" onClick={CreateSolution}>
-                            ยืนยัน
+                            อนุมัติ
                         </button>
                     </div>
                 </div>

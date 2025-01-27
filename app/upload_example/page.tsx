@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import FileUploadPreview from '../components/File';
 
 export default function FileManagement() {
   const [files, setFiles] = useState([]);
@@ -66,6 +67,7 @@ export default function FileManagement() {
 
   return (
     <div className="container mx-auto p-6">
+     <FileUploadPreview />
       <h1 className="text-2xl font-bold mb-4">File Management</h1>
       <form onSubmit={uploadFile} className="mb-4">
         <input

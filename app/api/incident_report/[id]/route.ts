@@ -18,14 +18,9 @@ export async function GET(
       include: { investigationMeetings: true, ReportFiles: true },
       where: { id: Number(id) },
     });
-    const { data: storageListData, error: storageListError } = await supabase
-      .storage
-      .from('reference_file')
-      .list('uploads', {
-        limit: 100,
-        offset: 0,
-        sortBy: { column: 'name', order: 'asc' },
-      });
+
+
+    
 
     if (!incident_report) {
       return NextResponse.json({ error: 'Incident not found' }, { status: 404 });
@@ -66,8 +61,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-
-    const reportWithFiles = await prisma.incidentReport.findUnique({
+    const reportRelations = await prisma.incidentReport.findUnique({
       where: { id: Number(id) },
       include: {
         investigationMeetings: true,
@@ -75,18 +69,24 @@ export async function DELETE(
       },
     });
 
-    if (!reportWithFiles) {
+    if (!reportRelations) {
       return new Response(
         JSON.stringify({ error: "Incident report not found" }),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
-      const fileUrl = reportWithFiles.ReportFiles.map(file => file.file_url).filter(url => url !== null);
-      const { error: deleteError } = await supabase
-        .storage
-        .from('reference_file')
-        .remove(fileUrl);
 
+    if (reportRelations.ReportFiles) {
+      for (const file of reportRelations.ReportFiles) {
+        const fileUrl = file.file_url;
+        if (fileUrl) {
+           await supabase
+            .storage
+            .from('reference_file')
+            .remove([fileUrl]);
+        }
+      }
+    }
     const deletedReport = await prisma.incidentReport.delete({
       where: { id: Number(id) },
       include: {
@@ -99,8 +99,10 @@ export async function DELETE(
       JSON.stringify({ message: "Delete success", deletedReport }),
     );
   } catch (error) {
+    console.error("Error deleting incident report:", error);
     return new Response(
       JSON.stringify({ error: "An unknown error occurred" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }
