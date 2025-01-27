@@ -15,13 +15,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { data: storageListData, error: storageListError } = await supabase
     .storage
     .from('reference_file')
-    .list('uploads', {
+    .list('meeting_file', {
       limit: 100,
       offset: 0,
       sortBy: { column: 'name', order: 'asc' },
     });
 
-    const file = await prisma.reportFile.findUnique({
+    const file = await prisma.meetingFile.findUnique({
       where: { id: Number(id) },
     });
 
@@ -53,13 +53,13 @@ export const DELETE = async (req: NextRequest, { params }: { params: Promise<{ i
     const { data, error } = await supabase
       .storage
       .from('reference_file')
-      .remove([`uploads/${file.file_url}`]);
+      .remove([`meeting_file/${file.file_url}`]);
 
     if (error) {
       console.error('Supabase file removal error:', error.message);
       return NextResponse.json({ error: 'Failed to remove file from storage.' }, { status: 500 });
     }
-    await prisma.reportFile.delete({
+    await prisma.meetingFile.delete({
       where: { id: Number(id) },
     });
 

@@ -3,27 +3,29 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export async function GET() {
-  return Response.json(await prisma.problemResolution.findMany(
-    { include: {  investigationMeeting:true } }
-  ))
+    return Response.json(await prisma.problemSolution.findMany(
+        { include: { investigationMeeting: true } }
+    ))
 }
 export async function POST(req: Request) {
     try {
         const {
             meeting_id,
-            preventive_measures,
-            responsible_person,
+            topic_solution,
+            assign_to,
             target_finish,
-            status,
+            status_solution,
+            manager_approve,
         } = await req.json()
-        const newResolution = await prisma.problemResolution.create({
-          include: {  investigationMeeting:true } ,
+        const newResolution = await prisma.problemSolution.create({
+            include: { investigationMeeting: true },
             data: {
                 meeting_id,
-                preventive_measures,
-                responsible_person,
-                target_finish,
-                status,
+                topic_solution,
+                assign_to,
+                target_finish: new Date(target_finish),
+                status_solution,
+                manager_approve,
             },
         })
         return Response.json(newResolution)

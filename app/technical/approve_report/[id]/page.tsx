@@ -1,9 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
+import { Modal } from '@/app/components/modal'
 
 interface IncidentReport {
-    priority: string;
     ref_no: string;
     topic: string;
     machine_code: string;
@@ -11,6 +12,7 @@ interface IncidentReport {
     incident_date: string;
     incident_time: string;
     incident_description: string;
+    priority: string;
     category_report: string;
     summary_incident: string;
     reporter_name: string;
@@ -22,11 +24,31 @@ interface IncidentReport {
         file_url?: string;
     }[];
 }
+interface InvestigationMeeting {
+    incident_report_id: string
+    topic_meeting: string
+    scheduled_date: string
+    meeting_date: string
+    summary_meeting: string
+    investigation_signature: string
+    manager_approve: string
+    file_meeting: string
+}
 
-
-export default function detailSubmit() {
+export default function AapproveReport() {
     const { id } = useParams()
     const [report, setReport] = useState<IncidentReport | null>(null)
+    const [open, setOpen] = useState<boolean>(false);
+    const [Investigation, setInvestigation] = useState<InvestigationMeeting>({
+        incident_report_id: '',
+        topic_meeting: '',
+        scheduled_date: '',
+        meeting_date: '',
+        summary_meeting: '',
+        investigation_signature: '',
+        manager_approve: '',
+        file_meeting: '',
+    })
 
     const router = useRouter()
 
@@ -43,8 +65,39 @@ export default function detailSubmit() {
     useEffect(() => {
         if (id) {
             fetchIncidentReports(Number(id))
-        }
+        } setInvestigation((prevState) => ({
+            ...prevState
+        }));
     }, [id])
+
+    const handleCreateMeeting = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInvestigation((prevState) => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const CreateMeeting = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            await axios.put(`/api/incident_report/${id}`, {
+                status_report: "รอการประชุม"
+            });
+            await axios.post(`/api/investigation_meeting`, {
+                ...Investigation,
+                incident_report_id: Number(id)
+            });
+            router.push('/technical');
+            fetchIncidentReports(Number(id));
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error("Error approving report:", error.response?.data || error.message);
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }        
+    }
 
     if (!report) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
@@ -53,7 +106,7 @@ export default function detailSubmit() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
 
-            <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
+            <h1 className="text-2xl font-semibold mb-4">ยืนยันการตรวจสอบรายงาน</h1>
             <form className="space-y-6">
                 <div className='flex gap-4'>
                     <div className='w-full flex gap-4'>
@@ -147,15 +200,71 @@ export default function detailSubmit() {
                         <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
                     </div>
                 </div>
-
-                <div className='gap-4 flex justify-end'>
-                    <a href='/dashboard_submit'
-                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        กลับ
-                    </a>
-                </div>
             </form>
+            <div className='gap-2 flex justify-end'>
+                <a
+                    href='/technical'
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    กลับ
+                </a>
+                <button
+                    onClick={() => setOpen(true)}
+                    type="submit"
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                    ยืนยันการตรวจสอบการรายงาน
+                </button>
+            </div>
+
+            <Modal open={open} onClose={() => setOpen(false)}>
+                <div className="flex flex-col gap-4">
+                    <h1 className="text-2xl justify-center">กำหนดวันประชุม</h1>
+                    <div className='w-full'>
+                        <label htmlFor="scheduled_date" className="block text-sm font-medium text-gray-700">
+                            เลือกวันและเวลา
+                        </label>
+                        <input
+                            type='datetime-local'
+                            name="scheduled_date"
+                            id="scheduled_date"
+                            value={Investigation.scheduled_date}
+                            onChange={handleCreateMeeting}
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        ></input>
+                    </div>
+                    <div className='w-full'>
+                        <label htmlFor="topic_meeting" className="block text-sm font-medium text-gray-700">
+                            หัวข้อการประชุม
+                        </label>
+                        <input
+                            type='text'
+                            name="topic_meeting"
+                            id="topic_meeting"
+                            required
+                            value={Investigation.topic_meeting}
+                            onChange={handleCreateMeeting}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        ></input>
+                    </div>
+
+                    <hr className="border-t-solid border-1 border-grey" />
+                    <div className="flex flex-row justify-center gap-2">
+                        <button
+                            className="border border-neutral-300 rounded-lg py-1.5 px-10
+               bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => setOpen(false)}
+                        >
+                            ยกเลิก
+                        </button>
+                        <button onClick={CreateMeeting} className="border border-green-300 rounded-lg py-1.5 px-10
+               bg-green-400 hover:bg-green-600 text-white">
+                            ยืนยัน
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     )
 }

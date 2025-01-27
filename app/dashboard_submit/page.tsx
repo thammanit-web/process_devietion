@@ -83,39 +83,48 @@ export default function DashboardSubmit() {
             </tr>
           </thead>
           <tbody>
-            {Incidentreports.filter((incident) => incident.status_report === "รออนุมัติการรายงานความผิดปกติ")
-              .map((incident) => (
-                <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
-                  <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
-                  <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                  <td className="px-6 py-4 border border-black">
-                    {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 border border-black">
-                    {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
-                  </td>
-
-                  <td className="px-6 py-4 border border-black">
-                    <Link href={`/head_verify/${incident.id}`} className='underline'> {incident.reporter_name}</Link>
-                    
-                    </td>
-                    <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                          incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                            incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                              incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                                  incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                    incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                        'bg-gray-400'
-                        }`}>        
-                      {incident.status_report}
-                  </td>
-                  <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                    <Link href={`/dashboard_submit/${incident.id}`} className='underline'>รายละอียด</Link>
-                  </td>
+            {
+              Incidentreports.filter((incident) =>
+                incident.status_report === "รออนุมัติการรายงานความผิดปกติ"
+              ).length == 0 ? (
+                <tr>
+                  <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
-              ))}
+              ) : (
+                Incidentreports.filter((incident) => incident.status_report === "รออนุมัติการรายงานความผิดปกติ")
+                  .map((incident) => (
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                      <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
+                      <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
+                      </td>
+
+                      <td className="px-6 py-4 border border-black">
+                        <Link href={`/head_verify/${incident.id}`} className='underline'> {incident.reporter_name}</Link>
+
+                      </td>
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
+                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                      'bg-gray-400'
+                        }`}>
+                        {incident.status_report}
+                      </td>
+                      <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
+                        <Link href={`/dashboard_submit/${incident.id}`} className='underline'>รายละอียด</Link>
+                      </td>
+                    </tr>
+                  )))
+            }
           </tbody>
         </table>
       </div>
@@ -149,35 +158,43 @@ export default function DashboardSubmit() {
             </tr>
           </thead>
           <tbody>
-            {Incidentreports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
-              .map((incident) => (
-                <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
-                  <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
-                  <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                  <td className="px-6 py-4 border border-black">
-                    {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 border border-black">
-                    {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
-                  <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                          incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                            incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                              incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                                  incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                    incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                        'bg-gray-400'
-                        }`}>        
-                      {incident.status_report}
-                  </td>
-                  <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                    <Link href={`/dashboard_submit/${incident.id}`} className='underline'>รายละอียด</Link>
-                  </td>
+            {
+              Incidentreports.filter((incident) =>
+                incident.status_report === "แก้ไขแล้ว"
+              ).length == 0 ? (
+                <tr>
+                  <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
-              ))
+              ) : (
+                Incidentreports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
+                  .map((incident) => (
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                      <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
+                      <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
+                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                      'bg-gray-400'
+                        }`}>
+                        {incident.status_report}
+                      </td>
+                      <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
+                        <Link href={`/dashboard_submit/${incident.id}`} className='underline'>รายละอียด</Link>
+                      </td>
+                    </tr>
+                  )))
             }
           </tbody>
         </table>

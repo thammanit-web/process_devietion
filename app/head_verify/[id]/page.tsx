@@ -19,10 +19,14 @@ interface IncidentReport {
     report_date: string;
     status_report: string;
     dead_approve?: string;
+    ReportFiles: {
+        id: number;
+        file_url?: string;
+    }[];
 }
 
 
-export default function IncidentReportDetail() {
+export default function headVerify() {
     const { id } = useParams()
     const [report, setReport] = useState<IncidentReport | null>(null)
     const [open, setOpen] = useState<boolean>(false);
@@ -129,6 +133,30 @@ export default function IncidentReportDetail() {
                         <p className='border rounded-lg px-4 py-2'>{report.summary_incident}</p>
                     </div>
                 </div>
+                <div className="lg:flex md:flex sm:grid gap-4 w-full">
+                    <div className="lg:grid md:grid sm:flex lg:text-lg md:text-lg sm:text-sm">
+                        <p className="border px-4 py-2 underline">ไฟล์ประกอบการรายงาน</p>
+                        { 
+                            report.ReportFiles?.map((file) => (
+                                <li key={file.id} className="mt-1 border px-4 py-2">
+                                    <a
+                                        href={file.file_url}
+                                        className="text-blue-500"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {file.file_url
+                                            ?.split("/")
+                                            .pop()
+                                            ?.split("-")
+                                            .slice(1)
+                                            .join("-") ?? ""}
+                                    </a>
+                                </li>
+                            )
+                        )}
+                    </div>
+                </div>
 
                 <div className="lg:flex md:flex sm:grid gap-4 w-full">
                     <div className='lg:flex md:flex sm:flex lg:text-lg md:text-lg sm:text-sm'>
@@ -139,6 +167,7 @@ export default function IncidentReportDetail() {
                         <p className='border px-4 py-2 underline'>วันที่รายงาน</p>
                         <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
                     </div>
+
                 </div>
             </form>
             <div className='gap-2 flex justify-end'>

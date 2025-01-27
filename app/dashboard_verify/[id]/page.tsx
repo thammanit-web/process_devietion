@@ -17,10 +17,14 @@ interface IncidentReport {
     report_date: string;
     status_report: string;
     dead_approve?: string;
+    ReportFiles: {
+        id: number;
+        file_url?: string;
+    }[];
 }
 
 
-export default function IncidentReportDetail() {
+export default function detailVerify() {
     const { id } = useParams()
     const [report, setReport] = useState<IncidentReport | null>(null)
 
@@ -99,6 +103,36 @@ export default function IncidentReportDetail() {
                     <div className='w-full'>
                         <p className='lg:text-lg md:text-sm sm:text-sm'>สาเหตุความผิดปกติเบื้องต้น</p>
                         <p className='border rounded-lg px-4 py-2'>{report.summary_incident}</p>
+                    </div>
+                </div>
+                <div className="lg:flex md:flex sm:grid gap-4 w-full">
+                    <div className="lg:grid md:grid sm:flex lg:text-lg md:text-lg sm:text-sm">
+                        <p className="border px-4 py-2 underline">ไฟล์ประกอบการรายงาน</p>
+                        {report.ReportFiles.length == 0 ? (
+                            <div>
+                                <p className="text-center py-4 font-bold text-lg border px-4">
+                                    ไม่มีไฟล์ประกอบการตรวจสอบ!!
+                                </p>
+                            </div>
+                        ) : (
+                            report.ReportFiles?.map((file) => (
+                                <li key={file.id} className="mt-1 border px-4 py-2">
+                                    <a
+                                        href={file.file_url}
+                                        className="text-blue-500"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {file.file_url
+                                            ?.split("/")
+                                            .pop()
+                                            ?.split("-")
+                                            .slice(1)
+                                            .join("-") ?? ""}
+                                    </a>
+                                </li>
+                            ))
+                        )}
                     </div>
                 </div>
 

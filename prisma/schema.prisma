@@ -34,13 +34,13 @@ model IncidentReport {
   status_report        String?
   head_approve         String?
 
-  referenceImages       ReferenceImage[]
+  ReportFiles           ReportFile[]
   investigationMeetings InvestigationMeeting[]
 }
 
-model ReferenceImage {
+model ReportFile {
   id                 Int             @id @default(autoincrement())
-  file_url          String?
+  file_url           String?
   incident_report_id Int?
   incidentReport     IncidentReport? @relation(fields: [incident_report_id], references: [id], onDelete: Cascade)
 }
@@ -53,11 +53,18 @@ model InvestigationMeeting {
   meeting_date            DateTime?
   summary_meeting         String?
   investigation_signature String?
-  manager_approve         Boolean?
-  file_meeting            String?
+  manager_approve         String?
   incidentReport          IncidentReport?   @relation(fields: [incident_report_id], references: [id], onDelete: Cascade)
   problemResolutions      ProblemSolution[]
+  meetingFiles            MeetingFile[]
   managerApproves         ManagerApprove[]
+}
+
+model MeetingFile {
+  id                   Int                   @id @default(autoincrement())
+  file_url             String?
+  meeting_id           Int?
+  investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
 }
 
 model ProblemSolution {
@@ -65,9 +72,9 @@ model ProblemSolution {
   meeting_id            Int?
   topic_solution        String
   assign_to             String?
-  target_finish         String?
+  target_finish         DateTime?
   status_solution       String?
-  manager_approve       Boolean?
+  manager_approve       String?
   investigationMeeting  InvestigationMeeting?  @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
   troubleshootSolutions TroubleshootSolution[]
   managerApproves       ManagerApprove[]

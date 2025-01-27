@@ -11,13 +11,13 @@ const supabase = createClient(
 
 export async function GET() {
   try {
-    const images = await prisma.reportFile.findMany({
-      include: { incidentReport: true },
+    const images = await prisma.meetingFile.findMany({
+      include: { investigationMeeting: true },
     });
     const { data: storageListData, error: storageListError } = await supabase
       .storage
       .from('reference_file')
-      .list('uploads', {
+      .list('meeting_file', {
         limit: 100,
         offset: 0,
         sortBy: { column: 'name', order: 'asc' },
@@ -37,10 +37,10 @@ export const POST = async (req: NextRequest) => {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
-    const incidentReportId = formData.get('incidentReportId');
+    const meetingId = formData.get('meetingId');
 
-    if (!file || !incidentReportId) {
-      throw new Error("Missing file or incidentReportId in the request.");
+    if (!file || !meetingId) {
+      throw new Error("Missing file or meetingId in the request.");
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'video/mp4'];
@@ -52,7 +52,7 @@ export const POST = async (req: NextRequest) => {
     if (file.size > maxSize) {
       throw new Error("File size exceeds the 5MB limit.");
     }
-    const fileName = `uploads/${Date.now()}-${file.name}`;
+    const fileName = `meeting_file/${Date.now()}-${file.name}`;
     
     const { error: uploadError } = await supabase.storage
       .from('reference_file')
@@ -68,10 +68,10 @@ export const POST = async (req: NextRequest) => {
 
     const imageUrl = publicUrlData.publicUrl;
 
-    const newImage = await prisma.reportFile.create({
+    const newImage = await prisma.meetingFile.create({
       data: {
         file_url: imageUrl,
-        incident_report_id: parseInt(incidentReportId as string),
+        meeting_id: parseInt(meetingId as string),
       },
     });
 

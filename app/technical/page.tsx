@@ -20,9 +20,20 @@ interface IncidentReport {
   report_date: String
   status_report: String
   head_approve: String
+  investigationMeetings: InvestigationMeeting[];
+}
+interface InvestigationMeeting {
+  incident_report_id: string
+  topic_meeting: string
+  scheduled_date: string
+  meeting_date: string
+  summary_meeting: string
+  investigation_signature: string
+  manager_approve: Boolean
+  file_meeting: string
 }
 
-export default function DashboardTechnical() {
+export default function dashboardTechnical() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
 
   const router = useRouter()
@@ -55,7 +66,7 @@ export default function DashboardTechnical() {
       <div className='flex justify-end items-between w-screen mb-4 mt-4'>
         <button
           onClick={handleLogout}
-          className='mx-8 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid'>
+          className='mx-8 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid hover:bg-gray-100'>
           ออกจากระบบ
         </button>
       </div>
@@ -92,34 +103,43 @@ export default function DashboardTechnical() {
             </tr>
           </thead>
           <tbody>
-            {Incidentreports.filter((incident) => incident.status_report === "รอยืนยันการตรวจสอบ")
-              .map((incident) => (
-                <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
-                  <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
-                  <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                  <td className={`text-white ${incident.priority==='Urgent'?'bg-red-500':'bg-blue-500'}`}>            
-                    {incident.priority}
-                    </td>
-                  <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
-                  <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
-                  <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
-                  <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                          incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                            incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                              incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                                  incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                    incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                        'bg-gray-400'
-                        }`}>        
-                      {incident.status_report}
-                  </td>
-                  <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                    <Link href={`/technical/${incident.id}`} className='underline'>ตรวจสอบ</Link>
-                  </td>
+            {
+              Incidentreports.filter((incident) =>
+                incident.status_report === "รอยืนยันการตรวจสอบ"||
+               incident.status_report === "รออนุมัติกำหนดการแก้ไข"
+              ).length == 0 ? (
+                <tr>
+                  <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
-              ))}
+              ) : (
+                Incidentreports.filter((incident) => incident.status_report === "รอยืนยันการตรวจสอบ")
+                  .map((incident) => (
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                      <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
+                      <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td className={`text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                        {incident.priority}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
+                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                      'bg-gray-400'
+                        }`}>
+                        {incident.status_report}
+                      </td>
+                      <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
+                        <Link href={`/technical/approve_report/${incident.id}`} className='underline bg-red-500 px-3 py-3 rounded-xl text-white hover:text-gray-400'>ตรวจสอบ!</Link>
+                      </td>
+                    </tr>
+                  )))}
           </tbody>
         </table>
       </div>
@@ -145,6 +165,9 @@ export default function DashboardTechnical() {
                 วันที่รายงาน
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
+                วันที่นัดประชุม
+              </th>
+              <th scope="col" className="px-6 py-3 border border-black">
                 ชื่อผู้รายงาน
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
@@ -157,32 +180,55 @@ export default function DashboardTechnical() {
           </thead>
           <tbody>
             {
-              Incidentreports.filter((incident) => incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รอยืนยันการตรวจสอบ" && incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ")
-                .map((incident) => (
-                  <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
-                    <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
-                    <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                    <td className={`text-white ${incident.priority==='Urgent'?'bg-red-500':'bg-blue-500'}`}>            
-                    {incident.priority}
-                    </td>
-                    <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
-                    <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString():''}</td>
-                    <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
-                    <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                          incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                            incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                              incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                                  incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                    incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                        'bg-gray-400'
-                        }`}>        
-                      {incident.status_report}
-                  </td>
-                    <td className="px-6 py-4 border border-black"><a href='#' className='underline'>รายละอียด</a></td>
-                  </tr>
-                ))
+              Incidentreports.filter((incident) =>
+                incident.status_report !== "แก้ไขแล้ว"
+              && incident.status_report !== "รอยืนยันการตรวจสอบ"
+              && incident.status_report !== "แก้ไขแล้ว"
+              && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
+              ).length == 0 ? (
+                <tr>
+                  <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
+                </tr>
+              ) : (
+                Incidentreports.filter((incident) =>
+                  incident.status_report !== "แก้ไขแล้ว"
+                  && incident.status_report !== "รอยืนยันการตรวจสอบ"
+                  && incident.status_report !== "แก้ไขแล้ว"
+                  && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
+                  && incident.status_report !== "รออนุมัติกำหนดการแก้ไข")
+                  .map((incident) => (
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                      <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
+                      <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td className={`text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                        {incident.priority}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
+                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString()
+                          : ''}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
+                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                      'bg-gray-400'
+                        }`}>
+                        {incident.status_report}
+                      </td>
+                      <td className="px-6 py-4 border border-black">
+                        <Link href={`/technical/investigation/${incident.id}`} className='underline bg-blue-300 px-3 py-3 rounded-xl text-black hover:text-gray-400'>ติดตามแก้ไข</Link>
+                      </td>
+
+                    </tr>
+                  )))
             }
           </tbody>
         </table>

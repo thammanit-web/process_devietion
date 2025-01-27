@@ -15,16 +15,6 @@ export default function Nav() {
     return null;
   }
 
-  const handleLogout = async () => {
-    const response = await fetch('/api/auth/logout', { method: 'POST' });
-
-    if (response.ok) {
-      router.push('/login');
-    } else {
-      console.error('Failed to logout');
-    }
-  };
-
   return (
     <nav className="flex items-center justify-between text-black w-full h-30 shadow-md">
       <div className='flex w-screen h-24 justify-between'>
@@ -33,10 +23,10 @@ export default function Nav() {
             <img className="w-14" src="https://www.thainitrate.com/images/tnc-logo.png" alt="ChitChat Logo" />
           </a>
         </div>
-        <div className='flex justify-center items-center flex-1'>
+        <div className='flex justify-center items-center w-full'>
           <div className=' text-black text-center mt-4 '>
             <h1 className='lg:text-3xl md:text-xl sm:text-xs'>PROCESS DEVIATION INVESTIGATION FORM</h1>
-            <h1>รายงานความผิดปกติในกระบวนการผลิต</h1>
+            <h1 className='flex justify-start'>รายงานความผิดปกติในกระบวนการผลิต</h1>
           </div>
         </div>
       </div>

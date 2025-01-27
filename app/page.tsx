@@ -9,10 +9,11 @@ export default function FirstPage() {
     <div className="overflow-x-auto justify-center min-h-screen grid"
       style={{
         backgroundImage:
-          "url('https://www.thainitrate.com/images/index/slider-1.JPG')",
+          "url('https://images.pexels.com/photos/1266808/pexels-photo-1266808.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
         backgroundPosition: 'center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
+      
       }}>
       <div className='flex w-screen h-24 justify-between'>
         <div className="shrink-0 mt-4 ms-6">
@@ -28,7 +29,7 @@ export default function FirstPage() {
       <div className="flex flex-wrap justify-center gap-10 mb-14">
         <a
           href="/dashboard_submit"
-          className="border border-black hover:border-white text-black hover:text-white h-40 md:h-40 sm:h-24 w-80 md:w-64 sm:w-36 flex items-center justify-center rounded-lg bg-gray-200 bg-opacity-50"
+          className="border border-black hover:border-gray-400 text-black hover:text-gray-400 h-40 md:h-40 sm:h-24 w-80 md:w-64 sm:w-36 flex items-center justify-center rounded-lg bg-gray-100"
         >
           <div className="grid justify-center text-center">
             <h1 className="text-xl md:text-lg sm:text-base">รายงานความผิดปกติ</h1>
@@ -38,7 +39,7 @@ export default function FirstPage() {
         </a>
         <a
           href="/dashboard_verify"
-          className="border border-black hover:border-white text-black hover:text-white h-40 md:h-40 sm:h-24 w-80 md:w-64 sm:w-36 flex items-center justify-center rounded-lg bg-gray-200 bg-opacity-50"
+          className="border border-black hover:border-gray-400 text-black hover:text-gray-400 h-40 md:h-40 sm:h-24 w-80 md:w-64 sm:w-36 flex items-center justify-center rounded-lg bg-gray-100"
         >
           <div className="grid justify-center text-center">
             <h1 className="text-xl md:text-lg sm:text-base">การตรวจสอบ

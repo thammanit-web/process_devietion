@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const problem_resolution = await prisma.problemResolution.findUnique({
+    const problem_resolution = await prisma.problemSolution.findUnique({
       where: { id: Number(id) },
     });
     if (!problem_resolution) {
@@ -28,17 +28,23 @@ export async function PUT(
   try {
     const { id } = await params
     const {              
-        preventive_measures,
-        responsible_person,
-        target_finish,
-        status, } = await req.json()
-    return Response.json(await prisma.problemResolution.update({
+      meeting_id,
+      topic_solution,
+      assign_to,
+      target_finish,
+      status_solution,
+      manager_approve,
+     } = await req.json()
+    return Response.json(await prisma.problemSolution.update({
       where: { id: Number(id) },
       data: {              
-        preventive_measures,
-        responsible_person,
-        target_finish,
-        status, },
+        meeting_id,
+        topic_solution,
+        assign_to,
+        target_finish: new Date(target_finish),
+        status_solution,
+        manager_approve,
+       },
     }))
   } catch (error) {
     return new Response(error as BodyInit, {
@@ -54,7 +60,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const deletedResolution = await prisma.problemResolution.delete({
+    const deletedResolution = await prisma.problemSolution.delete({
       where: { id: Number(id) },
     });
     return Response.json({message: "Resolution successfully deleted",deletedResolution}); 
