@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from "next/navigation";
 
-export default function LoginCard() {
+function LoginCardContent() {
   const [employee_email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,7 +11,7 @@ export default function LoginCard() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
-  const next = searchParams.get('next');
+  const next = searchParams.get("next");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +27,9 @@ export default function LoginCard() {
 
       const data = await response.json();
 
-
       if (response.ok) {
         console.log("Login successful:", data);
-        router.push(next || '/')
+        router.push(next || "/");
       } else {
         setError(data.error || "Login failed");
       }
@@ -41,9 +40,9 @@ export default function LoginCard() {
     }
   };
 
-  const handaleHome = async () => {
-    router.push('/')
-  }
+  const handleHome = async () => {
+    router.push("/");
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -91,14 +90,21 @@ export default function LoginCard() {
           </button>
         </form>
         <button
-          onClick={handaleHome}
+          onClick={handleHome}
           className={`w-full mb-2 bg-gray-600 hover:bg-gray-500 text-white font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded`}
           disabled={loading}
         >
           กลับหน้าแรก
         </button>
-
       </div>
     </div>
+  );
+}
+
+export default function LoginCard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginCardContent />
+    </Suspense>
   );
 }
