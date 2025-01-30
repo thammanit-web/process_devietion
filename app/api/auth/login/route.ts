@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
+import { PrismaClient } from '@prisma/client'
+
+
+const prisma = new PrismaClient()
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'your-secret-key';
 export const dynamic = 'force-dynamic'; 
