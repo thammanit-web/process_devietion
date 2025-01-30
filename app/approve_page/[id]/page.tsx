@@ -40,7 +40,7 @@ interface ManagerApprove {
     comment_troubleshoot: string
 }
 
-export default function setSolution() {
+export default function SetSolution() {
     const { id } = useParams()
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
