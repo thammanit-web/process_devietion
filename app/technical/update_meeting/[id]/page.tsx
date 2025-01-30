@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
+import investigationMeeting from '../../investigation/[id]/page'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -41,13 +42,14 @@ export default function updateMeeting() {
 
     const [open, setOpen] = useState<boolean>(false);
     const [meetingId, setMeetingId] = useState<number | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
 
     const router = useRouter()
 
     const fetchMeeting = async (id: number) => {
         try {
+            
             const respone = await fetch(`/api/investigation_meeting/${id}`)
             const data = await respone.json()
             console.log("Fetched Data:", data);
@@ -66,8 +68,10 @@ export default function updateMeeting() {
         if (id) {
             fetchMeeting(Number(id));
         }
+        const today = new Date().toISOString().slice(0, 16);
         setInvestigation((prevState) => ({
             ...prevState,
+            meeting_date: today
         }));
     }, [id]);
 
@@ -85,54 +89,52 @@ export default function updateMeeting() {
             console.error("Invalid ID");
             return;
         }
-        try {
-            await axios.put(`/api/investigation_meeting/${id}`, {
-                ...Investigation,
-                manager_approve:'รอกำหนดการแก้ไข'
-            } );
-           
-            router.back()
-            fetchMeeting(Number(id));
-        } catch (error) {
-            console.error("Error updating meeting:", error);
-        }
-    };
-
-    const handleFileUpload = async () => {
-        if (!selectedFile || !meetingId) {
-            alert("กรุณาเลือกไฟล์และยืนยันการรายงาน");
-            return;
-        }
 
         const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('meetingId', meetingId.toString());
+        formData.append("meeting_date", Investigation.meeting_date);
+        formData.append("summary_meeting", Investigation.summary_meeting);
+
+        selectedFiles.forEach((file, index) => {
+            formData.append(`files`, file);
+        });
+
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+        }
 
         try {
-
-            await axios.post('/api/file_meeting', formData, {
+            const response = await axios.put(`/api/investigation_meeting/${id}`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    "Content-Type": "multipart/form-data",
                 },
             });
-            fetchMeeting(meetingId)
-            alert("อัพโหลดไฟล์สำเร็จ");
+
+            console.log("Update response:", response);
+            router.back();
         } catch (error) {
-            console.error("Error uploading file:", error);
-            alert("อัพโหลดไฟล์ไม่สำเร็จ");
+            console.error("Error updating meeting:", error);
+            alert("Failed to update meeting. Please check the data and try again.");
         }
     };
 
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            setSelectedFiles((prevFiles) => [
+                ...prevFiles,
+                ...Array.from(files),
+            ]);
+        }
+    };
+
+    const handleRemoveFile = (fileToRemove: File) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter((file) => file !== fileToRemove));
+    };
 
     if (!Investigation) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
     }
-
-    const meetingDate = Investigation.meeting_date
-        ? new Date(Investigation.meeting_date)
-        : new Date();
-    const localDate = meetingDate.toISOString().slice(0, 16).replace('T', 'T');
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -176,10 +178,10 @@ export default function updateMeeting() {
                         วันที่ประชุม
                     </label>
                     <input
-                        type='datetime-local'
+                        type='date'
                         name="meeting_date"
                         id="meeting_date"
-                        value={localDate}
+                        value={Investigation.meeting_date || ""}
                         onChange={handleChange}
                         required
                         className="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -202,39 +204,56 @@ export default function updateMeeting() {
 
                 <p>อัพโหลดไฟล์ที่เกี่ยวข้อง</p>
                 <hr className="border-t-solid border-1 border-grey" />
-                <div>
-                    <ul className='mb-4 text-lg underline'>
-                        {Investigation.meetingFiles.map((file) => (
-                            <li key={file.id} className="mt-1">
-                                <a href={file.file_url} className="text-blue-500" target="_blank" rel="noopener noreferrer">
+                <div className='mb-4'>
+                    {
+                        Investigation.meetingFiles?.map((file) => (
+                            <li key={file.id} className="mt-1 border px-4 py-2">
+                                <a
+                                    href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                    className="text-blue-500"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
                                     {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                 </a>
                             </li>
-                        ))}
-                    </ul>
-                    <label htmlFor="file" className="block text-xs text-gray-700">
-                        เลือกไฟล์ (สูงสุด 5MB)
-                    </label>
-                    <div className='flex gap-2'>
-                        <input
-                            type="file"
-                            id="file"
-                            name="file"
-                            accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
-                            onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        />
-                        <button
-                            className="flex border hover:shadow-md rounded-lg py-1.5 px-4"
-                            onClick={handleFileUpload}
-                        >
-                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path fillRule="evenodd" d="M12 3a1 1 0 0 1 .78.375l4 5a1 1 0 1 1-1.56 1.25L13 6.85V14a1 1 0 1 1-2 0V6.85L8.78 9.626a1 1 0 1 1-1.56-1.25l4-5A1 1 0 0 1 12 3ZM9 14v-1H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-4v1a3 3 0 1 1-6 0Zm8 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z" clipRule="evenodd" />
-                            </svg>
-
-                        </button>
-                    </div>
+                        )
+                        )}
                 </div>
+                <div>
+                    <label htmlFor="file" className="block text-sm font-medium text-gray-400">เลือกไฟล์ (สูงสุด 5MB)</label>
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
+                        multiple
+                        onChange={handleFileChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                </div>
+
+                {selectedFiles.length > 0 && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold">Selected Files:</h3>
+                        <ul className="space-y-2">
+                            {selectedFiles.map((file, index) => (
+                                <li key={index} className="flex items-center gap-4">
+                                    <span>{file.name}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveFile(file)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+
             </div>
 
             <div className='gap-2 flex justify-end'>

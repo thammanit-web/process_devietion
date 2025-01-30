@@ -23,6 +23,7 @@ interface IncidentReport {
   investigationMeetings: InvestigationMeeting[];
 }
 interface InvestigationMeeting {
+  id: number;
   incident_report_id: string
   topic_meeting: string
   scheduled_date: string
@@ -63,12 +64,17 @@ export default function dashboardTechnical() {
 
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
-      <div className='flex justify-end items-between w-screen mb-4 mt-4'>
-        <button
-          onClick={handleLogout}
-          className='mx-8 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid hover:bg-gray-100'>
-          ออกจากระบบ
-        </button>
+      <div className='flex justify-end w-screen mb-4 mt-4'>
+        <div className='mx-8 flex gap-2'>
+          <a href="/dashboard_verify" className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>หน้าหลัก</a>
+          <button
+            onClick={handleLogout}
+            className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div className="relative overflow-x-auto mx-8 mb-16">
@@ -129,8 +135,9 @@ export default function dashboardTechnical() {
                               incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
                                 incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
                                   incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                      'bg-gray-400'
+                                    incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-teal-500' :
+                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                        'bg-gray-400'
                         }`}>
                         {incident.status_report}
                       </td>
@@ -184,7 +191,7 @@ export default function dashboardTechnical() {
                 && incident.status_report !== "รอยืนยันการตรวจสอบ"
                 && incident.status_report !== "แก้ไขแล้ว"
                 && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
-             
+
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
@@ -195,7 +202,7 @@ export default function dashboardTechnical() {
                   && incident.status_report !== "รอยืนยันการตรวจสอบ"
                   && incident.status_report !== "แก้ไขแล้ว"
                   && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
-              )
+                )
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
@@ -211,21 +218,28 @@ export default function dashboardTechnical() {
                           : ''}
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
-                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                      'bg-gray-400'
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-[#ff6347]' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-[#32cd32]' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-[#1e90ff]' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-[#ff1493]' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-[#ff4500]' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-[#8a2be2]' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-[#00bfff]' :
+                                    incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-[#adff2f]' :
+                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-[#da70d6]' :
+                                        'bg-[#808080]'
                         }`}>
                         {incident.status_report}
                       </td>
-                      <td className="px-6 py-4 border border-black">
-                        <Link href={`/technical/investigation/${incident.id}`} className='underline bg-blue-300 px-3 py-3 rounded-xl text-black hover:text-gray-400'>ติดตามแก้ไข</Link>
-                      </td>
+                        <td className="px-6 py-4 border border-black">
+                        <Link 
+                          href={incident.status_report === 'รอตรวจสอบการแก้ไข' 
+                          ? `/technical/check_maintenance/${incident.investigationMeetings[0]?.id}` 
+                          : `/technical/investigation/${incident.id}`} 
+                          className='underline bg-blue-300 px-3 py-3 rounded-xl text-black hover:text-gray-400'>
+                          {incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'รีวิวการแก้ไข' : 'ติดตามแก้ไข'}
+                        </Link>
+                        </td>
 
                     </tr>
                   )))

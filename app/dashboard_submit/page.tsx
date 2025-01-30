@@ -49,7 +49,7 @@ export default function DashboardSubmit() {
 
         <button
           onClick={hadleSubmitReport}
-          className='mx-8 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid'>
+          className='mx-8 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
           + รายงานปัญหา
         </button>
       </div>
@@ -191,7 +191,7 @@ export default function DashboardSubmit() {
                         {incident.status_report}
                       </td>
                       <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                        <Link href={`/dashboard_submit/${incident.id}`} className='underline'>รายละอียด</Link>
+                        <Link href={`/detail_report/${incident.id}`} className='underline'>รายละอียด</Link>
                       </td>
                     </tr>
                   )))

@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   return Response.json(await prisma.investigationMeeting.findMany(
-    { include: { problemResolutions: true, incidentReport: true } }
+    { include: { problemResolutions: true, incidentReport: true,managerApproves:true } }
   ))
 }
 export async function POST(req: Request) {

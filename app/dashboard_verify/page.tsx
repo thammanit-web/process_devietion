@@ -50,7 +50,7 @@ export default function DashboardVerify() {
       console.error(error)
     }
   }
-  
+
 
   const hadleTechnical = () => {
     router.push('/technical')
@@ -63,17 +63,17 @@ export default function DashboardVerify() {
         <div className='flex mx-8 gap-2'>
           <button
             onClick={hadleTechnical}
-            className='hover:bg-gray-100 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid'>
+            className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
             ผู้ตรวจสอบ
           </button>
-          <button
-
-            className='hover:bg-gray-100 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid'>
-            ผู้ดำเนินการแก้ไข
-          </button>
           <a
-              href="/approve_page"
-            className='hover:bg-gray-100 w-46 h-14 bg-trasparent px-4 border  text-gray-950 hover:text-gray-400 rounded-xl mt-4 shadow-md text-center items-center grid'>
+            href="/maintenance_page"
+            className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+            ผู้ดำเนินการแก้ไข
+          </a>
+          <a
+            href="/approve_page"
+            className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
             ผู้อนุมัติ
           </a>
         </div>
@@ -115,9 +115,9 @@ export default function DashboardVerify() {
               Incidentreports.filter((incident) =>
                 incident.status_report === "รอยืนยันการตรวจสอบ"
               ).length == 0 ? (
-              <tr>
+                <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
-              </tr>
+                </tr>
               ) : (
                 Incidentreports.filter((incident) => incident.status_report === "รอยืนยันการตรวจสอบ")
                   .map((incident) => (
@@ -141,9 +141,9 @@ export default function DashboardVerify() {
                               incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
                                 incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
                                   incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                  incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-teal-400' :
-                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                      'bg-gray-400'
+                                    incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-teal-400' :
+                                      incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                        'bg-gray-400'
                         }`}>
                         {incident.status_report}
                       </td>
@@ -193,41 +193,41 @@ export default function DashboardVerify() {
               Incidentreports.filter((incident) =>
                 incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รอยืนยันการตรวจสอบ" && incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ"
               ).length == 0 ? (
-              <tr>
+                <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
-              </tr>
+                </tr>
               ) : (
-              Incidentreports.filter((incident) => incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รอยืนยันการตรวจสอบ" && incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ")
-                .map((incident) => (
-                  <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
-                    <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
-                    <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                    <td className={`text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>
-                      {incident.priority}
-                    </td>
-                    <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}</td>
-                    <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}</td>
-                    <td className="px-6 py-4 border border-black">
-                      {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
-                        ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString()
-                        : ''}
-                    </td>
-                    <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
-                    <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
-                      incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
-                        incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                          incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
-                            incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
-                              incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
-                                incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
-                                  incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
-                                    'bg-gray-400'
-                      }`}>
-                      {incident.status_report}
-                    </td>
-                    <td className="px-6 py-4 border border-black" ><Link href={`/dashboard_verify/${incident.id}`} className='underline'>รายละอียด</Link></td>
-                  </tr>
-                 ) ))
+                Incidentreports.filter((incident) => incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รอยืนยันการตรวจสอบ" && incident.status_report !== "แก้ไขแล้ว" && incident.status_report !== "รออนุมัติการรายงานความผิดปกติ")
+                  .map((incident) => (
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                      <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
+                      <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td className={`text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>
+                        {incident.priority}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
+                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString()
+                          : ''}
+                      </td>
+                      <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
+                      <td className={` text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-400' :
+                        incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-orange-400' :
+                          incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
+                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-purple-400' :
+                              incident.status_report === 'รอการแก้ไข' ? 'bg-red-400' :
+                                incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-indigo-400' :
+                                  incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-teal-400' :
+                                    incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
+                                      'bg-gray-400'
+                        }`}>
+                        {incident.status_report}
+                      </td>
+                      <td className="px-6 py-4 border border-black" ><Link href={`/detail_report/${incident.id}`} className='underline'>รายละอียด</Link></td>
+                    </tr>
+                  )))
             }
           </tbody>
         </table>

@@ -54,7 +54,7 @@ export const POST = async (req: NextRequest) => {
     }
     const fileName = `meeting_file/${Date.now()}-${file.name}`;
     
-    const { error: uploadError } = await supabase.storage
+    const {data:uploadData ,error: uploadError } = await supabase.storage
       .from('reference_file')
       .upload(fileName,file);
 
@@ -62,15 +62,9 @@ export const POST = async (req: NextRequest) => {
       throw new Error(`Upload failed: ${uploadError.message}`);
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('reference_file')
-      .getPublicUrl(fileName);
-
-    const imageUrl = publicUrlData.publicUrl;
-
     const newImage = await prisma.meetingFile.create({
       data: {
-        file_url: imageUrl,
+        file_url: uploadData.fullPath,
         meeting_id: parseInt(meetingId as string),
       },
     });

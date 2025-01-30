@@ -9,7 +9,9 @@ const supabase = createClient(
 
 export async function GET() {
     return Response.json(await prisma.incidentReport.findMany(
-        { include: { investigationMeetings: true, ReportFiles: true } }
+        { include: { investigationMeetings: { include: { problemResolutions: {
+            include: { troubleshootSolutions: true }
+          } } }, ReportFiles: true } }
     ))
 }
 

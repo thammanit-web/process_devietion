@@ -17,15 +17,11 @@ export async function GET(
     const { id } = await params
     const investigation_meeting = await prisma.investigationMeeting.findUnique({
       where: { id: Number(id) },
-      include: {incidentReport:true,problemResolutions:true,meetingFiles:true}
-    });
-    const { data: storageListData, error: storageListError } = await supabase
-    .storage
-    .from('reference_file')
-    .list('meeting_file', {
-      limit: 100,
-      offset: 0,
-      sortBy: { column: 'name', order: 'asc' },
+      include: {
+        incidentReport: true, problemResolutions: {
+          include: { troubleshootSolutions: true }
+        }, meetingFiles: true, managerApproves: true
+      }
     });
     if (!investigation_meeting) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
@@ -41,33 +37,63 @@ export async function PUT(
   { params }: { params: Promise<{ id: number }> },
 ) {
   try {
-    const { id } = await params
-    const {
-      incident_report_id,
-      topic_meeting,
-      scheduled_date,
-      meeting_date,
-      summary_meeting,
-      investigation_signature,
-      manager_approve,
-      factor_manager_signature 
-    } = await req.json()
-    return Response.json(await prisma.investigationMeeting.update({
+    const { id } = await params;
+    const formData = await req.formData();
+    const meeting_date = formData.get('meeting_date') as string;
+    const summary_meeting = formData.get('summary_meeting') as string;
+    const manager_approve = formData.get('manager_approve') as string;
+    const files = formData.getAll('files') as File[];
+    
+    const updateMeeting = await prisma.investigationMeeting.update({
       where: { id: Number(id) },
-      data: {
-        incident_report_id,
-        topic_meeting,
-        scheduled_date,
+      data: {   
         meeting_date: new Date(meeting_date),
         summary_meeting,
-        investigation_signature,
-        manager_approve,
+        manager_approve
       },
-    }))
+    });
+
+    const MeetingId = updateMeeting.id;
+    if (files.length > 0) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'video/mp4'];
+      const maxSize = 5 * 1024 * 1024;
+      const uploadedFiles = [];
+
+      for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
+          return new Response(JSON.stringify({ error: "Invalid file type." }), { status: 400 });
+        }
+
+        if (file.size > maxSize) {
+          return new Response(JSON.stringify({ error: "File size exceeds the 5MB limit." }), { status: 400 });
+        }
+
+        const fileName = `meeting_file/${Date.now()}-${file.name}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('reference_file')
+          .upload(fileName, file);
+
+        if (uploadError) {
+          return new Response(JSON.stringify({ error: `Upload failed: ${uploadError.message}` }), { status: 500 });
+        }
+
+        const newFile = await prisma.meetingFile.create({
+          data: {
+            file_url: uploadData.path,
+            meeting_id: MeetingId,
+          },
+        });
+
+        uploadedFiles.push(newFile);
+      }
+
+      return new Response(JSON.stringify({ success: true, updateMeeting, fileReports: uploadedFiles }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ success: true, updateMeeting }), { status: 200 });
   } catch (error) {
-    return new Response(error as BodyInit, {
-      status: 500,
-    })
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
 

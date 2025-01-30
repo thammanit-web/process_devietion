@@ -21,8 +21,10 @@ interface IncidentReport {
         id: number;
         file_url?: string;
     }[];
+    investigationMeetings:{
+    id: string
+} []
 }
-
 
 export default function detailSubmit() {
     const { id } = useParams()
@@ -53,7 +55,12 @@ export default function detailSubmit() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
 
-            <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
+            <div className='flex w-full justify-between'>
+                <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
+                <div>
+                    <a href={`/detail_report/meeting/${id}`} className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>รายละเอียดการแก้ไขปัญหา</a>
+                </div>
+            </div>
             <form className="space-y-6">
                 <div className='flex gap-4'>
                     <div className='w-full flex gap-4'>
@@ -119,7 +126,7 @@ export default function detailSubmit() {
                             report.ReportFiles?.map((file) => (
                                 <li key={file.id} className="mt-1 border px-4 py-2">
                                     <a
-                                       href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                        href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
                                         className="text-blue-500"
                                         target="_blank"
                                         rel="noopener noreferrer"

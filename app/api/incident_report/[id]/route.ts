@@ -15,12 +15,13 @@ export async function GET(
   try {
     const { id } = await params
     const incident_report = await prisma.incidentReport.findUnique({
-      include: { investigationMeetings: true, ReportFiles: true },
+      include: { investigationMeetings: {
+        include: { problemResolutions: {
+          include: { troubleshootSolutions: true }
+        } }
+      }, ReportFiles: true },
       where: { id: Number(id) },
     });
-
-
-    
 
     if (!incident_report) {
       return NextResponse.json({ error: 'Incident not found' }, { status: 404 });
