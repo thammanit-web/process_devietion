@@ -3,7 +3,7 @@ import React, { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 
-export default function LoginCardContent() {
+function LoginCardContent() {
   const [employee_email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -98,5 +98,13 @@ export default function LoginCardContent() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LoginCard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginCardContent />
+    </Suspense>
   );
 }
