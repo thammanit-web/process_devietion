@@ -113,10 +113,6 @@ export default function investigationMeeting() {
             console.error("Error approving report:", error)
         }
     }
-    const openModal = (meetingId: string) => {
-        setSelectedMeetingId(meetingId);
-        setIsOpen(true);
-    };
 
     if (!report) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
@@ -130,7 +126,7 @@ export default function investigationMeeting() {
                 <div className='flex'>
                     <div className='w-full flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                        <p className={`py-2 font-bold underline border border-black px-4 ${report.priority === 'urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
+                        <p className={`py-2 font-bold underline border border-black px-4 ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
                     </div>
 
                 </div>
@@ -170,62 +166,24 @@ export default function investigationMeeting() {
                                     </td>
                                     <td className="px-6 py-2 border border-black">{meeting.topic_meeting}</td>
                                     <td className="px-6 py-2 border border-black">
-                                        <div className='flex justify-center gap-6'>
+                                        <div className='flex justify-center gap-2'>
                                             <div className="relative group cursor-pointer">
-                                                <a href={`/technical/update_meeting/${meeting.id}`} className="cursor-pointer underline">
+                                                <a href={`/technical/update_meeting/${meeting.id}`} className="cursor-pointer underline font-black">
                                                     <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path fillRule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v6.41A7.5 7.5 0 1 0 10.5 22H6a2 2 0 0 1-2-2V9h5a2 2 0 0 0 2-2Z" clipRule="evenodd" />
-                                                        <path fillRule="evenodd" d="M9 16a6 6 0 1 1 12 0 6 6 0 0 1-12 0Zm6-3a1 1 0 0 1 1 1v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 1 1 0-2h1v-1a1 1 0 0 1 1-1Z" clipRule="evenodd" />
+                                                        <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clipRule="evenodd" />
                                                     </svg>
-
                                                 </a>
                                                 <div className="absolute left-1/2 w-52 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-500 text-white text-xs rounded-md px-3 py-1">
                                                     เพิ่มรายละเอียดการประชุม
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 w-3 h-3">
-                                                        <svg
-                                                            className="w-6 h-6 text-gray-500 dark:text-white"
-                                                            aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="24"
-                                                            height="24"
-                                                            fill="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                fillRule="evenodd"
-                                                                d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z"
-                                                                clipRule="evenodd"
-                                                            />
-                                                        </svg>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div>
                                                 <div className="relative group cursor-pointer">
-                                                    <a href={`/technical/detail_meeting/${meeting.id}`} className='cursor-pointer'><svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path fillRule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7Z" clipRule="evenodd" />
-                                                    </svg>
-                                                    </a>
-                                                    <div className="absolute left-1/2 w-52 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-500 text-white text-xs rounded-md px-3 py-1">
+                                                    <a href={`/technical/detail_meeting/${meeting.id}`} className='cursor-pointer underline font-black'>
                                                         ดูรายละเอียดการประชุม
-                                                        <div className="absolute left-1/2 transform -translate-x-1/2 w-3 h-3">
-                                                            <svg
-                                                                className="w-6 h-6 text-gray-500 dark:text-white"
-                                                                aria-hidden="true"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                width="24"
-                                                                height="24"
-                                                                fill="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    fillRule="evenodd"
-                                                                    d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z"
-                                                                    clipRule="evenodd"
-                                                                />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -272,7 +230,7 @@ export default function investigationMeeting() {
             <div className='gap-2 flex justify-end'>
                 <a
                     onClick={router.back}
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     กลับ
                 </a>

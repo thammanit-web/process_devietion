@@ -54,6 +54,7 @@ export default function setSolution() {
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
+    const [open, setOpen] = useState<boolean>(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -78,7 +79,7 @@ export default function setSolution() {
         e.preventDefault();
         try {
             await axios.put(`/api/investigation_meeting/${id}`, {
-            manager_approve: "รอตรวจสอบการแก้ไข",
+                manager_approve: "รอตรวจสอบการแก้ไข",
             }, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -101,29 +102,26 @@ export default function setSolution() {
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
             <div className="gap-4 grid mb-4">
-                {meetingDetail?.incidentReport.map((incident) => (
-                    <div key={incident.id} className='flex'>
-                        <div className='w-full flex gap-2 text-blue-500'>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Topic</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.topic}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.priority}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Ref. No</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.ref_no}</p>
-                            </div>
-                        </div>
+                <p className='text-2xl font-semibold'>อนุมัติกำหนดการแก้ไข</p>
+                <div className='w-full flex gap-2 '>
+                    <div className="flex">
+                        <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการรายงาน</p>
+                        <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{meetingDetail?.incidentReport[0]?.topic}</p>
                     </div>
-                ))}
+                </div>
 
-                <div className='w-full  lg:flex md:flex gap-2'>
+                <div className='w-full flex justify-between gap-2'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการประชุม</p>
-                        <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{meetingDetail?.topic_meeting}</p>
+                        <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>
+                            {meetingDetail?.topic_meeting}</p>
+                    </div>
+                    <div>
+                        <a href={`/detail_report/${id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+                            <svg className="w-6 h-6 text-gray-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fillRule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clipRule="evenodd" />
+                            </svg>
+                            รายละเอียด Deviation</a>
                     </div>
                 </div>
 
@@ -149,12 +147,12 @@ export default function setSolution() {
                                         {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString() : ''}
                                     </td>
                                     <td
-                                        className={`border border-black px-4 py-2 ${problemSolution.status_solution === 'รอแก้ไข' ? 'bg-yellow-300' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
+                                        className={`border border-black px-4 py-2`}
                                     >
                                         {problemSolution.status_solution}
                                     </td>
                                     <td className=" px-4 py-2 items-center flex justify-center">
-                                        <a href={`/maintenance_page/edit/${problemSolution.id}`} className='cursor-pointer'>
+                                        <a onClick={() => setOpen(true)} className='cursor-pointer'>
                                             <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                 <path fillRule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clipRule="evenodd" />
                                                 <path fillRule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clipRule="evenodd" />

@@ -37,14 +37,15 @@ export async function POST(req: Request) {
             return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
         }
 
+        const currentYear = new Date().getFullYear().toString().slice(-2);
         const lastIncident = await prisma.incidentReport.findFirst({
-            where: { ref_no: { startsWith: '25/' } },
+            where: { ref_no: { startsWith: `${currentYear}/` } },
             orderBy: { ref_no: 'desc' },
             select: { ref_no: true }
         });
 
         const lastRefNumber = lastIncident?.ref_no?.split('/')[1] ?? '000';
-        const newRefNo = `25/${String(Number(lastRefNumber) + 1).padStart(3, '0')}`;
+        const newRefNo = `${currentYear}/${String(Number(lastRefNumber) + 1).padStart(3, '0')}`;
 
         const newIncident = await prisma.incidentReport.create({
             data: {

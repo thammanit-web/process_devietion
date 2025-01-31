@@ -63,6 +63,7 @@ export default function setSolution() {
         troubleshootSolutions: [],
     })
     const [open, setOpen] = useState<boolean>(false);
+    const [Isopen, setIsOpen] = useState<boolean>(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -104,7 +105,6 @@ export default function setSolution() {
             await axios.post(`/api/problem_resolution`, {
                 ...problemResolution,
                 meeting_id: Number(id),
-                manager_approve: "รอแก้ไข",
                 status_solution: "รอแก้ไข"
             });
             fetchMeeting(Number(id));
@@ -129,7 +129,7 @@ export default function setSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติกำหนดการแก้ไข"
             })
-            router.push('/technical')
+            router.back()
         } catch (error) {
             alert('Create Solution error');
             console.error(error);
@@ -141,39 +141,16 @@ export default function setSolution() {
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
             <div className="gap-4 grid mb-4">
-                {meetingDetail?.incidentReport.map((incident) => (
-                    <div key={incident.id} className='flex'>
-                        <div className='w-full flex gap-2 text-blue-500'>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Topic</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.topic}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.priority}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Ref. No</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.ref_no}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                <div>
+                    <p className='text-2xl font-semibold'>
+                        การกำหนดการแก้ไข รายงาน {meetingDetail?.incidentReport[0]?.topic}
+                    </p>
+                </div>
                 <div className='w-full  lg:flex md:flex gap-2'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการประชุม</p>
                         <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{meetingDetail?.topic_meeting}</p>
                     </div>
-                </div>
-                <div className='flex gap-2'>
-                    <div className='flex'>
-                        <h1 className='border border-black py-2 px-4 font-bold'>คอมเมนท์เกี่ยวกับการกำหนดการแก้ไข</h1>
-                        <h1 className='border border-black py-2 px-4'>{meetingDetail?.managerApproves[0]?.comment_solution}</h1>
-                    </div>
-                    <div className='flex'>
-                        <h1 className='border border-black py-2 px-4 font-bold'>คอมเมนท์เกี่ยวกับการแก้ไขปัญหา</h1>
-                        <h1 className='border border-black py-2 px-4'>{meetingDetail?.managerApproves[0]?.comment_troubleshoot}</h1>
-                    </div>  
                 </div>
                 <div>
                     <button onClick={() => setOpen(true)} className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>+ กำหนดการแก้ไข</button>
@@ -189,7 +166,6 @@ export default function setSolution() {
                                 <th className="border border-black  px-4 py-2">วันที่กำหนดแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
                                 <th className="border border-black  px-4 py-2">สถานะการแก้ไข</th>
-                                <th className="border border-black  px-4 py-2"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -205,14 +181,6 @@ export default function setSolution() {
                                         className={`border border-black px-4 py-2 ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-yellow-300' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
                                     >
                                         {resolution.status_solution}
-                                    </td>
-                                    <td className="border border-black px-4 py-2 items-center flex justify-center">
-                                        <a href={`/technical/check_maintenance/${resolution.id}`} className='cursor-pointer'>
-                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Z" />
-                                                <path fillRule="evenodd" d="M11 7V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9h5a2 2 0 0 0 2-2Zm4.707 5.707a1 1 0 0 0-1.414-1.414L11 14.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z" clipRule="evenodd" />
-                                            </svg>
-                                        </a>
                                     </td>
                                 </tr>
                             ))}
@@ -230,7 +198,7 @@ export default function setSolution() {
                     กลับ
                 </a>
                 <button
-                    onClick={handleApprove}
+                    onClick={() => setIsOpen(true)}
                     className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     ยืนยัน
@@ -299,6 +267,27 @@ export default function setSolution() {
                         </button>
                         <button className="border border-green-300 rounded-lg py-1.5 px-10
                            bg-green-400 hover:bg-green-600 text-white" onClick={CreateSolution}>
+                            ยืนยัน
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+            <Modal open={Isopen} onClose={() => setIsOpen(false)}>
+                <div className="flex flex-col gap-4 px-4 py-4">
+                    <h1 className="text-2xl justify-center">ยืนยันการกำหนดการแก้ไข</h1>
+                    <p>
+                    </p>
+                    <hr className="border-t-solid border-1 border-grey" />
+                    <div className="flex flex-row justify-center gap-2">
+                        <button
+                            className="border border-neutral-300 rounded-lg py-1.5 px-10
+                                     bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            ยกเลิก
+                        </button>
+                        <button onClick={handleApprove} className="border border-green-300 rounded-lg py-1.5 px-10
+                                     bg-green-400 hover:bg-green-600 text-white">
                             ยืนยัน
                         </button>
                     </div>

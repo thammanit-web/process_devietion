@@ -139,26 +139,8 @@ export default function updateMeeting() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
 
-            <h1 className="text-2xl font-semibold mb-2">รายละเอียดการประชุม</h1>
+            <h1 className="text-2xl font-semibold mb-4">เพิ่มรายละเอียดการประชุม</h1>
             <div className='gap-4 grid mb-4'>
-                {Investigation.incidentReport.map((incident) => (
-                    <div key={incident.id} className='flex'>
-                        <div className='w-full flex gap-2 text-blue-500'>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Topic</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.topic}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.priority}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Ref. No</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.ref_no}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
                 <div className='w-full  lg:flex md:flex gap-2'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการประชุม</p>

@@ -1,10 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
-import { Modal } from '@/app/components/modal'
-import investigationMeeting from '../../investigation/[id]/page'
-
 interface InvestigationMeeting {
     incident_report_id: string
     topic_meeting: string
@@ -39,10 +35,7 @@ export default function updateMeeting() {
         incidentReport: [],
         meetingFiles: []
     });
-
-    const [open, setOpen] = useState<boolean>(false);
     const [meetingId, setMeetingId] = useState<number | null>(null);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
 
     const router = useRouter()
@@ -77,26 +70,9 @@ export default function updateMeeting() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
 
-            <h1 className="text-2xl font-semibold mb-2">รายละเอียดการประชุม</h1>
+            <h1 className="text-2xl font-semibold mb-4">รายละเอียดการประชุม</h1>
             <div className='gap-4 grid mb-4'>
-                {Investigation.incidentReport.map((incident) => (
-                    <div key={incident.id} className='flex'>
-                        <div className='w-full flex gap-2 text-blue-500'>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Topic</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.topic}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.priority}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Ref. No</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.ref_no}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+
                 <div className='w-full  lg:flex md:flex gap-2'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการประชุม</p>
@@ -117,8 +93,10 @@ export default function updateMeeting() {
                         วันที่ประชุม
                     </label>
                     <div
-                        className="mt-1 text-lg boder border-black px-4 py-2"
-                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString() : ""}</div>
+                        className="mt-1 text-lg boder border-black px-4 py-2 "
+                    >
+                        {Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString() : ""}
+                    </div>
                 </div>
                 <div className='w-full mb-4'>
                     <label htmlFor="summary_meeting" className="block text-lg underline font-medium text-gray-700">

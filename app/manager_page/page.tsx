@@ -3,8 +3,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link'
-import investigationMeeting from './[id]/page';
-
+import investigationMeeting from '../technical/investigation/[id]/page';
 interface IncidentReport {
   id: number;
   ref_no: String
@@ -33,11 +32,21 @@ interface InvestigationMeeting {
   investigation_signature: string
   manager_approve: Boolean
   file_meeting: string
+  problemResolutions: ProblemResolution[]
+}
+interface ProblemResolution {
+  id: number
+  meeting_id: string
+  topic_solution: string
+  solution_id: string
+  assign_to: string
+  target_finish: string
+  status_solution: string
+  manager_approve: string
 }
 
 export default function dashboardTechnical() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
-  const [InMeetingReport, setInMeetingReport] = useState<IncidentReport[]>([]);
 
   const router = useRouter()
 
@@ -111,13 +120,14 @@ export default function dashboardTechnical() {
           <tbody>
             {
               Incidentreports.filter((incident) =>
-                incident.status_report === "รอการแก้ไข"
+                incident.status_report === "รออนุมัติกำหนดการแก้ไข"
+                || incident.status_report === "รออนุมัติการแก้ไข"
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
               ) : (
-                Incidentreports.filter((incident) => incident.status_report === "รอการแก้ไข")
+                Incidentreports.filter((incident) => incident.status_report === "รออนุมัติกำหนดการแก้ไข" || incident.status_report === "รออนุมัติการแก้ไข")
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
@@ -142,7 +152,14 @@ export default function dashboardTechnical() {
                           {incident.status_report}</p>
                       </td>
                       <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                        <Link href={`/maintenance_page/${incident.investigationMeetings[0]?.id}`} className='underline hover:text-gray-400'>ดำเนินการแก้ไข</Link>
+                        <Link 
+                        href=
+                        {incident.status_report === 'รออนุมัติกำหนดการแก้ไข' 
+                          ? `/manager_page/schedule/${incident.investigationMeetings[0]?.id}`
+                          : `/manager_page/improved/${incident.investigationMeetings[0]?.id}`} 
+                          className='underline text-black hover:text-gray-400'>
+                          อนุมัติ
+                          </Link>
                       </td>
                     </tr>
                   )))}
