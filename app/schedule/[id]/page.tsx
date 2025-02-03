@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
+import { LoadingOverlay } from '@/app/components/loading'
 
 interface IncidentReport {
     ref_no: string;
@@ -49,7 +50,7 @@ export default function AapproveReport() {
         manager_approve: '',
         file_meeting: '',
     })
-
+    const [loading, setLoading] = useState(false);
     const router = useRouter()
 
     const fetchIncidentReports = async (id: number) => {
@@ -81,6 +82,7 @@ export default function AapproveReport() {
     const CreateMeeting = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            setLoading(true)
             await axios.put(`/api/incident_report/${id}`, {
                 status_report: "รอการประชุม"
             });
@@ -88,7 +90,7 @@ export default function AapproveReport() {
                 ...Investigation,
                 incident_report_id: Number(id)
             });
-           router.back()
+            router.back()
             fetchIncidentReports(Number(id));
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -96,7 +98,7 @@ export default function AapproveReport() {
             } else {
                 console.error("Unexpected error:", error);
             }
-        }        
+        }
     }
 
     if (!report) {
@@ -105,7 +107,7 @@ export default function AapproveReport() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-
+            {loading && <LoadingOverlay />}
             <h1 className="text-2xl font-semibold mb-4">ยืนยันการตรวจสอบรายงาน</h1>
             <form className="space-y-6">
                 <div className='flex gap-4'>
@@ -172,7 +174,7 @@ export default function AapproveReport() {
                             report.ReportFiles?.map((file) => (
                                 <li key={file.id} className="mt-1 border px-4 py-2">
                                     <a
-                                          href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                        href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
                                         className="text-blue-500"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -203,7 +205,7 @@ export default function AapproveReport() {
             </form>
             <div className='gap-2 flex justify-end'>
                 <a
-                  onClick={router.back}
+                    onClick={router.back}
                     className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     กลับ
@@ -230,7 +232,7 @@ export default function AapproveReport() {
                             id="scheduled_date"
                             value={Investigation.scheduled_date}
                             onChange={handleCreateMeeting}
-                            onClick={()=>console.log(Investigation.scheduled_date)}
+                            onClick={() => console.log(Investigation.scheduled_date)}
                             required
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         ></input>

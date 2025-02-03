@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
+import { LoadingOverlay } from '@/app/components/loading'
 
 interface IncidentReport {
     id: string
@@ -51,6 +52,7 @@ export default function investigationMeeting() {
     const [openMeeting, setOpenMeeting] = useState(false);
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [loading, setLoading] = useState(false);
 
     const router = useRouter()
 
@@ -104,11 +106,13 @@ export default function investigationMeeting() {
     const CreateMeeting = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            setLoading(true)
             await axios.post(`/api/investigation_meeting`, {
                 ...Investigation,
                 incident_report_id: Number(id),
                 manager_approve: ""
             })
+            setLoading(false)
             setOpen(false)
             fetchIncidentReports(Number(id))
         } catch (error) {
@@ -143,12 +147,13 @@ export default function investigationMeeting() {
         }
 
         try {
+            setLoading(true)
             const response = await axios.put(`/api/investigation_meeting/${Investigation.id}`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-
+            setLoading(false)
             console.log("Update response:", response);
             setOpenMeeting(false)
             fetchIncidentReports(Number(id))
@@ -180,7 +185,7 @@ export default function investigationMeeting() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-
+            {loading && <LoadingOverlay />}
             <h1 className="text-2xl font-semibold mb-4">รายละเอียดการประชุม</h1>
             <div className='gap-4 grid mb-4'>
                 <div className='flex'>

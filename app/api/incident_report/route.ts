@@ -126,14 +126,14 @@ export async function POST(req: Request) {
         <p><strong>หัวข้อการรายงาน:</strong> ${topic}</p>
         <p><strong>รหัสเครื่องจักร:</strong> ${machine_code}</p>
         <p><strong>ชื่อเครื่องจักร/อุปกรณ์:</strong> ${machine_name}</p>
-        <p><strong>วันเวลาที่เกิดเหตุ:</strong> ${new Date(incident_date).toLocaleString('th-TH')}</p>
+        <p><strong>วันเวลาที่เกิดเหตุ:</strong> ${new Date(incident_date).toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}</p>
         <p><strong>เหตุการณ์:</strong> ${incident_description}</p>
         <p><strong>สาเหตุความผิดปกติเบื้องต้น:</strong> ${summary_incident}</p>
         <p><strong>ชื่อผู้รายงาน:</strong> ${reporter_name}</p>
-        <p><strong>วันที่รายงาน:</strong> ${new Date(report_date).toLocaleDateString()}</p>
+        <p><strong>วันที่รายงาน:</strong> ${new Date(report_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         ${uploadedFiles.length > 0 ? `<p><strong>ไฟล์ประกอบการรายงาน:</strong> ${uploadedFiles.map(file => `<a href="${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}" target="_blank">${file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}</a>`).join('<br>')}</p>` : ''}
         <p><strong>อนุมัติการรายงาน:</strong> <a href="${incidentUrl}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>
-    `;
+        `;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: 'thammanitrinthang@gmail.com',

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
+import { LoadingOverlay } from '@/app/components/loading'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -65,6 +66,7 @@ export default function setSolution() {
         finish_date: '',
 
     })
+    const [loading, setLoading] = useState(false);
 
 
     const fetchMeeting = async (id: number) => {
@@ -89,6 +91,7 @@ export default function setSolution() {
     const handleSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.put(`/api/investigation_meeting/${id}`, {
                 manager_approve: "รอตรวจสอบการแก้ไข",
             }, {
@@ -132,11 +135,13 @@ export default function setSolution() {
             formData.append('solution_id', problemSolution.id);
         }
         try {
+            setLoading(true)
             await axios.post('/api/troubleshoot_solution', formData);
             await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
                 status_solution: "แก้ไขสำเร็จ",
             })
             fetchMeeting(Number(id));
+            setLoading(false)
             setIsOpen(false);
         } catch (error) {
             alert('Create Solution error');
@@ -146,8 +151,10 @@ export default function setSolution() {
     const handleDelete = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            setLoading(true)
             await axios.delete(`/api/troubleshoot_solution/${problemSolution?.troubleshootSolutions[0].id}`)
             fetchMeeting(Number(id));
+            setLoading(false)
             setOpen(false);
         } catch (error) {
             console.error("Error Delete report:", error)
@@ -164,6 +171,8 @@ export default function setSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
+
+            {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <p className='text-2xl font-semibold'>ดำเนินการแก้ไข</p>
                 <div className='w-full flex gap-2 '>

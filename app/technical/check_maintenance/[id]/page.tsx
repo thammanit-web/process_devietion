@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import investigationMeeting from '../../investigation/[id]/page'
 import { Modal } from '@/app/components/modal'
+import { LoadingOverlay } from '@/app/components/loading'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -57,6 +58,7 @@ export default function setSolution() {
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -80,6 +82,7 @@ export default function setSolution() {
     const handleSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.put(`/api/investigation_meeting/${id}`, {
                 manager_approve: "รออนุมัติการแก้ไข",
             }, {
@@ -99,6 +102,7 @@ export default function setSolution() {
     const handleReject = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการแก้ไข",
             })
@@ -124,7 +128,8 @@ export default function setSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
-            <div className="gap-4 grid mb-4">
+            {loading && <LoadingOverlay />}
+            <div className="gap-4 grid mb-4"> 
                 {meetingDetail?.incidentReport.map((incident) => (
                     <div key={incident.id} className='flex'>
                         <div className='w-full flex gap-2 text-blue-500'>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
+import { LoadingOverlay } from '@/app/components/loading'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -64,6 +65,7 @@ export default function SetSolution() {
     })
     const [openApprove, setOpenApprove] = useState<boolean>(false);
     const [openReject, setOpenReject] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -101,7 +103,7 @@ export default function SetSolution() {
     const handleManagerApprove = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-
+            setLoading(true)
             await axios.post(`/api/manager_approve`, {
                 ...managerApproves,
                 meeting_id: Number(id),
@@ -130,6 +132,7 @@ export default function SetSolution() {
     const handleManagerReject = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.post(`/api/manager_approve`, {
                 ...managerApproves,
                 meeting_id: id,
@@ -162,6 +165,7 @@ export default function SetSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
+             {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <p className='text-2xl font-semibold'>อนุมัติกำหนดการแก้ไข</p>
                 <div className='w-full flex gap-2 '>

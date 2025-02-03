@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Modal } from '../../components/modal';
+import { LoadingOverlay } from '@/app/components/loading';
 
 interface IncidentForm {
     topic: string;
@@ -40,6 +41,7 @@ export default function createReport() {
     const [open, setOpen] = useState<boolean>(false);
     const [incidentReportId, setIncidentReportId] = useState<number | null>(null);
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0];
@@ -96,8 +98,8 @@ export default function createReport() {
         selectedFiles.forEach((file, index) => {
             formDataWithFiles.append('files', file);
         });
-
         try {
+            setLoading(true);
             const response = await axios.post('/api/incident_report', formDataWithFiles, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -116,7 +118,8 @@ export default function createReport() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="relative max-w-6xl mx-auto px-4 py-8">
+            {loading && <LoadingOverlay />}
             <h1 className="text-2xl font-semibold mb-4">แบบฟอร์มรายงานความผิดปกติ</h1>
             <form className="space-y-6">
                 <div className="flex gap-4">

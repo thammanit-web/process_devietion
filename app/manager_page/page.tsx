@@ -30,7 +30,7 @@ interface InvestigationMeeting {
   meeting_date: string
   summary_meeting: string
   investigation_signature: string
-  manager_approve: Boolean
+  manager_approve: string
   file_meeting: string
   problemResolutions: ProblemResolution[]
 }
@@ -129,10 +129,22 @@ export default function dashboardTechnical() {
               ) : (
                 Incidentreports.filter((incident) => incident.status_report === "รออนุมัติกำหนดการแก้ไข" || incident.status_report === "รออนุมัติการแก้ไข")
                   .map((incident) => (
-                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" 
-                      onClick={() => router.push(incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
-                      ? `/manager_page/schedule/${incident.investigationMeetings[0]?.id}`
-                      : `/manager_page/improved/${incident.investigationMeetings[0]?.id}`)}>
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const meeting = incident.investigationMeetings.find(meeting =>
+                          incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
+                            ? meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข'
+                            : meeting.manager_approve === 'รออนุมัติการแก้ไข'
+                        );
+                        if (meeting) {
+                          router.push(
+                            incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
+                              ? `/manager_page/schedule/${meeting.id}`
+                              : `/manager_page/improved/${meeting.id}`
+                          );
+                        } 
+                      }}>
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td>
@@ -156,10 +168,24 @@ export default function dashboardTechnical() {
                       </td>
                       <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
                         <Link
-                          href=
-                          {incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
-                            ? `/manager_page/schedule/${incident.investigationMeetings[0]?.id}`
-                            : `/manager_page/improved/${incident.investigationMeetings[0]?.id}`}
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const meeting = incident.investigationMeetings.find(meeting =>
+                              incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
+                                ? meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข'
+                                : meeting.manager_approve === 'รออนุมัติการแก้ไข'
+                            );
+                            if (meeting) {
+                              router.push(
+                                incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
+                                  ? `/manager_page/schedule/${meeting.id}`
+                                  : `/manager_page/improved/${meeting.id}`
+                              );
+                            } else {
+                              alert('No meeting found with the required approval status.');
+                            }
+                          }}
                           className='underline text-black hover:text-gray-400'>
                           อนุมัติ
                         </Link>

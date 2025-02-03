@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import investigationMeeting from '../../investigation/[id]/page'
+import { LoadingOverlay } from '@/app/components/loading'
 interface InvestigationMeeting {
     incident_report_id: string
     topic_meeting: string
@@ -64,6 +65,7 @@ export default function setSolution() {
     })
     const [open, setOpen] = useState<boolean>(false);
     const [Isopen, setIsOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -102,11 +104,13 @@ export default function setSolution() {
     const CreateSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.post(`/api/problem_resolution`, {
                 ...problemResolution,
                 meeting_id: Number(id),
-                status_solution: "รอแก้ไข"
+                status_solution: "รอการแก้ไข"
             });
+            setLoading(false)
             fetchMeeting(Number(id));
             setOpen(false);
         } catch (error) {
@@ -118,6 +122,7 @@ export default function setSolution() {
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setLoading(true)
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "รออนุมัติกำหนดการแก้ไข",
@@ -140,6 +145,7 @@ export default function setSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
+             {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <div>
                     <p className='text-2xl font-semibold'>

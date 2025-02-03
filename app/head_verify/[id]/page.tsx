@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal';
+import { LoadingOverlay } from '@/app/components/loading';
 
 interface IncidentReport {
     ref_no: string;
@@ -31,6 +32,7 @@ export default function headVerify() {
     const [report, setReport] = useState<IncidentReport | null>(null)
     const [open, setOpen] = useState<boolean>(false);
     const [openReject, setOpenReject] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
 
     const router = useRouter()
 
@@ -53,6 +55,7 @@ export default function headVerify() {
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            setLoading(true)
             await axios.put(`/api/incident_report/${id}`, {
                 head_approve: "Approve",
                 status_report: "รอยืนยันการตรวจสอบ"
@@ -66,6 +69,7 @@ export default function headVerify() {
     const handleReject = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            setLoading(true)
             await axios.delete(`/api/incident_report/${id}`)
             router.push('/')
         } catch (error) {
@@ -79,6 +83,7 @@ export default function headVerify() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
+            {loading && <LoadingOverlay />}
 
             <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">ยืนยันความผิดปกติ</h1>
             <form className="space-y-6">
@@ -136,7 +141,7 @@ export default function headVerify() {
                 <div className="lg:flex md:flex sm:grid gap-4 w-full">
                     <div className="lg:grid md:grid sm:flex lg:text-lg md:text-lg sm:text-sm">
                         <p className="border px-4 py-2 underline">ไฟล์ประกอบการรายงาน</p>
-                        { 
+                        {
                             report.ReportFiles?.map((file) => (
                                 <li key={file.id} className="mt-1 border px-4 py-2">
                                     <a
@@ -149,7 +154,7 @@ export default function headVerify() {
                                     </a>
                                 </li>
                             )
-                        )}
+                            )}
                     </div>
                 </div>
 
