@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 
 interface IncidentReport {
+    id: string
     ref_no: string;
     topic: string;
     priority: string;
@@ -21,7 +22,7 @@ interface InvestigationMeeting {
     manager_approve: string
     meetingFiles: {
         id: number;
-        file_url?: string;
+        file_url: string;
     }[];
     problemResolution: {
         id: number;
@@ -46,9 +47,10 @@ export default function investigationMeeting() {
         problemResolution: []
     })
     const [open, setOpen] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
+    const [openDetail, setOpenDetail] = useState(false);
+    const [openMeeting, setOpenMeeting] = useState(false);
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     const router = useRouter()
 
@@ -113,6 +115,64 @@ export default function investigationMeeting() {
             console.error("Error approving report:", error)
         }
     }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInvestigation((prevState) => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const updateMeeting = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!id) {
+            console.error("Invalid ID");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("meeting_date", Investigation.meeting_date);
+        formData.append("summary_meeting", Investigation.summary_meeting);
+
+        selectedFiles.forEach((file, index) => {
+            formData.append(`files`, file);
+        });
+
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ": " + pair[1]);
+        }
+
+        try {
+            const response = await axios.put(`/api/investigation_meeting/${Investigation.id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            console.log("Update response:", response);
+            setOpenMeeting(false)
+            fetchIncidentReports(Number(id))
+        } catch (error) {
+            console.error("Error updating meeting:", error);
+            alert("Failed to update meeting. Please check the data and try again.");
+        }
+    };
+
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            setSelectedFiles((prevFiles) => [
+                ...prevFiles,
+                ...Array.from(files),
+            ]);
+        }
+    };
+
+    const handleRemoveFile = (fileToRemove: File) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter((file) => file !== fileToRemove));
+    };
+
 
     if (!report) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
@@ -159,16 +219,19 @@ export default function investigationMeeting() {
                             report?.investigationMeetings?.map((meeting) => (
                                 <tr key={meeting.id} className="border border-black text-center text-md">
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleString() : ''}
+                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleString() : ''}
+                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">{meeting.topic_meeting}</td>
                                     <td className="px-6 py-2 border border-black">
                                         <div className='flex justify-center gap-2'>
                                             <div className="relative group cursor-pointer">
-                                                <a href={`/technical/update_meeting/${meeting.id}`} className="cursor-pointer underline font-black">
+                                                <a onClick={() => {
+                                                    setOpenMeeting(true);
+                                                    setInvestigation(meeting)
+                                                }} className="cursor-pointer underline font-black">
                                                     <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                         <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clipRule="evenodd" />
                                                     </svg>
@@ -181,7 +244,11 @@ export default function investigationMeeting() {
                                             </div>
                                             <div>
                                                 <div className="relative group cursor-pointer">
-                                                    <a href={`/technical/detail_meeting/${meeting.id}`} className='cursor-pointer underline font-black'>
+                                                    <a onClick={() => {
+                                                        setOpenDetail(true);
+                                                        setInvestigation(meeting)
+                                                    }}
+                                                        className='cursor-pointer underline font-black'>
                                                         ดูรายละเอียดการประชุม
                                                     </a>
                                                 </div>
@@ -284,46 +351,158 @@ export default function investigationMeeting() {
                     </div>
                 </div>
             </Modal>
-            <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-                <div className="flex flex-col gap-4">
-                    <h1 className="text-2xl justify-center">รายละเอียดการประชุม</h1>
-                    <div className='mt-6 mb-6'>
-                        <div className='w-full mb-4'>
-                            <label htmlFor="meeting_date" className="block text-lg underline font-medium text-gray-700">
-                                วันที่ประชุม
-                            </label>
-                            <div
-                                className="mt-1 text-lg block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString() : ""}</div>
-                        </div>
-                        <div className='w-full mb-4'>
-                            <label htmlFor="summary_meeting" className="block text-lg underline font-medium text-gray-700">
-                                สรุปการประชุม
-                            </label>
-                            <div className="mt-1 text-lg block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            >{Investigation.summary_meeting}</div>
-                        </div>
+            <Modal open={openDetail} onClose={() => setOpenDetail(false)}>
+                <div className="flex flex-col gap-4 px-4">
+                    <h1 className="text-xl font-black">รายละเอียดการประชุม</h1>
+                    {Investigation && (
+                        <>
+                            <div>
+                                <div className='w-full mb-4'>
+                                    <label htmlFor="meeting_date" className="underline block text-sm font-medium text-gray-700">
+                                        วันที่ประชุม
+                                    </label>
+                                    <div
+                                        className="rounded-md mt-2 border border-black px-4 py-2"
+                                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString() : ""}</div>
+                                </div>
+                                <div className='w-full mb-4'>
+                                    <label htmlFor="summary_meeting" className="block text-sm underline font-medium text-gray-700">
+                                        สรุปการประชุม
+                                    </label>
+                                    <div className="rounded-md mt-2 border border-black px-4 py-2"
+                                    >{Investigation.summary_meeting}</div>
+                                </div>
 
-                        <p className='text-lg underline'>ไฟล์ที่เกี่ยวข้อง</p>
-                        <div className='mb-4'>
-                            {
-                                Investigation.meetingFiles?.map((file) => (
-                                    <li key={file.id} className="mt-1 border px-4 py-2">
-                                        <a
-                                            href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
-                                            className="text-blue-500"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
-                                        </a>
-                                    </li>
-                                )
-                                )}
-                        </div>
-                    </div>
+                                <p className='text-sm underline'>ไฟล์ที่เกี่ยวข้อง</p>
+                                <div className="rounded-md mt-2 border border-black px-4 py-2">
+
+                                    {
+                                        Investigation.meetingFiles?.map((file) => (
+                                            <li key={file.id}>
+                                                <a
+                                                    href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                                    className="text-blue-500"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                </a>
+                                            </li>
+                                        )
+                                        )}
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </Modal>
+
+            <Modal open={openMeeting} onClose={() => setOpenMeeting(false)}>
+                <div className="flex flex-col gap-4">
+                    <h1 className="text-xl justify-center font-black">รายละเอียดการประชุม</h1>
+                    {Investigation && (
+                        <>
+                            <div>
+                                <div className='w-full mb-4'>
+                                    <label htmlFor="meeting_date" className="block text-sm font-medium text-gray-700">
+                                        วันที่ประชุม
+                                    </label>
+                                    <input
+                                        type='date'
+                                        name="meeting_date"
+                                        id="meeting_date"
+                                        value={Investigation.meeting_date || ""}
+                                        onChange={handleChange}
+                                        required
+                                        className="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    ></input>
+                                </div>
+                                <div className='w-full mb-4'>
+                                    <label htmlFor="summary_meeting" className="block text-sm font-medium text-gray-700">
+                                        สรุปการประชุม
+                                    </label>
+                                    <textarea
+                                        name="summary_meeting"
+                                        id="summary_meeting"
+                                        rows={6}
+                                        required
+                                        value={Investigation.summary_meeting || ""}
+                                        onChange={handleChange}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    ></textarea>
+                                </div>
+
+                                <p>อัพโหลดไฟล์ที่เกี่ยวข้อง</p>
+                                <hr className="border-t-solid border-1 border-grey" />
+                                <div className='mb-4'>
+                                    {
+                                        Investigation.meetingFiles?.map((file) => (
+                                            <li key={file.id} className="mt-1 border px-4 py-2">
+                                                <a
+                                                    href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                                    className="text-blue-500"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                </a>
+                                            </li>
+                                        )
+                                        )}
+                                </div>
+                                <div>
+                                    <label htmlFor="file" className="block text-sm font-medium text-gray-400">เลือกไฟล์ (สูงสุด 5MB)</label>
+                                    <input
+                                        type="file"
+                                        id="file"
+                                        name="file"
+                                        accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                </div>
+
+                                {selectedFiles.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="text-lg font-semibold">Selected Files:</h3>
+                                        <ul className="space-y-2">
+                                            {selectedFiles.map((file, index) => (
+                                                <li key={index} className="flex items-center gap-4">
+                                                    <span>{file.name}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveFile(file)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                <hr className="border-t-solid border-1 border-grey mt-4" />
+                                <div className="flex justify-center gap-2 mt-4">
+                                    <button
+                                        className="border border-neutral-300 rounded-lg px-4 py-1
+               bg-blue-500 hover:bg-blue-600 text-white"
+                                        onClick={() => setOpenMeeting(false)}
+                                    >
+                                        ยกเลิก
+                                    </button>
+                                    <button onClick={updateMeeting} className="border border-green-300 rounded-lg px-4 py-1
+               bg-green-400 hover:bg-green-600 text-white">
+                                        ยืนยัน
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </Modal>
+
+
         </div>
     )
 }

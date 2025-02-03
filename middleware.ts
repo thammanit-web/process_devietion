@@ -14,5 +14,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/"],
+  matcher: ["/", "/maintenance_page","/technical","/production","/schedule","/manager_approve"],
 };

@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
+import { createTransport } from 'nodemailer';
+
 
 const prisma = new PrismaClient();
 const supabase = createClient(
@@ -9,9 +12,17 @@ const supabase = createClient(
 
 export async function GET() {
     return Response.json(await prisma.incidentReport.findMany(
-        { include: { investigationMeetings: { include: { problemResolutions: {
-            include: { troubleshootSolutions: true }
-          } } }, ReportFiles: true } }
+        {
+            include: {
+                investigationMeetings: {
+                    include: {
+                        problemResolutions: {
+                            include: { troubleshootSolutions: true }
+                        }, meetingFiles: true
+                    }
+                }, ReportFiles: true
+            }
+        }
     ))
 }
 
@@ -67,10 +78,10 @@ export async function POST(req: Request) {
 
         const incidentReportId = newIncident.id;
 
+        let uploadedFiles = [];
         if (files.length > 0) {
             const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'video/mp4'];
             const maxSize = 5 * 1024 * 1024;
-            const uploadedFiles = [];
 
             for (const file of files) {
                 if (!allowedTypes.includes(file.type)) {
@@ -82,7 +93,6 @@ export async function POST(req: Request) {
                 }
 
                 const fileName = `uploads/${Date.now()}-${file.name}`;
-
                 const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('reference_file')
                     .upload(fileName, file);
@@ -100,16 +110,46 @@ export async function POST(req: Request) {
 
                 uploadedFiles.push(newFile);
             }
-
-            return Response.json({ success: true, incidentReport: newIncident, fileReports: uploadedFiles }, { status: 200 });
         }
 
-        return Response.json({ success: true, incidentReport: newIncident, fileReports: [] }, { status: 200 });
+        // **SEND EMAIL NOTIFICATION**
+        const transporter = createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+        const incidentUrl = `http://localhost:3000/head_verify/${newIncident.id}`;
+        const emailHTML = `
+        <h2>การรายงานความผิดปกติ</h2>
+        <p><strong>หัวข้อการรายงาน:</strong> ${topic}</p>
+        <p><strong>รหัสเครื่องจักร:</strong> ${machine_code}</p>
+        <p><strong>ชื่อเครื่องจักร/อุปกรณ์:</strong> ${machine_name}</p>
+        <p><strong>วันเวลาที่เกิดเหตุ:</strong> ${new Date(incident_date).toLocaleString('th-TH')}</p>
+        <p><strong>เหตุการณ์:</strong> ${incident_description}</p>
+        <p><strong>สาเหตุความผิดปกติเบื้องต้น:</strong> ${summary_incident}</p>
+        <p><strong>ชื่อผู้รายงาน:</strong> ${reporter_name}</p>
+        <p><strong>วันที่รายงาน:</strong> ${new Date(report_date).toLocaleDateString()}</p>
+        ${uploadedFiles.length > 0 ? `<p><strong>ไฟล์ประกอบการรายงาน:</strong> ${uploadedFiles.map(file => `<a href="${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}" target="_blank">${file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}</a>`).join('<br>')}</p>` : ''}
+        <p><strong>อนุมัติการรายงาน:</strong> <a href="${incidentUrl}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>
+    `;
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: 'thammanitrinthang@gmail.com',
+            subject: `กาารายงานความผิดปกติ: ${topic}`,
+            html: emailHTML,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        return NextResponse.json({ success: true, incidentReport: newIncident, fileReports: uploadedFiles }, { status: 200 });
 
     } catch (error) {
         console.error('Error creating incident report:', error);
         return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
     }
 }
+
 
 

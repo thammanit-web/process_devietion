@@ -31,6 +31,15 @@ interface ProblemResolution {
     status_solution: string
     manager_approve: string
     managerApproves: ManagerApprove[]
+    troubleshootSolutions: Troubleshoot[]
+}
+interface Troubleshoot {
+    id: string
+    solution_id: string
+    result_troubleshoot: string
+    file_summary: string
+    finish_date: string
+    problemSolution: string
 }
 interface ManagerApprove {
     id: string
@@ -44,6 +53,8 @@ export default function SetSolution() {
     const { id } = useParams()
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
+    const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
+    const [open, setOpen] = useState<boolean>(false);
     const [managerApproves, setManagerApprove] = useState<ManagerApprove>({
         id: '',
         meeting_id: '',
@@ -106,7 +117,7 @@ export default function SetSolution() {
                     },
                 });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
-                status_report: "รอการแก้ไข",
+                status_report: "แก้ไขแล้ว",
             })
             fetchMeeting(Number(id));
             router.back()
@@ -133,6 +144,13 @@ export default function SetSolution() {
                         "Content-Type": "multipart/form-data",
                     },
                 });
+            await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
+                status_report: "รอการแก้ไข",
+            })
+            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id);
+            await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
+                status_solution: "รอการแก้ไข",
+            })
             router.push('/')
         } catch (error) {
             alert('Create Solution error');
@@ -161,7 +179,7 @@ export default function SetSolution() {
                             {meetingDetail?.topic_meeting}</p>
                     </div>
                     <div>
-                        <a href={`/detail_report/${id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+                        <a href={`/detail_deviation/${meetingDetail?.incident_report_id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
                             <svg className="w-6 h-6 text-gray-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                 <path fillRule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clipRule="evenodd" />
                             </svg>
@@ -170,22 +188,37 @@ export default function SetSolution() {
                 </div>
 
                 <div className="solution">
-                    <table className="w-full border-collapse border border-gray-300">
-                        <thead>
-                            <tr className="bg-gray-300 text-center">
-                                <th className="border border-gray-300 px-4 py-2">หัวข้อการแก้ไช</th>
-                                <th className="border border-gray-300 px-4 py-2">ผู้รับผิดชอบ</th>
-                                <th className="border border-gray-300 px-4 py-2">วันที่กำหนดแก้ไข</th>
-                                <th className="border border-gray-300 px-4 py-2">สถานะการแก้ไข</th>
+                    <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
+                                <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
+                                <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">วันที่แก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">การแก้ไข</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {meetingDetail?.problemResolutions.map((solution) => (
-                                <tr key={solution.id} className="hover:bg-gray-50 text-center">
-                                    <td className="border border-gray-300 px-4 py-2">{solution.topic_solution}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{solution.assign_to}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{solution.target_finish ? new Date(solution.target_finish.toString()).toLocaleDateString() : ''}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{solution.status_solution}</td>
+                            {meetingDetail?.problemResolutions?.map((resolution) => (
+                                <tr key={resolution.id} className="border border-black text-center text-md">
+                                    <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</td>
+                                    <td className="border border-black px-6 py-2">
+                                        {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
+                                    </td>
+                                    <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
+                                        {resolution.status_solution}
+                                    </td>
+                                    <td className="px-6 py-2 border border-black">
+                                        <a onClick={() => {
+                                            setOpen(true);
+                                            setProblemSolution(resolution);
+                                        }} className='cursor-pointer underline font-black'>
+                                            ดูการแก้ไช
+                                        </a>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -276,6 +309,32 @@ export default function SetSolution() {
                                 อนุมัติ
                             </button>
                         </div>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal open={open} onClose={() => setOpen(false)}>
+                <div className='px-4 py-4 justify-center items-center'>
+                    <div>
+                        {problemSolution && (
+                            <>
+                                <div className="solution">
+                                    {problemSolution && problemSolution.troubleshootSolutions && problemSolution?.troubleshootSolutions.map((solution) => (
+                                        <form key={solution.id} className='border border-black px-4 py-2'>
+                                            <p>รายละเอียดการแก้ไข</p>
+                                            <p className='ms-2 underline'>{solution.result_troubleshoot}</p>
+                                            <p className='mt-4'>ไฟล์อัพโหลด</p>
+                                            <p className='ms-2 underline'>
+                                                <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
+                                                    {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                </a></p>
+                                            <p className='mt-4'>วันที่แก้ไข</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                        </form>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </Modal>

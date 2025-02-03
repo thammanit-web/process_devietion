@@ -169,7 +169,7 @@ export default function setSolution() {
                             </tr>
                         </thead>
                         <tbody>
-                            {meetingDetail?.problemResolutions.map((resolution) => (
+                            {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="hover:bg-gray-50 text-center items-center">
                                     <td className="border border-black px-4 py-2">{resolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{resolution.assign_to}</td>
@@ -177,9 +177,7 @@ export default function setSolution() {
                                     <td className="border border-black px-4 py-2">
                                         {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString() : ''}
                                     </td>
-                                    <td
-                                        className={`border border-black px-4 py-2 ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-yellow-300' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
-                                    >
+                                    <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
                                     </td>
                                 </tr>

@@ -167,24 +167,7 @@ export default function setSolution() {
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
             <div className="gap-4 grid mb-4">
-                {meetingDetail && meetingDetail.incidentReport.length > 0 && meetingDetail?.incidentReport.map((incident) => (
-                    <div key={incident.id} className='flex'>
-                        <div className='w-full flex gap-2 text-blue-500'>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Topic</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.topic}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Priority</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.priority}</p>
-                            </div>
-                            <div className="flex">
-                                <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>Ref. No</p>
-                                <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{incident.ref_no}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+
                 <div className='w-full  lg:flex md:flex gap-2'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการแก้ไข</p>
@@ -195,11 +178,6 @@ export default function setSolution() {
                         <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{problemSolution?.target_finish ? new Date(problemSolution?.target_finish.toString()).toLocaleDateString() : ''}</p>
                     </div>
                 </div>
-                <div>
-                    <button onClick={() => setOpen(true)} className='drop-shadow-lg shadow-md px-4 py-2 rounded-lg hover:bg-gray-100'>+ เพิ่มการแก้ไข</button>
-                </div>
-
-
                 <div className="solution">
                     <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
@@ -207,7 +185,6 @@ export default function setSolution() {
                                 <th className="border border-black px-4 py-2">รายละเอียดการแก้ไข</th>
                                 <th className="border border-black px-4 py-2">ไฟล์อัพโหลด</th>
                                 <th className="border border-black px-4 py-2">วันที่แก้ไข</th>
-                                <th className="border border-black px-4 py-2">action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -220,13 +197,6 @@ export default function setSolution() {
                                         </a>
                                     </td>
                                     <td className="border border-black px-4 py-2">{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString() : ''}</td>
-                                    <td className="border border-black px-4 py-2 items-center flex justify-center">
-                                        <a onClick={handleDelete} className='cursor-pointer'>
-                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
-                                            </svg>
-                                        </a>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

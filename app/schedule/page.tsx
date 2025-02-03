@@ -117,7 +117,7 @@ export default function dashboardTechnical() {
                             ) : (
                                 Incidentreports.filter((incident) => incident.status_report === "รอยืนยันการตรวจสอบ")
                                     .map((incident) => (
-                                        <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                                        <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={()=>router.push(`/schedule/${incident.id}`)}>
                                             <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                                             <td className="px-6 py-4 border border-black">{incident.topic}</td>
                                             <td>
@@ -130,8 +130,8 @@ export default function dashboardTechnical() {
                                                 <p className={`py-2 rounded-xl text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-300' :
                                                     incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-yellow-300' :
                                                         incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
-                                                            incident.status_report === 'รอการอนุมัติการกำหนดการแก้ไข' ? 'bg-yellow-300' :
-                                                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-400' :
+                                                            incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-yellow-300' :
+                                                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-600' :
                                                                     incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-yellow-300' :
                                                                         incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-red-500' :
                                                                             incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :

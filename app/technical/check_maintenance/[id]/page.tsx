@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import investigationMeeting from '../../investigation/[id]/page'
+import { Modal } from '@/app/components/modal'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -55,6 +56,7 @@ export default function setSolution() {
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
+    const [open, setOpen] = useState<boolean>(false);
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -79,7 +81,7 @@ export default function setSolution() {
         e.preventDefault();
         try {
             await axios.put(`/api/investigation_meeting/${id}`, {
-            manager_approve: "รออนุมัติการแก้ไข",
+                manager_approve: "รออนุมัติการแก้ไข",
             }, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -87,8 +89,26 @@ export default function setSolution() {
             });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
-                }, );
-            router.push('/maintenance_page')
+            },);
+            router.back()
+        } catch (error) {
+            alert('Create Solution error');
+            console.error(error);
+        }
+    };
+    const handleReject = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
+                status_report: "รอการแก้ไข",
+            })
+            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id);
+            await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
+                status_solution: "รอการแก้ไข",
+            })
+            console.log('Problem Resolution IDs:', problemResolutionIds);
+            fetchMeeting(Number(id));
+            router.back()
         } catch (error) {
             alert('Create Solution error');
             console.error(error);
@@ -158,11 +178,11 @@ export default function setSolution() {
                                         {problemSolution.status_solution}
                                     </td>
                                     <td className=" px-4 py-2 items-center flex justify-center">
-                                        <a href={`/technical/check_maintenance/detail_maintain/${problemSolution.id}`} className='cursor-pointer'>
-                                            <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                                <path fillRule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clipRule="evenodd" />
-                                                <path fillRule="evenodd" d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z" clipRule="evenodd" />
-                                            </svg>
+                                        <a onClick={() => {
+                                                setOpen(true);
+                                                setProblemSolution(problemSolution);
+                                            }} className='cursor-pointer underline font-black'>
+                                           ดูการแก้ไช
                                         </a>
                                     </td>
                                 </tr>
@@ -172,11 +192,10 @@ export default function setSolution() {
                     </table>
                 </div>
 
-
             </div>
             <div className='gap-2 flex justify-end'>
                 <a
-                    onClick={router.back}
+                    onClick={handleReject}
                     className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     ไม่อนุมัติ
@@ -188,6 +207,31 @@ export default function setSolution() {
                 </button>
             </div>
 
+            <Modal open={open} onClose={() => setOpen(false)}>
+                <div className='px-4 py-4 justify-center items-center'>
+                    <div>
+                        {problemSolution && (
+                            <>
+                                <div className="solution">
+                                    {problemSolution && problemSolution.troubleshootSolutions && problemSolution?.troubleshootSolutions.map((solution) => (
+                                        <form key={solution.id} className='border border-black px-4 py-2'>
+                                            <p>รายละเอียดการแก้ไข</p>
+                                            <p className='ms-2 underline'>{solution.result_troubleshoot}</p>
+                                            <p className='mt-4'>ไฟล์อัพโหลด</p>
+                                            <p className='ms-2 underline'>
+                                                <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
+                                                    {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                </a></p>
+                                            <p className='mt-4'>วันที่แก้ไข</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                        </form>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </Modal>
 
         </div>
     )

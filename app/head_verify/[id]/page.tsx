@@ -67,7 +67,7 @@ export default function headVerify() {
         e.preventDefault()
         try {
             await axios.delete(`/api/incident_report/${id}`)
-            router.push('/dashboard_submit')
+            router.push('/')
         } catch (error) {
             console.error("Error rejecting report:", error)
         }
@@ -86,7 +86,7 @@ export default function headVerify() {
                 <div className='flex gap-4'>
                     <div className='w-full flex gap-4'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm'>Priority</p>
-                        <p className={`font-bold underline ${report.priority === 'urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
+                        <p className={`font-bold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
                     </div>
                     <div className='w-full flex gap-4'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm'>Ref. No.</p>

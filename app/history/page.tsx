@@ -1,9 +1,8 @@
 'use client'
 import axios from 'axios';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link'
-import investigationMeeting from '../technical/investigation/[id]/page';
 interface IncidentReport {
   id: number;
   ref_no: String
@@ -20,32 +19,9 @@ interface IncidentReport {
   report_date: String
   status_report: String
   head_approve: String
-  investigationMeetings: InvestigationMeeting[];
-}
-interface InvestigationMeeting {
-  id: string
-  incident_report_id: string
-  topic_meeting: string
-  scheduled_date: string
-  meeting_date: string
-  summary_meeting: string
-  investigation_signature: string
-  manager_approve: Boolean
-  file_meeting: string
-  problemResolutions: ProblemResolution[]
-}
-interface ProblemResolution {
-  id: number
-  meeting_id: string
-  topic_solution: string
-  solution_id: string
-  assign_to: string
-  target_finish: string
-  status_solution: string
-  manager_approve: string
 }
 
-export default function dashboardTechnical() {
+export default function DashboardSubmit() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
 
   const router = useRouter()
@@ -62,17 +38,6 @@ export default function dashboardTechnical() {
       console.error(error)
     }
   }
-
-  const handleLogout = async () => {
-    const response = await fetch('/api/auth/logout', { method: 'POST' });
-
-    if (response.ok) {
-      router.push('/');
-    } else {
-      console.error('Failed to logout');
-    }
-  };
-
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
       <div className='flex justify-end items-between w-screen mb-4 mt-4'>
@@ -87,18 +52,15 @@ export default function dashboardTechnical() {
       </div>
 
       <div className="relative overflow-x-auto mx-8 mb-16">
-        <div className='text-lg mb-2'>รอยืนยันการตรวจสอบ</div>
+        <div className='text-lg mb-2'>ประวัติการรายงานความผิดปกติ</div>
         <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
+          <thead className="text-center text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3 border border-black">
                 Ref. No
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 Topic
-              </th>
-              <th scope="col" className="px-6 py-3 border border-black">
-                Priority
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 วันที่เกิดเหตุ
@@ -120,33 +82,30 @@ export default function dashboardTechnical() {
           <tbody>
             {
               Incidentreports.filter((incident) =>
-                incident.status_report === "รออนุมัติกำหนดการแก้ไข"
-                || incident.status_report === "รออนุมัติการแก้ไข"
+                incident.status_report === "แก้ไขแล้ว"
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
               ) : (
-                Incidentreports.filter((incident) => incident.status_report === "รออนุมัติกำหนดการแก้ไข" || incident.status_report === "รออนุมัติการแก้ไข")
+                Incidentreports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
                   .map((incident) => (
-                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" 
-                      onClick={() => router.push(incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
-                      ? `/manager_page/schedule/${incident.investigationMeetings[0]?.id}`
-                      : `/manager_page/improved/${incident.investigationMeetings[0]?.id}`)}>
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={()=>router.push(`/detail_deviation/${incident.id}`)}>
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
-                      <td>
-                        <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
                       </td>
-                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
-                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">
+                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
+                      </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-300' :
                           incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-yellow-300' :
                             incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
                               incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-yellow-300' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-600' :
+                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-400' :
                                   incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-yellow-300' :
                                     incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-red-500' :
                                       incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
@@ -155,17 +114,11 @@ export default function dashboardTechnical() {
                           {incident.status_report}</p>
                       </td>
                       <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                        <Link
-                          href=
-                          {incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
-                            ? `/manager_page/schedule/${incident.investigationMeetings[0]?.id}`
-                            : `/manager_page/improved/${incident.investigationMeetings[0]?.id}`}
-                          className='underline text-black hover:text-gray-400'>
-                          อนุมัติ
-                        </Link>
+                        <Link href={`/detail_deviation/${incident.id}`} className='underline'>รายละอียด</Link>
                       </td>
                     </tr>
-                  )))}
+                  )))
+            }
           </tbody>
         </table>
       </div>

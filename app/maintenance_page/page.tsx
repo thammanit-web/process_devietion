@@ -133,7 +133,7 @@ export default function dashboardTechnical() {
                           incident.status_report === 'รอยืนยันการตรวจสอบ' ? 'bg-yellow-300' :
                             incident.status_report === 'รอการประชุม' ? 'bg-blue-400' :
                               incident.status_report === 'รออนุมัติกำหนดการแก้ไข' ? 'bg-yellow-300' :
-                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-400' :
+                                incident.status_report === 'รอการแก้ไข' ? 'bg-blue-600' :
                                   incident.status_report === 'รอตรวจสอบการแก้ไข' ? 'bg-yellow-300' :
                                     incident.status_report === 'รออนุมัติการแก้ไข' ? 'bg-red-500' :
                                       incident.status_report === 'แก้ไขแล้ว' ? 'bg-green-400' :
