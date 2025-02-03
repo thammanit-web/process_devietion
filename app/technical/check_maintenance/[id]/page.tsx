@@ -83,13 +83,6 @@ export default function setSolution() {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.put(`/api/investigation_meeting/${id}`, {
-                manager_approve: "รออนุมัติการแก้ไข",
-            }, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
             },);

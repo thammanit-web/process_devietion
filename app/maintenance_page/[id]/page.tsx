@@ -92,13 +92,6 @@ export default function setSolution() {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.put(`/api/investigation_meeting/${id}`, {
-                manager_approve: "รอตรวจสอบการแก้ไข",
-            }, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอตรวจสอบการแก้ไข",
             })
@@ -283,12 +276,19 @@ export default function setSolution() {
                                             <p className='mt-4'>วันที่แก้ไข</p>
                                             <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
                                             <div className='flex justify-end w-full'>
-                                                <a onClick={handleDelete} className='cursor-pointer justify-end text-red-500 px-2 rounded-sm'>
+                                                <a onClick={handleDelete} className='cursor-pointer font-medium justify-end text-red-500 px-2 rounded-sm'>
                                                     ลบ
                                                 </a>
                                             </div>
                                         </form>
                                     ))}
+                                    <div className='flex w-full justify-end mt-4'>
+                                    <a onClick={() => {
+                                        setIsOpen(true);
+                                    }} className='cursor-pointer font-medium text-blue-500 border px-4 py-1'>
+                                        เพิ่ม
+                                    </a>
+                                    </div>
                                 </div>
                             </>
                         )}

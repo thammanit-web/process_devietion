@@ -110,7 +110,6 @@ export default function investigationMeeting() {
             await axios.post(`/api/investigation_meeting`, {
                 ...Investigation,
                 incident_report_id: Number(id),
-                manager_approve: ""
             })
             setLoading(false)
             setOpen(false)
