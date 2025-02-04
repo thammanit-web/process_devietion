@@ -151,15 +151,15 @@ export default function detailVerify() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-                <button onClick={router.back} className='rounded-full px-2 border py-2 border-gray-800 hover:border-gray-400'>
-                    <svg className="w-6 h-6 text-gray-800 dark:text-white hover:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 19-7-7 7-7" />
-                    </svg>
-                </button>
+            <button onClick={router.back} className='rounded-full px-2 border py-2 border-gray-800 hover:border-gray-400'>
+                <svg className="w-6 h-6 text-gray-800 dark:text-white hover:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 19-7-7 7-7" />
+                </svg>
+            </button>
             <div className='flex justify-end w-full'>
                 <button onClick={exportToPDF} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg hover:text-red-300 hover:border-red-300">Export PDF</button>
             </div>
-            
+
             <form className="gap-6 ms-10 grid" ref={reportRef}>
                 <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายงานความผิดปกติในกระบวนการผลิต</h1>
                 <div className="md:flex sm:grid gap-6">
@@ -258,86 +258,110 @@ export default function detailVerify() {
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">รายละเอียดการประชุม</h1>
                 {
-                    report?.investigationMeetings
-                        ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว')
-                        .map((meeting) => (
-                            <div key={meeting.id}>
-                                <div className='ms-4 gap-6 grid'>
-                                    <div className='flex gap-4'>
-                                        <p className='font-semibold'>วันที่นัดประชุม</p>
-                                        <p>{meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}</p>
-                                    </div>
-                                    <div className='flex gap-4'>
-                                        <p className='font-semibold'>วันที่ประชุม</p>
-                                        <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}</p>
-                                    </div>
-                                    <div className='flex gap-4'>
-                                        <p className='font-semibold'>หัวข้อการประชุม</p>
-                                        <p>{meeting.topic_meeting}</p>
-                                    </div>
-                                    <div className='grid gap-4'>
-                                        <p className='font-semibold'>รายละเอียดการประชุม</p>
-                                        <p className='ms-2'>{meeting.summary_meeting}</p>
-                                    </div>
-                                    <div className='grid gap-4'>
-                                        <p className='font-semibold'>ไฟล์ที่เกี่ยวข้อง</p>
-                                        <p>  {
-                                            meeting.meetingFiles?.map((file) => (
-                                                <li key={file.id}>
-                                                    <a
-                                                        href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
-                                                        className="text-blue-500"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
-                                                    </a>
-                                                </li>
-                                            )
-                                            )}</p>
+                    report?.investigationMeetings?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว').length === 0
+                        ? <p>ยังไม่ประชุม</p>
+                        : report?.investigationMeetings
+                            ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว')
+                            .map((meeting) => (
+                                <div key={meeting.id}>
+                                    <div className='ms-4 gap-6 grid'>
+                                        <div className='flex gap-4'>
+                                            <p className='font-semibold'>วันที่นัดประชุม</p>
+                                            <p>{meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}</p>
+                                        </div>
+                                        <div className='flex gap-4'>
+                                            <p className='font-semibold'>วันที่ประชุม</p>
+                                            <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}</p>
+                                        </div>
+                                        <div className='flex gap-4'>
+                                            <p className='font-semibold'>หัวข้อการประชุม</p>
+                                            <p>{meeting.topic_meeting}</p>
+                                        </div>
+                                        <div className='grid gap-4'>
+                                            <p className='font-semibold'>รายละเอียดการประชุม</p>
+                                            <p className='ms-2'>{meeting.summary_meeting}</p>
+                                        </div>
+                                        <div className='grid gap-4'>
+                                            <p className='font-semibold'>ไฟล์ที่เกี่ยวข้อง</p>
+                                            <p>  {
+                                                meeting.meetingFiles?.map((file) => (
+                                                    <li key={file.id}>
+                                                        <a
+                                                            href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                                            className="text-blue-500"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                        </a>
+                                                    </li>
+                                                )
+                                                )}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">การกำหนดการแก้ไข</h1>
-                {meetingDetail?.problemResolutions?.map((resolution) => (
-                    <div key={resolution.id} className='ms-4 gap-6 grid'>
-                        <div className='flex gap-6'>
-                            <div className='flex gap-4'>
-                                <p className="font-semibold">หัวข้อการแก้ไช</p>
-                                <p>{resolution.topic_solution}</p>
+                {
+                    meetingDetail?.problemResolutions && meetingDetail.problemResolutions.length === 0
+                        ? <p>ยังไม่กำหนดการแก้ไข</p>
+                        : meetingDetail?.problemResolutions?.map((resolution) => (
+                            <div key={resolution.id} className='ms-4 gap-6 grid border border-gray-600 justify-center py-4'>
+                                <div className='flex gap-4'>
+                                    <div className='flex gap-4'>
+                                        <p className="font-semibold">หัวข้อการแก้ไช</p>
+                                        <p>{resolution.topic_solution}</p>
+                                    </div>
+                                    <div className='flex gap-4'>
+                                        <p className="font-semibold">ผู้รับผิดชอบ</p>
+                                        <p>{resolution.assign_to}</p>
+                                    </div>
+                                    <div className='flex gap-4'>
+                                        <p className="font-semibold">วันที่กำหนดแก้ไข</p>
+                                        <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</p>
+                                    </div>
+
+                                    <div className='flex gap-4'>
+                                        <p className="font-semibold">วันที่แก้ไข</p>
+                                        <p>
+                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
+                                        </p>
+                                    </div>
+                                    <div className='flex gap-4'>
+                                        <p className="font-semibold">สถานะการแก้ไข</p>
+                                        <p>{resolution.status_solution}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    {
+                                        resolution && resolution.troubleshootSolutions && resolution.troubleshootSolutions.length === 0
+                                            ? <p>ยังไม่แก้ไข</p>
+                                            : resolution?.troubleshootSolutions?.map((solution) => (
+                                                <div key={solution.id} className=' gap-6 flex border border-gray-600 justify-center py-4'>
+                                                    <div className='flex gap-4'>
+                                                        <p className='font-semibold'>รายละเอียดการแก้ไข</p>
+                                                        <p >{solution.result_troubleshoot}</p>
+                                                    </div>
+                                                    <div className='flex gap-4'>
+                                                        <p className='font-semibold'>ไฟล์อัพโหลด</p>
+                                                        <p>
+                                                            <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
+                                                                {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                            </a></p>
+                                                    </div>
+                                                    <div className='flex gap-4'>
+                                                        <p className='font-semibold'>วันที่แก้ไข</p>
+                                                        <p>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                </div>
+
                             </div>
-                            <div className='flex gap-4'>
-                                <p className="font-semibold">ผู้รับผิดชอบ</p>
-                                <p>{resolution.assign_to}</p>
-                            </div>
-                            <div className='flex gap-4'>
-                                <p className="font-semibold">วันที่กำหนดแก้ไข</p>
-                                <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</p>
-                            </div>
-                            <div className='flex gap-4'>
-                                <p className="font-semibold">วันที่แก้ไข</p>
-                                <p>
-                                    {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
-                                </p>
-                            </div>
-                            <div className='flex gap-4'>
-                                <p className="font-semibold">สถานะการแก้ไข</p>
-                                <p>{resolution.status_solution}</p>
-                            </div>
-                            <div className='flex gap-4'>
-                                <a onClick={() => {
-                                    setOpen(true);
-                                    setProblemSolution(resolution);
-                                }} className='cursor-pointer font-semibold border border-gray-500 px-2 rounded-lg hover:text-gray-400'>
-                                    ดูการแก้ไช
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                        ))}
             </form>
 
             <Modal open={open} onClose={() => setOpen(false)}>
