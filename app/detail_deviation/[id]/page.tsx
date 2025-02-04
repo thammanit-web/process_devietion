@@ -1,7 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 interface IncidentReport {
     priority: string;
@@ -70,10 +74,11 @@ export default function detailVerify() {
     const [report, setReport] = useState<IncidentReport | null>(null)
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [open, setOpen] = useState<boolean>(false);
-    const [IsOpen, setIsOpen] = useState<boolean>(false);
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
     const [openDetail, setOpenDetail] = useState(false);
     const router = useRouter()
+    const reportRef = useRef<HTMLFormElement>(null); 
+    
 
     const fetchIncidentReports = async (id: number) => {
         try {
@@ -100,6 +105,61 @@ export default function detailVerify() {
         }
     }
 
+    const exportToPDF = () => {
+        if (reportRef.current) {
+            html2canvas(reportRef.current, { scale: 2 }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190;
+                const pageHeight = 297;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                let heightLeft = imgHeight;
+                let position = 10;
+
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`Process_Deviation_${report?.ref_no}.pdf`);
+            });
+        }
+    };
+
+    // Export as Excel
+    const exportToExcel = () => {
+        if (!report) return;
+
+        const worksheet = XLSX.utils.json_to_sheet([
+            {
+                'Priority': report.priority,
+                'Reference No': report.ref_no,
+                'Topic': report.topic,
+                'Category': report.category_report,
+                'Machine Code': report.machine_code,
+                'Machine Name': report.machine_name,
+                'Incident Date': report.incident_date,
+                'Description': report.incident_description,
+                'Reporter': report.reporter_name,
+                'Report Date': report.report_date,
+                'Status': report.status_report,
+            },
+        ]);
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Incident Report');
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(file, `Process_Deviation_${report.ref_no}.xlsx`);
+    };
+
     useEffect(() => {
         if (id) {
             fetchIncidentReports(Number(id))
@@ -119,9 +179,15 @@ export default function detailVerify() {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
 
-            <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
-            <form className="space-y-6">
-                <div className='flex gap-4'>
+            <div className='flex justify-between w-full'>
+                <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
+                <div className="flex gap-4 mt-6">
+                    <button onClick={exportToPDF} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg">Export PDF</button>
+                    <button onClick={exportToExcel} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg">Export Excel</button>
+                </div>
+            </div>
+            <form className="space-y-6"  ref={reportRef}>
+                <div className='flex gap-4' >
                     <div className='w-full flex gap-4'>
                         <p className='font-bold'>Priority</p>
                         <p className={`font-bold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>

@@ -110,8 +110,7 @@ export default function DashboardSubmit() {
                                                 {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 border border-black">
-                                                <Link href={`/head_verify/${incident.id}`} className='underline'> {incident.reporter_name}</Link>
-
+                                                {incident.reporter_name}
                                             </td>
                                             <td>
                                                 <p className={`py-2 rounded-xl text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-300' :
