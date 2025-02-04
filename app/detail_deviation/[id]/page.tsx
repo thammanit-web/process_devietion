@@ -127,7 +127,7 @@ export default function detailVerify() {
                     heightLeft -= pageHeight;
                 }
 
-                pdf.save(`Process_Deviation_${report?.ref_no}.pdf`);
+                pdf.save(`Process Deviation ${report?.topic}.pdf`);
             });
         }
     };
@@ -157,7 +157,7 @@ export default function detailVerify() {
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
 
         const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(file, `Process_Deviation_${report.ref_no}.xlsx`);
+        saveAs(file, `Process Deviation ${report.topic}.xlsx`);
     };
 
     useEffect(() => {
