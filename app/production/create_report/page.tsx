@@ -83,7 +83,7 @@ export default function createReport() {
         e.preventDefault();
 
         // Check if all required fields are filled
-        if (!formData.topic || !formData.machine_code || !formData.machine_name || !formData.incident_date || !formData.incident_description || !formData.category_report || !formData.reporter_name || !formData.report_date) {
+        if (!formData.topic || !formData.machine_code || !formData.machine_name || !formData.incident_date || !formData.incident_description || !formData.category_report) {
             alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
             return;
         }
