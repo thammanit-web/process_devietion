@@ -82,6 +82,12 @@ export default function createReport() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Check if all required fields are filled
+        if (!formData.topic || !formData.machine_code || !formData.machine_name || !formData.incident_date || !formData.incident_description || !formData.category_report || !formData.reporter_name || !formData.report_date) {
+            alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+            return;
+        }
+
         const incidentSummary = formData.summary_incident?.trim() === '' ? 'ไม่มีสาเหตุเบื้องต้น' : formData.summary_incident;
 
         const formDataWithFiles = new FormData();
@@ -149,7 +155,7 @@ export default function createReport() {
                                 required
                                 onChange={handleCategoryChange}
                             >
-                                <option>เลือกประเภท</option>
+                                 <option>เลือกประเภท</option>
                                 <option value="Product quality!">Product quality!</option>
                                 <option value="Equipment failure">Equipment failure</option>
                                 <option value="Safety!">Safety!</option>
