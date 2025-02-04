@@ -93,7 +93,7 @@ export default function SetSolution() {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.post(`/api/manager_approve`, {
+            await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
                 meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
@@ -122,7 +122,7 @@ export default function SetSolution() {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.post(`/api/manager_approve`, {
+            await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
                 meeting_id: id,
                 solution_id: meetingDetail?.problemResolutions[0]?.id,

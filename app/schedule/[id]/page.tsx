@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import investigationMeeting from '@/app/technical/investigation/[id]/page'
 
 interface IncidentReport {
     ref_no: string;
@@ -34,6 +35,11 @@ interface InvestigationMeeting {
     investigation_signature: string
     manager_approve: string
     file_meeting: string
+    problemResolution: {
+        id: number;
+        manager_approve: string
+        status_solution: string
+    }[]
 }
 
 export default function AapproveReport() {
@@ -49,6 +55,7 @@ export default function AapproveReport() {
         investigation_signature: '',
         manager_approve: '',
         file_meeting: '',
+        problemResolution:[]
     })
     const [loading, setLoading] = useState(false);
     const router = useRouter()

@@ -16,7 +16,6 @@ export async function POST(req: Request) {
             comment_troubleshoot,
         } = await req.json()
         const newComment = await prisma.managerApprove.create({
-            include: { investigationMeeting: true,problemSolution:true },
             data: {
                 meeting_id,
                 solution_id,

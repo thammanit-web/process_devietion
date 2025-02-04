@@ -135,7 +135,7 @@ export default function dashboardTechnical() {
                         const meeting = incident.investigationMeetings.find(meeting =>
                           incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
                             ? meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข'
-                            : meeting.manager_approve === 'รออนุมัติการแก้ไข'
+                            : meeting.manager_approve === 'อนุมัติแล้ว'
                         );
                         if (meeting) {
                           router.push(
@@ -174,7 +174,7 @@ export default function dashboardTechnical() {
                             const meeting = incident.investigationMeetings.find(meeting =>
                               incident.status_report === 'รออนุมัติกำหนดการแก้ไข'
                                 ? meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข'
-                                : meeting.manager_approve === 'รออนุมัติการแก้ไข'
+                                : meeting.manager_approve === 'อนุมัติแล้ว'
                             );
                             if (meeting) {
                               router.push(

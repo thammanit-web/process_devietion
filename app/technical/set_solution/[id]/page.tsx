@@ -114,6 +114,7 @@ export default function setSolution() {
             fetchMeeting(Number(id));
             setOpen(false);
         } catch (error) {
+            setLoading(false)
             alert('Create Solution error');
             console.error(error);
         }
@@ -123,6 +124,14 @@ export default function setSolution() {
         e.preventDefault();
         try {
             setLoading(true)
+            if (meetingDetail?.problemResolutions && meetingDetail.problemResolutions.length > 0) {
+                console.log("Problem Resolution:", meetingDetail.problemResolutions);
+                console.log("Meeting ID:", meetingDetail.problemResolutions[0].meeting_id);
+                console.log("Solution ID:", meetingDetail.problemResolutions[0].id);
+            } else {
+                console.log("No problem resolutions found.");
+            }
+
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "รออนุมัติกำหนดการแก้ไข",
@@ -131,21 +140,27 @@ export default function setSolution() {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            await axios.post(`/api/manager_approve`, {
+                meeting_id: Number(meetingDetail?.problemResolutions[0].meeting_id),
+                solution_id: Number(meetingDetail?.problemResolutions[0].id),
+                comment_solution: '',
+                comment_troubleshoot: ''
+            });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติกำหนดการแก้ไข"
             })
+            console.log(problemResolution.meeting_id, problemResolution.id);
             router.back()
         } catch (error) {
-            alert('Create Solution error');
+            setLoading(false)
+            alert('ส่งอนุมัติ error');
             console.error(error);
         }
     };
 
-
-
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
-             {loading && <LoadingOverlay />}
+            {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <div>
                     <p className='text-2xl font-semibold'>

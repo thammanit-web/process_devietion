@@ -119,7 +119,7 @@ export default function dashboardTechnical() {
               ) : (
                 Incidentreports.filter((incident) => incident.status_report === "รอการแก้ไข")
                   .map((incident) => (
-                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center">
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={()=>router.push(`/maintenance_page/${incident.investigationMeetings[0]?.id}`)}>
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td>
