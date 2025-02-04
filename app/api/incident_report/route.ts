@@ -112,7 +112,6 @@ export async function POST(req: Request) {
             }
         }
 
-        // **SEND EMAIL NOTIFICATION**
         const transporter = createTransport({
             service: 'gmail',
             auth: {

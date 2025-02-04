@@ -122,7 +122,7 @@ export default function setSolution() {
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
             {loading && <LoadingOverlay />}
-            <div className="gap-4 grid mb-4"> 
+            <div className="gap-4 grid mb-4">
                 {meetingDetail?.incidentReport.map((incident) => (
                     <div key={incident.id} className='flex'>
                         <div className='w-full flex gap-2 text-blue-500'>
@@ -142,11 +142,19 @@ export default function setSolution() {
                     </div>
                 ))}
 
-                <div className='w-full  lg:flex md:flex gap-2'>
+                <div className='w-full  lg:flex md:flex gap-2 justify-between'>
                     <div className='flex'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm border border-black px-4 py-2'>หัวข้อการประชุม</p>
                         <p className='underline lg:text-lg md:text-xs sm:text-xs border border-black px-4 py-2'>{meetingDetail?.topic_meeting}</p>
                     </div>
+                    <div>
+                        <a href={`/detail_deviation/${meetingDetail?.incident_report_id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+                            <svg className="w-6 h-6 text-gray-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fillRule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clipRule="evenodd" />
+                            </svg>
+                            รายละเอียด Deviation</a>
+                    </div>
+
                 </div>
 
                 <div className="solution">
@@ -177,10 +185,10 @@ export default function setSolution() {
                                     </td>
                                     <td className=" px-4 py-2 items-center flex justify-center">
                                         <a onClick={() => {
-                                                setOpen(true);
-                                                setProblemSolution(problemSolution);
-                                            }} className='cursor-pointer underline font-black'>
-                                           ดูการแก้ไช
+                                            setOpen(true);
+                                            setProblemSolution(problemSolution);
+                                        }} className='cursor-pointer underline font-black'>
+                                            ดูการแก้ไช
                                         </a>
                                     </td>
                                 </tr>

@@ -75,14 +75,13 @@ export default function createReport() {
             setSelectedFiles((prevFiles) => [
                 ...prevFiles,
                 ...Array.from(files),
-            ]);  
-        } 
+            ]);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Check if all required fields are filled
         if (!formData.topic || !formData.machine_code || !formData.machine_name || !formData.incident_date || !formData.incident_description || !formData.category_report) {
             alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
             return;
@@ -155,7 +154,7 @@ export default function createReport() {
                                 required
                                 onChange={handleCategoryChange}
                             >
-                                 <option>เลือกประเภท</option>
+                                <option>เลือกประเภท</option>
                                 <option value="Product quality!">Product quality!</option>
                                 <option value="Equipment failure">Equipment failure</option>
                                 <option value="Safety!">Safety!</option>
