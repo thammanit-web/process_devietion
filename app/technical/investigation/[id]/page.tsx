@@ -136,7 +136,6 @@ export default function investigationMeeting() {
         const formData = new FormData();
         formData.append("meeting_date", Investigation.meeting_date);
         formData.append("summary_meeting", Investigation.summary_meeting);
-
         selectedFiles.forEach((file, index) => {
             formData.append(`files`, file);
         });

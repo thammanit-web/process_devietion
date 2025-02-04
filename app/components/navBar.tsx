@@ -34,7 +34,7 @@ export default function Nav() {
         <div className='flex justify-center items-center w-full'>
           <div className=' text-black text-center mt-4 '>
             <p className='lg:text-3xl md:text-xl sm:text-xs'>PROCESS DEVIATION INVESTIGATION FORM</p>
-            <p className='flex justify-start'>รายงานความผิดปกติในกระบวนการผลิต</p>
+            <p className='flex justify-center'>รายงานความผิดปกติในกระบวนการผลิต</p>
           </div>
         </div>
       </div>

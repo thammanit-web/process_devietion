@@ -3,22 +3,70 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 interface IncidentReport {
-  id: number;
-  ref_no: String
-  priority: String
-  topic: String
-  machine_code: String
-  machine_name: String
-  incident_date: String
-  incident_time: String
-  incident_description: String
-  total_time: String
-  summary_incident: String
-  reporter_name: String
-  report_date: String
-  status_report: String
-  head_approve: String
+  id:number
+  priority: string;
+  ref_no: string;
+  topic: string;
+  machine_code: string;
+  machine_name: string;
+  incident_date: string;
+  incident_time: string;
+  incident_description: string;
+  category_report: string;
+  summary_incident: string;
+  reporter_name: string;
+  report_date: string;
+  status_report: string;
+  dead_approve?: string;
+  ReportFiles: {
+      id: number;
+      file_url?: string;
+  }[];
+  investigationMeetings: InvestigationMeeting[];
+}
+interface InvestigationMeeting {
+  id: string
+  incident_report_id: string
+  topic_meeting: string
+  scheduled_date: string
+  meeting_date: string
+  summary_meeting: string
+  investigation_signature: string
+  manager_approve: string
+  meetingFiles: {
+      id: number;
+      file_url?: string;
+  }[];
+  problemResolutions: ProblemResolution[]
+  managerApproves: ManagerApprove[]
+}
+interface ProblemResolution {
+  id: string
+  meeting_id: string
+  topic_solution: string
+  assign_to: string
+  target_finish: string
+  status_solution: string
+  manager_approve: string
+  troubleshootSolutions: Troubleshoot[]
+}
+interface Troubleshoot {
+  id: string
+  solution_id: string
+  result_troubleshoot: string
+  file_summary: string
+  finish_date: string
+  problemSolution: string
+}
+interface ManagerApprove {
+  id: string
+  meeting_id: string
+  solution_id: string
+  comment_solution: string
+  comment_troubleshoot: string
 }
 
 export default function DashboardSubmit() {
@@ -38,10 +86,50 @@ export default function DashboardSubmit() {
       console.error(error)
     }
   }
+
+  const exportToExcel = () => {
+    if (Incidentreports.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+    const formattedData = Incidentreports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
+    .map((report) => ({
+      'Priority': report.priority,
+      'Reference No': report.ref_no,
+      'Topic': report.topic,
+      'Category': report.category_report,
+      'รหัสเครื่องจักร': report.machine_code,
+      'วันที่เกิดเหตุ': report.incident_date? new Date(report.incident_date).toLocaleString():'',
+      'เหตุการณ์': report.incident_description,
+      'ผู้รายงานความผิดปกติ': report.reporter_name,
+      'วันที่รายงาน': report.report_date? new Date(report.report_date).toLocaleDateString():'',
+      'สถานะ': report.status_report,
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+  
+    worksheet['!cols'] = [
+      { wch: 10 }, 
+      { wch: 20 }, 
+      { wch: 15 },
+      { wch: 15 }, 
+      { wch: 20 }, 
+      { wch: 20 }, 
+      { wch: 20 }, 
+      { wch: 20 }, 
+      { wch: 20 } 
+    ];
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Incident Reports");
+  
+    XLSX.writeFile(workbook, `Process Deviation.xlsx`);
+  };
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
       <div className='flex justify-end items-between w-screen mb-4 mt-4'>
         <div className='mx-8 flex gap-2'>
+        <button onClick={exportToExcel} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg hover:text-red-300 hover:border-red-300">Export Excel</button>
           <a href="/" className='flex border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
             <svg className="w-5 text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clipRule="evenodd" />

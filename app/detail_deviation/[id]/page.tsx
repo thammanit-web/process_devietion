@@ -4,8 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+
 
 interface IncidentReport {
     priority: string;
@@ -77,8 +76,8 @@ export default function detailVerify() {
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
     const [openDetail, setOpenDetail] = useState(false);
     const router = useRouter()
-    const reportRef = useRef<HTMLFormElement>(null); 
-    
+    const reportRef = useRef<HTMLFormElement>(null);
+
 
     const fetchIncidentReports = async (id: number) => {
         try {
@@ -132,33 +131,7 @@ export default function detailVerify() {
         }
     };
 
-    // Export as Excel
-    const exportToExcel = () => {
-        if (!report) return;
 
-        const worksheet = XLSX.utils.json_to_sheet([
-            {
-                'Priority': report.priority,
-                'Reference No': report.ref_no,
-                'Topic': report.topic,
-                'Category': report.category_report,
-                'Machine Code': report.machine_code,
-                'Machine Name': report.machine_name,
-                'Incident Date': report.incident_date,
-                'Description': report.incident_description,
-                'Reporter': report.reporter_name,
-                'Report Date': report.report_date,
-                'Status': report.status_report,
-            },
-        ]);
-
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Incident Report');
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
-        const file = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        saveAs(file, `Process Deviation ${report.topic}.xlsx`);
-    };
 
     useEffect(() => {
         if (id) {
@@ -178,77 +151,80 @@ export default function detailVerify() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-
-            <div className='flex justify-between w-full'>
-                <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายละเอียดการรายงาน {report.topic}</h1>
-                <div className="flex gap-4 mt-6">
-                    <button onClick={exportToPDF} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg">Export PDF</button>
-                    <button onClick={exportToExcel} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg">Export Excel</button>
-                </div>
+                <button onClick={router.back} className='rounded-full px-2 border py-2 border-gray-800 hover:border-gray-400'>
+                    <svg className="w-6 h-6 text-gray-800 dark:text-white hover:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 19-7-7 7-7" />
+                    </svg>
+                </button>
+            <div className='flex justify-end w-full'>
+                <button onClick={exportToPDF} className="border-red-500 border text-red-500 px-2 py-1 rounded-lg hover:text-red-300 hover:border-red-300">Export PDF</button>
             </div>
-            <form className="space-y-6"  ref={reportRef}>
-                <div className='flex gap-4' >
+            
+            <form className="gap-6 ms-10 grid" ref={reportRef}>
+                <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายงานความผิดปกติในกระบวนการผลิต</h1>
+                <div className="md:flex sm:grid gap-6">
                     <div className='w-full flex gap-4'>
-                        <p className='font-bold'>Priority</p>
-                        <p className={`font-bold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
+                        <p className='font-semibold'>Priority</p>
+                        <p className={`font-semibold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
                     </div>
                     <div className='w-full flex gap-4'>
-                        <p className='font-bold '>Ref. No.</p>
+                        <p className='font-semibold '>Ref. No.</p>
                         <p className='underline'>{report.ref_no}</p>
                     </div>
                 </div>
-                <div className='flex gap-4'>
+                <div className="md:flex sm:grid gap-6">
                     <div className='w-full flex gap-4'>
-                        <p className='font-bold '>Topic</p>
+                        <p className='font-semibold '>Topic</p>
                         <p className=' underline' >{report.topic}</p>
                     </div>
                     <div className='w-full flex gap-4'>
-                        <p className='font-bold '>Category</p>
+                        <p className='font-semibold '>Category</p>
                         <p className='underline '>{report.category_report}</p>
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex sm:grid gap-4">
-                    <div className='w-full '>
-                        <p className=''>รหัสเครื่องจักร</p>
-                        <p className='border rounded-lg x-4 py-2'>{report.machine_code}</p>
+                <div className="md:flex sm:grid gap-6">
+                    <div className='w-full flex gap-4'>
+                        <p className='font-semibold'>รหัสเครื่องจักร</p>
+                        <p className=''>{report.machine_code}</p>
                     </div>
 
-                    <div className='w-full'>
-                        <p className=''>ชื่อเครื่องจักร/อุปกรณ์</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.machine_name}</p>
+                    <div className='w-full flex gap-4'>
+                        <p className='font-semibold'>ชื่อเครื่องจักร/อุปกรณ์</p>
+                        <p className=''>{report.machine_name}</p>
                     </div>
-
-
-                    <div className='w-full'>
-                        <p className=''>วันและเวลาที่เกิดเหตุ</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString() : ''}</p>
-                    </div>
-
                 </div>
 
-                <div className="lg:flex md:flex sm:grid gap-4 w-full">
-                    <div className='w-full'>
-                        <p className=''>เหตุการณ์</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.incident_description}</p>
+
+                <div className='w-full flex gap-4'>
+                    <p className='font-semibold'>วันและเวลาที่เกิดเหตุ</p>
+                    <p className=''>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString() : ''}</p>
+                </div>
+
+
+
+                <div className="md:flex sm:grid gap-6">
+                    <div className='w-full flex gap-4'>
+                        <p className='font-semibold'>เหตุการณ์</p>
+                        <p >{report.incident_description}</p>
                     </div>
-                    <div className='w-full'>
-                        <p className=''>สาเหตุความผิดปกติเบื้องต้น</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.summary_incident}</p>
+                    <div className='w-full flex gap-4'>
+                        <p className='font-semibold'>สาเหตุความผิดปกติเบื้องต้น</p>
+                        <p >{report.summary_incident}</p>
                     </div>
                 </div>
                 <div className="lg:flex md:flex sm:grid gap-4 w-full">
                     <div className="lg:grid md:grid sm:flex ">
-                        <p className="border px-4 py-2 underline">ไฟล์ประกอบการรายงาน</p>
+                        <p className="font-semibold">ไฟล์ประกอบการรายงาน</p>
                         {report.ReportFiles.length == 0 ? (
                             <div>
-                                <p className="text-center py-4 font-bold text-lg border px-4">
+                                <p className="text-center mt-2">
                                     ไม่มีไฟล์ประกอบการตรวจสอบ!!
                                 </p>
                             </div>
                         ) : (
                             report.ReportFiles?.map((file) => (
-                                <li key={file.id} className="mt-1 border px-4 py-2">
+                                <li key={file.id} className="mt-1 ">
                                     <a
                                         href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
                                         className="text-blue-500"
@@ -268,109 +244,100 @@ export default function detailVerify() {
                     </div>
                 </div>
 
-                <div className="lg:flex md:flex sm:grid gap-4 w-full ">
-                    <div className='lg:flex md:flex sm:flex '>
-                        <p className='border px-4 py-2 underline'>ชื่อผู้รายงาน</p>
-                        <p className='border px-4 py-2 text-red-600'>{report.reporter_name}</p>
+                <div className="md:flex sm:grid gap-6">
+                    <div className='w-full flex gap-4'>
+                        <p className='underline'>ชื่อผู้รายงาน</p>
+                        <p className=' text-red-600'>{report.reporter_name}</p>
                     </div>
-                    <div className='lg:flex md:flex sm:flex lg:text-lg md:text-lg sm:text-sm'>
-                        <p className='border px-4 py-2 underline'>วันที่รายงาน</p>
-                        <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
+                    <div className='w-full flex gap-4'>
+                        <p className='underline'>วันที่รายงาน</p>
+                        <p className=' text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
                     </div>
                 </div>
 
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">รายละเอียดการประชุม</h1>
-                <div className="lg:flex md:flex sm:grid gap-4 w-full justify-center items-center">
-                    <div>
-                        <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 border border-black"> วันที่นัดประชุม</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">วันที่ประชุม</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">หัวข้อการประชุม</th>
-                                    <th scope="col" className="px-6 py-3 border border-black"> รายละเอียดการประชุม</th>
-                                    <th scope="col" className="px-6 py-3 border border-black"> การอนุมัติ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    report?.investigationMeetings?.map((meeting) => (
-                                        <tr key={meeting.id} className="border border-black text-center text-md">
-                                            <td className="px-6 py-2 border border-black">
-                                                {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}
-                                            </td>
-                                            <td className="px-6 py-2 border border-black">
-                                                {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}
-                                            </td>
-                                            <td className="px-6 py-2 border border-black">{meeting.topic_meeting}</td>
-                                            <td className="px-6 py-2 border border-black">
-                                                <a onClick={() => {
-                                                    setOpenDetail(true);
-                                                    setMeetingDetail(meeting)
-                                                }} className='cursor-pointer underline font-black'>
-                                                    ดูรายละเอียดการประชุม
-                                                </a>
-                                            </td>
-                                            <td className="px-6 py-2 border border-black">{meeting.manager_approve}</td>
-                                        </tr>
-                                    ))
-                                }
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {
+                    report?.investigationMeetings
+                        ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว')
+                        .map((meeting) => (
+                            <div key={meeting.id}>
+                                <div className='ms-4 gap-6 grid'>
+                                    <div className='flex gap-4'>
+                                        <p className='font-semibold'>วันที่นัดประชุม</p>
+                                        <p>{meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}</p>
+                                    </div>
+                                    <div className='flex gap-4'>
+                                        <p className='font-semibold'>วันที่ประชุม</p>
+                                        <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}</p>
+                                    </div>
+                                    <div className='flex gap-4'>
+                                        <p className='font-semibold'>หัวข้อการประชุม</p>
+                                        <p>{meeting.topic_meeting}</p>
+                                    </div>
+                                    <div className='grid gap-4'>
+                                        <p className='font-semibold'>รายละเอียดการประชุม</p>
+                                        <p className='ms-2'>{meeting.summary_meeting}</p>
+                                    </div>
+                                    <div className='grid gap-4'>
+                                        <p className='font-semibold'>ไฟล์ที่เกี่ยวข้อง</p>
+                                        <p>  {
+                                            meeting.meetingFiles?.map((file) => (
+                                                <li key={file.id}>
+                                                    <a
+                                                        href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
+                                                        className="text-blue-500"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
+                                                    </a>
+                                                </li>
+                                            )
+                                            )}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
 
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">การกำหนดการแก้ไข</h1>
-                <div className="lg:flex md:flex sm:grid gap-4 w-full justify-center items-center">
-                    <div>
-                        <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">วันที่แก้ไข</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">การแก้ไข</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {meetingDetail?.problemResolutions?.map((resolution) => (
-                                    <tr key={resolution.id} className="border border-black text-center text-md">
-                                        <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
-                                        <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
-                                        <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</td>
-                                        <td className="border border-black px-6 py-2">
-                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
-                                        </td>
-                                        <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
-                                            {resolution.status_solution}
-                                        </td>
-                                        <td className="px-6 py-2 border border-black">
-                                            <a onClick={() => {
-                                                setOpen(true);
-                                                setProblemSolution(resolution);
-                                            }} className='cursor-pointer underline font-black'>
-                                                ดูการแก้ไช
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {meetingDetail?.problemResolutions?.map((resolution) => (
+                    <div key={resolution.id} className='ms-4 gap-6 grid'>
+                        <div className='flex gap-6'>
+                            <div className='flex gap-4'>
+                                <p className="font-semibold">หัวข้อการแก้ไช</p>
+                                <p>{resolution.topic_solution}</p>
+                            </div>
+                            <div className='flex gap-4'>
+                                <p className="font-semibold">ผู้รับผิดชอบ</p>
+                                <p>{resolution.assign_to}</p>
+                            </div>
+                            <div className='flex gap-4'>
+                                <p className="font-semibold">วันที่กำหนดแก้ไข</p>
+                                <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</p>
+                            </div>
+                            <div className='flex gap-4'>
+                                <p className="font-semibold">วันที่แก้ไข</p>
+                                <p>
+                                    {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
+                                </p>
+                            </div>
+                            <div className='flex gap-4'>
+                                <p className="font-semibold">สถานะการแก้ไข</p>
+                                <p>{resolution.status_solution}</p>
+                            </div>
+                            <div className='flex gap-4'>
+                                <a onClick={() => {
+                                    setOpen(true);
+                                    setProblemSolution(resolution);
+                                }} className='cursor-pointer font-semibold border border-gray-500 px-2 rounded-lg hover:text-gray-400'>
+                                    ดูการแก้ไช
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div className='gap-4 flex justify-end'>
-                    <a onClick={router.back}
-                        className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        กลับ
-                    </a>
-                </div>
+                ))}
             </form>
 
             <Modal open={open} onClose={() => setOpen(false)}>
