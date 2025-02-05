@@ -117,7 +117,7 @@ export default function dashboardTechnical() {
             </select>
 
             <select
-              value={filters.priority}
+              value={filters.status_report}
               onChange={(e) => setFilters({ ...filters, status_report: e.target.value })}
               className={`border rounded-xl text-sm`}
             >
