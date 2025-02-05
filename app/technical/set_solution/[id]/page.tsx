@@ -194,9 +194,9 @@ export default function setSolution() {
                                 <tr key={resolution.id} className="hover:bg-gray-50 text-center items-center">
                                     <td className="border border-black px-4 py-2">{resolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{resolution.assign_to}</td>
-                                    <td className="border border-black px-4 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</td>
+                                    <td className="border border-black px-4 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit', }) : ''}</td>
                                     <td className="border border-black px-4 py-2">
-                                        {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString() : ''}
+                                        {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
                                     </td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
@@ -244,7 +244,7 @@ export default function setSolution() {
                             กำหนดวันที่แก้ไข
                         </label>
                         <input
-                            type='datetime-local'
+                            type='date'
                             name="target_finish"
                             required
                             onChange={handleChange}

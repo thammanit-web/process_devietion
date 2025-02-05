@@ -100,10 +100,10 @@ export default function DashboardVerify() {
       'Category': report.category_report,
       'รหัสเครื่องจักร': report.machine_code,
       'ชื่อเครื่องจักร/อุปกรณ์': report.machine_name,
-      'วันที่เกิดเหตุ': report.incident_date? new Date(report.incident_date).toLocaleString():'',
+      'วันที่เกิดเหตุ': report.incident_date? new Date(report.incident_date).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }):'',
       'เหตุการณ์': report.incident_description,
       'ผู้รายงานความผิดปกติ': report.reporter_name,
-      'วันที่รายงาน': report.report_date? new Date(report.report_date).toLocaleDateString():'',
+      'วันที่รายงาน': report.report_date? new Date(report.report_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }):'',
       'สถานะ': report.status_report,
     }));
   
@@ -192,11 +192,11 @@ export default function DashboardVerify() {
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
                       </td>
-                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}</td>
-                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}</td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}</td>
                       <td className="px-6 py-4 border border-black">
                         {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
-                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString()
+                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false })
                           : ''}
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>

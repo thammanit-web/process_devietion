@@ -124,7 +124,7 @@ export default function SetSolution() {
             setLoading(true)
             await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
-                meeting_id: id,
+                meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
             await axios.put(`/api/investigation_meeting/${id}`, {
@@ -191,7 +191,7 @@ export default function SetSolution() {
                                     <tr key={resolution.id} className="border border-black text-center text-md">
                                         <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
                                         <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
-                                        <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</td>
+                                        <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
                                         <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                             {resolution.status_solution}
                                         </td>

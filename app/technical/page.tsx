@@ -30,7 +30,7 @@ interface InvestigationMeeting {
   meeting_date: string
   summary_meeting: string
   investigation_signature: string
-  manager_approve: Boolean
+  manager_approve: string
   file_meeting: string
 }
 
@@ -51,16 +51,6 @@ export default function dashboardTechnical() {
       console.error(error)
     }
   }
-
-  const handleLogout = async () => {
-    const response = await fetch('/api/auth/logout', { method: 'POST' });
-
-    if (response.ok) {
-      router.push('/');
-    } else {
-      console.error('Failed to logout');
-    }
-  };
 
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
@@ -130,21 +120,30 @@ export default function dashboardTechnical() {
                 )
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer"
-                    onClick={()=>router.push( incident.status_report === 'รอตรวจสอบการแก้ไข'
-                      ? `/technical/check_maintenance/${incident.investigationMeetings[0]?.id}`
-                      : incident.status_report === 'รออนุมัติการแก้ไข'
-                        ? `/technical/investigation/${incident.id}`
-                        : `/technical/investigation/${incident.id}`)}>
+                    onClick={() => {
+                      const approvedMeeting = incident.investigationMeetings?.find(
+                        (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
+                      );
+                    
+                      if (incident.status_report === 'รอตรวจสอบการแก้ไข') {
+                        router.push(`/technical/check_maintenance/${approvedMeeting?.id || incident.investigationMeetings[0]?.id}`);
+                      } else if (incident.status_report === 'รออนุมัติการแก้ไข' || approvedMeeting) {
+                        router.push(`/technical/investigation/${incident.id}`);
+                      } else {
+                        router.push(`/technical/investigation/${incident.id}`);
+                      }
+                    }}
+                    >
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
                       </td>
-                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
-                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
                       <td className="px-6 py-4 border border-black">
                         {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
-                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString()
+                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' })
                           : ''}
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
@@ -162,14 +161,20 @@ export default function dashboardTechnical() {
                           {incident.status_report}</p>
                       </td>
                       <td className="px-6 py-4 border border-black">
-                        <Link
-                          href={
-                            incident.status_report === 'รอตรวจสอบการแก้ไข'
-                              ? `/technical/check_maintenance/${incident.investigationMeetings[0]?.id}`
-                              : incident.status_report === 'รออนุมัติการแก้ไข'
-                                ? `/technical/approve_fix/${incident.id}`
-                                : `/technical/investigation/${incident.id}`
-                          }
+                        <button
+                          onClick={() => {
+                            const approvedMeeting = incident.investigationMeetings?.find(
+                              (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
+                            );
+                          
+                            if (incident.status_report === 'รอตรวจสอบการแก้ไข') {
+                              router.push(`/technical/check_maintenance/${approvedMeeting?.id || incident.investigationMeetings[0]?.id}`);
+                            } else if (incident.status_report === 'รออนุมัติการแก้ไข' || approvedMeeting) {
+                              router.push(`/technical/investigation/${incident.id}`);
+                            } else {
+                              router.push(`/technical/investigation/${incident.id}`);
+                            }
+                          }}
                           className='underline text-black hover:text-gray-400'>
                           {incident.status_report === 'รอตรวจสอบการแก้ไข'
                             ? 'รีวิวการแก้ไข'
@@ -178,7 +183,7 @@ export default function dashboardTechnical() {
                               : incident.status_report === 'รอการประชุม'
                                 ? 'ประชุม'
                                 : 'ติดตามแก้ไข'}
-                        </Link>
+                        </button>
                       </td>
 
                     </tr>

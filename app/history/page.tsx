@@ -99,10 +99,10 @@ export default function DashboardSubmit() {
       'Topic': report.topic,
       'Category': report.category_report,
       'รหัสเครื่องจักร': report.machine_code,
-      'วันที่เกิดเหตุ': report.incident_date? new Date(report.incident_date).toLocaleString():'',
+      'วันที่เกิดเหตุ': report.incident_date? new Date(report.incident_date).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }):'',
       'เหตุการณ์': report.incident_description,
       'ผู้รายงานความผิดปกติ': report.reporter_name,
-      'วันที่รายงาน': report.report_date? new Date(report.report_date).toLocaleDateString():'',
+      'วันที่รายงาน': report.report_date? new Date(report.report_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }):'',
       'สถานะ': report.status_report,
     }));
   
@@ -182,10 +182,10 @@ export default function DashboardSubmit() {
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td className="px-6 py-4 border border-black">
-                        {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : 'N/A'}
+                        {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 border border-black">
-                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : 'N/A'}
+                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
                       <td>

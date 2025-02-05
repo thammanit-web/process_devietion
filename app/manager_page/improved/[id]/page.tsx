@@ -136,25 +136,21 @@ export default function SetSolution() {
             setLoading(true)
             await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
-                meeting_id: id,
+                meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
-            await axios.put(`/api/investigation_meeting/${id}`, {
-                ...meetingDetail,
-                manager_approve: "ไม่อนุมัติ",
-            }
-                , {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการแก้ไข",
             })
-            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id);
-            await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
-                status_solution: "รอการแก้ไข",
-            })
+            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id) || [];
+            await Promise.all(
+                problemResolutionIds.map(problemId =>
+                    axios.put(`/api/problem_resolution/${problemId}`, {
+                        status_solution: "รอการแก้ไข",
+                    })
+                )
+            );
+            fetchMeeting(Number(id));
             router.push('/')
         } catch (error) {
             alert('Create Solution error');
@@ -162,8 +158,6 @@ export default function SetSolution() {
             console.error(error);
         }
     };
-
-
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
@@ -210,9 +204,9 @@ export default function SetSolution() {
                                 <tr key={resolution.id} className="border border-black text-center text-md">
                                     <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
                                     <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
-                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-6 py-2">
-                                        {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
+                                        {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
                                     </td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
@@ -312,7 +306,7 @@ export default function SetSolution() {
                             </button>
                             <button className="border border-red-300 rounded-lg py-1.5 px-10
                            bg-red-500 hover:bg-red-600 text-white" onClick={handleManagerReject}>
-                                อนุมัติ
+                                ไม่อนุมัติ
                             </button>
                         </div>
                     </div>
@@ -335,7 +329,7 @@ export default function SetSolution() {
                                                     {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                 </a></p>
                                             <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
                                         </form>
                                     ))}
                                 </div>

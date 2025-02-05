@@ -174,9 +174,9 @@ export default function setSolution() {
                                 <tr key={problemSolution.id} className="hover:bg-gray-50 text-center items-center border border-black">
                                     <td className="border border-black px-4 py-2">{problemSolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{problemSolution.assign_to}</td>
-                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString() : ''}</td>
+                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit'}) : ''}</td>
                                     <td className="border border-black px-4 py-2">
-                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString() : ''}
+                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
                                     </td>
                                     <td
                                         className={`border border-black px-4 py-2 ${problemSolution.status_solution === 'รอแก้ไข' ? 'bg-yellow-300' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
@@ -229,7 +229,7 @@ export default function setSolution() {
                                                     {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                 </a></p>
                                             <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
                                         </form>
                                     ))}
                                 </div>

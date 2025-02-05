@@ -164,15 +164,15 @@ export default function detailVerify() {
                 <h1 className="lg:text-2xl md:text-xl sm:text-lg font-semibold mb-4">รายงานความผิดปกติในกระบวนการผลิต</h1>
                 <div className="md:flex sm:grid gap-6">
                     <div className='w-full flex gap-4'>
-                        <p className='font-semibold'>Priority</p>
-                        <p className={`font-semibold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
+                        <p className='font-semibold lg:text-base md:text-base sm:text-sm'>Priority</p>
+                        <p className={`font-semibold underline lg:text-base md:text-base sm:text-sm ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
                     </div>
                     <div className='w-full flex gap-4'>
-                        <p className='font-semibold '>Ref. No.</p>
-                        <p className='underline'>{report.ref_no}</p>
+                        <p className='font-semibold lg:text-base md:text-base sm:text-sm'>Ref. No.</p>
+                        <p className='underline lg:text-base md:text-base sm:text-sm' >{report.ref_no}</p>
                     </div>
                 </div>
-                <div className="md:flex sm:grid gap-6">
+                <div className="md:flex sm:grid gap-6 lg:text-base md:text-base sm:text-sm">
                     <div className='w-full flex gap-4'>
                         <p className='font-semibold '>Topic</p>
                         <p className=' underline' >{report.topic}</p>
@@ -183,7 +183,7 @@ export default function detailVerify() {
                     </div>
                 </div>
 
-                <div className="md:flex sm:grid gap-6">
+                <div className="md:flex sm:grid gap-6 lg:text-base md:text-base sm:text-sm">
                     <div className='w-full flex gap-4'>
                         <p className='font-semibold'>รหัสเครื่องจักร</p>
                         <p className=''>{report.machine_code}</p>
@@ -196,14 +196,14 @@ export default function detailVerify() {
                 </div>
 
 
-                <div className='w-full flex gap-4'>
+                <div className='w-full flex gap-4 lg:text-base md:text-base sm:text-sm'>
                     <p className='font-semibold'>วันและเวลาที่เกิดเหตุ</p>
-                    <p className=''>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString() : ''}</p>
+                    <p className=''>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                 </div>
 
 
 
-                <div className="md:flex sm:grid gap-6">
+                <div className="md:flex sm:grid gap-6 lg:text-base md:text-base sm:text-sm">
                     <div className='w-full flex gap-4'>
                         <p className='font-semibold'>เหตุการณ์</p>
                         <p >{report.incident_description}</p>
@@ -213,7 +213,7 @@ export default function detailVerify() {
                         <p >{report.summary_incident}</p>
                     </div>
                 </div>
-                <div className="lg:flex md:flex sm:grid gap-4 w-full">
+                <div className="lg:flex md:flex sm:grid gap-4 w-full  lg:text-base md:text-base sm:text-sm">
                     <div className="lg:grid md:grid sm:flex ">
                         <p className="font-semibold">ไฟล์ประกอบการรายงาน</p>
                         {report.ReportFiles.length == 0 ? (
@@ -244,38 +244,42 @@ export default function detailVerify() {
                     </div>
                 </div>
 
-                <div className="md:flex sm:grid gap-6">
+                <div className="md:flex sm:grid gap-6 lg:text-base md:text-base sm:text-sm">
                     <div className='w-full flex gap-4'>
                         <p className='underline'>ชื่อผู้รายงาน</p>
                         <p className=' text-red-600'>{report.reporter_name}</p>
                     </div>
                     <div className='w-full flex gap-4'>
                         <p className='underline'>วันที่รายงาน</p>
-                        <p className=' text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
+                        <p className=' text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString('en-GB') : ''}</p>
                     </div>
                 </div>
 
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">รายละเอียดการประชุม</h1>
                 {
-                    report?.investigationMeetings?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว').length === 0
+                    report?.investigationMeetings?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว' || meeting.manager_approve==='รออนุมัติกำหนดการแก้ไข').length === 0
                         ? <p>ยังไม่ประชุม</p>
                         : report?.investigationMeetings
-                            ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว')
+                            ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว'||meeting.manager_approve==='รออนุมัติกำหนดการแก้ไข')
                             .map((meeting) => (
                                 <div key={meeting.id}>
-                                    <div className='ms-4 gap-6 grid'>
+                                    <div className='ms-4 gap-6 grid lg:text-base md:text-base sm:text-sm'>
                                         <div className='flex gap-4'>
                                             <p className='font-semibold'>วันที่นัดประชุม</p>
-                                            <p>{meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}</p>
+                                            <p>{meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString('en-GB') : ''}</p>
                                         </div>
                                         <div className='flex gap-4'>
                                             <p className='font-semibold'>วันที่ประชุม</p>
-                                            <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}</p>
+                                            <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                         </div>
                                         <div className='flex gap-4'>
                                             <p className='font-semibold'>หัวข้อการประชุม</p>
                                             <p>{meeting.topic_meeting}</p>
+                                        </div>
+                                        <div className='flex gap-4'>
+                                            <p className='font-semibold'>การอนุมัติ</p>
+                                            <p>{meeting.manager_approve}</p>
                                         </div>
                                         <div className='grid gap-4'>
                                             <p className='font-semibold'>รายละเอียดการประชุม</p>
@@ -309,7 +313,7 @@ export default function detailVerify() {
                         ? <p>ยังไม่กำหนดการแก้ไข</p>
                         : meetingDetail?.problemResolutions?.map((resolution) => (
                             <div key={resolution.id} className='ms-4 gap-6 grid border border-gray-600 justify-center py-4'>
-                                <div className='flex gap-4'>
+                                <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-sm sm:text-sm'>
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">หัวข้อการแก้ไช</p>
                                         <p>{resolution.topic_solution}</p>
@@ -320,13 +324,13 @@ export default function detailVerify() {
                                     </div>
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">วันที่กำหนดแก้ไข</p>
-                                        <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString() : ''}</p>
+                                        <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                     </div>
 
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">วันที่แก้ไข</p>
                                         <p>
-                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString() : ''}
+                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
                                         </p>
                                     </div>
                                     <div className='flex gap-4'>
@@ -338,23 +342,23 @@ export default function detailVerify() {
                                 <div>
                                     {
                                         resolution && resolution.troubleshootSolutions && resolution.troubleshootSolutions.length === 0
-                                            ? <p>ยังไม่แก้ไข</p>
+                                            ? <p className='flex justify-center w-full border border-gray-400 px-2 py-1 text-center'>ยังไม่มีการแก้ไข</p>
                                             : resolution?.troubleshootSolutions?.map((solution) => (
-                                                <div key={solution.id} className=' gap-6 flex border border-gray-600 justify-center py-4'>
-                                                    <div className='flex gap-4'>
+                                                <div key={solution.id} className=' gap-6 flex border border-gray-600 justify-center py-4 '>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
                                                         <p className='font-semibold'>รายละเอียดการแก้ไข</p>
                                                         <p >{solution.result_troubleshoot}</p>
                                                     </div>
-                                                    <div className='flex gap-4'>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
                                                         <p className='font-semibold'>ไฟล์อัพโหลด</p>
                                                         <p>
                                                             <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
                                                                 {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                             </a></p>
                                                     </div>
-                                                    <div className='flex gap-4'>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
                                                         <p className='font-semibold'>วันที่แก้ไข</p>
-                                                        <p>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
+                                                        <p>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -363,77 +367,6 @@ export default function detailVerify() {
                             </div>
                         ))}
             </form>
-
-            <Modal open={open} onClose={() => setOpen(false)}>
-                <div className='px-4 py-4 justify-center items-center'>
-                    <div>
-                        {problemSolution && (
-                            <>
-                                <div className="solution">
-                                    {problemSolution && problemSolution.troubleshootSolutions && problemSolution?.troubleshootSolutions.map((solution) => (
-                                        <form key={solution.id} className='border border-black px-4 py-2'>
-                                            <p>รายละเอียดการแก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.result_troubleshoot}</p>
-                                            <p className='mt-4'>ไฟล์อัพโหลด</p>
-                                            <p className='ms-2 underline'>
-                                                <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
-                                                    {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
-                                                </a></p>
-                                            <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB') : ''}</p>
-                                        </form>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </Modal>
-            <Modal open={openDetail} onClose={() => setOpenDetail(false)}>
-                <div className="flex flex-col gap-4 px-4">
-                    <h1 className="text-xl font-black">รายละเอียดการประชุม</h1>
-                    {meetingDetail && (
-                        <>
-                            <div>
-                                <div className='w-full mb-4'>
-                                    <label htmlFor="meeting_date" className="underline block text-sm font-medium text-gray-700">
-                                        วันที่ประชุม
-                                    </label>
-                                    <div
-                                        className="rounded-md mt-2 border border-black px-4 py-2"
-                                    >{meetingDetail.meeting_date ? new Date(meetingDetail.meeting_date.toString()).toLocaleDateString() : ""}</div>
-                                </div>
-                                <div className='w-full mb-4'>
-                                    <label htmlFor="summary_meeting" className="block text-sm underline font-medium text-gray-700">
-                                        สรุปการประชุม
-                                    </label>
-                                    <div className="rounded-md mt-2 border border-black px-4 py-2"
-                                    >{meetingDetail.summary_meeting}</div>
-                                </div>
-
-                                <p className='text-sm underline'>ไฟล์ที่เกี่ยวข้อง</p>
-                                <div className="rounded-md mt-2 border border-black px-4 py-2">
-
-                                    {
-                                        meetingDetail.meetingFiles?.map((file) => (
-                                            <li key={file.id}>
-                                                <a
-                                                    href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
-                                                    className="text-blue-500"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
-                                                </a>
-                                            </li>
-                                        )
-                                        )}
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </Modal>
         </div>
     )
 }

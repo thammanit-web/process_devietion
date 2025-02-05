@@ -231,10 +231,10 @@ export default function investigationMeeting() {
                             report?.investigationMeetings?.map((meeting) => (
                                 <tr key={meeting.id} className="border border-black text-center text-md">
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString() : ''}
+                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString() : ''}
+                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">{meeting.topic_meeting}</td>
                                     <td className="px-6 py-2 border border-black">
@@ -323,7 +323,7 @@ export default function investigationMeeting() {
                             เลือกวันและเวลา
                         </label>
                         <input
-                            type='datetime-local'
+                            type='date'
                             name="scheduled_date"
                             id="scheduled_date"
                             value={Investigation.scheduled_date}
@@ -375,7 +375,7 @@ export default function investigationMeeting() {
                                     </label>
                                     <div
                                         className="rounded-md mt-2 border border-black px-4 py-2"
-                                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString() : ""}</div>
+                                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ""}</div>
                                 </div>
                                 <div className='w-full mb-4'>
                                     <label htmlFor="summary_meeting" className="block text-sm underline font-medium text-gray-700">

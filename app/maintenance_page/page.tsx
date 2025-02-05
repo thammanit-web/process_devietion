@@ -31,13 +31,12 @@ interface InvestigationMeeting {
   meeting_date: string
   summary_meeting: string
   investigation_signature: string
-  manager_approve: Boolean
+  manager_approve: string
   file_meeting: string
 }
 
 export default function dashboardTechnical() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
-  const [InMeetingReport, setInMeetingReport] = useState<IncidentReport[]>([]);
 
   const router = useRouter()
 
@@ -54,21 +53,11 @@ export default function dashboardTechnical() {
     }
   }
 
-  const handleLogout = async () => {
-    const response = await fetch('/api/auth/logout', { method: 'POST' });
-
-    if (response.ok) {
-      router.push('/');
-    } else {
-      console.error('Failed to logout');
-    }
-  };
-
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
       <div className='flex justify-end items-between w-screen mb-4 mt-4'>
         <div className='mx-8 flex gap-2'>
-        <a href="/" className='flex border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+          <a href="/" className='flex border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
             <svg className="w-5 text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clipRule="evenodd" />
             </svg>
@@ -119,14 +108,24 @@ export default function dashboardTechnical() {
               ) : (
                 Incidentreports.filter((incident) => incident.status_report === "รอการแก้ไข")
                   .map((incident) => (
-                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={()=>router.push(`/maintenance_page/${incident.investigationMeetings[0]?.id}`)}>
+                    <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={(e) => {
+                      e.preventDefault();
+                      const meeting = incident.investigationMeetings.find(
+                        (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
+                      );
+
+                      if (meeting) {
+                        router.push(`/maintenance_page/${meeting.id}`);
+                      }
+                    }}
+                    >
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
                       </td>
-                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString() : ''}</td>
-                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString() : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.status_report === 'รออนุมัติการรายงานความผิดปกติ' ? 'bg-yellow-300' :
@@ -142,7 +141,17 @@ export default function dashboardTechnical() {
                           {incident.status_report}</p>
                       </td>
                       <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                        <Link href={`/maintenance_page/${incident.investigationMeetings[0]?.id}`} className='underline hover:text-gray-400'>ดำเนินการแก้ไข</Link>
+                        <a onClick={(e) => {
+                          e.preventDefault();
+                          const meeting = incident.investigationMeetings.find(
+                            (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
+                          );
+
+                          if (meeting) {
+                            router.push(`/maintenance_page/${meeting.id}`);
+                          }
+                        }}
+                          className='underline hover:text-gray-400'>ดำเนินการแก้ไข</a>
                       </td>
                     </tr>
                   )))}

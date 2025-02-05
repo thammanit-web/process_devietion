@@ -131,7 +131,7 @@ export default function detailTechnical() {
                         </p>
                         <p className="border rounded-lg px-4 py-2">
                             {report.incident_date
-                                ? new Date(report.incident_date.toString()).toLocaleString()
+                                ? new Date(report.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false })
                                 : ""}
                         </p>
                     </div>
@@ -195,7 +195,7 @@ export default function detailTechnical() {
                         <p className="border px-4 py-2 underline">วันที่รายงาน</p>
                         <p className="border px-4 py-2 text-red-600">
                             {report.report_date
-                                ? new Date(report.report_date.toString()).toLocaleDateString()
+                                ? new Date(report.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false })
                                 : ""}
                         </p>
                     </div>

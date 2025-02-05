@@ -123,7 +123,7 @@ export default function headVerify() {
 
                     <div className='w-full'>
                         <p className='lg:text-lg md:text-sm sm:text-sm'>วันและเวลาที่เกิดเหตุ</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString() : ''}</p>
+                        <p className='border rounded-lg px-4 py-2'>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                     </div>
 
                 </div>
@@ -165,7 +165,7 @@ export default function headVerify() {
                     </div>
                     <div className='lg:flex md:flex sm:flex lg:text-lg md:text-lg sm:text-sm'>
                         <p className='border px-4 py-2 underline'>วันที่รายงาน</p>
-                        <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString() : ''}</p>
+                        <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
                     </div>
 
                 </div>
