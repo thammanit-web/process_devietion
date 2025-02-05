@@ -119,7 +119,7 @@ export async function POST(req: Request) {
                 pass: process.env.EMAIL_PASS,
             },
         });
-        const incidentUrl = `http://localhost:3000/head_verify/${newIncident.id}`;
+        const incidentUrl = `https://process-devietion-brown.vercel.app/head_verify/${newIncident.id}`;
         const emailHTML = `
         <h2>การรายงานความผิดปกติ</h2>
         <p><strong>หัวข้อการรายงาน:</strong> ${topic}</p>

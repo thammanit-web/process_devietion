@@ -333,7 +333,7 @@ export default function detailVerify() {
                                             {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
                                         </p>
                                     </div>
-                                    <div className='flex gap-4'>
+                                    <div className='flex gap-4'>    
                                         <p className="font-semibold">สถานะการแก้ไข</p>
                                         <p>{resolution.status_solution}</p>
                                     </div>
