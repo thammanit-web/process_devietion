@@ -26,6 +26,7 @@ interface IncidentReport {
       file_url?: string;
   }[];
   investigationMeetings: InvestigationMeeting[];
+  [key: string]: any;
 }
 interface InvestigationMeeting {
   id: string
@@ -71,6 +72,10 @@ interface ManagerApprove {
 
 export default function DashboardSubmit() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
+   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "ascending" | "descending" }>({
+      key: "ref_no",
+      direction: "ascending",
+    });
 
   const router = useRouter()
 
@@ -125,6 +130,25 @@ export default function DashboardSubmit() {
   
     XLSX.writeFile(workbook, `Process Deviation.xlsx`);
   };
+
+  const handleSort = (key: string) => {
+    let direction: "ascending" | "descending" = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedReports = [...Incidentreports].sort((a, b) => {
+    if (a[sortConfig.key as keyof IncidentReport] < b[sortConfig.key as keyof IncidentReport]) {
+      return sortConfig.direction === "ascending" ? -1 : 1;
+    }
+    if (a[sortConfig.key as keyof IncidentReport] > b[sortConfig.key as keyof IncidentReport]) {
+      return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
       <div className='flex justify-end items-between w-screen mb-4 mt-4'>
@@ -143,24 +167,55 @@ export default function DashboardSubmit() {
         <div className='text-lg mb-2'>ประวัติการรายงานความผิดปกติ</div>
         <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
           <thead className="text-center text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
+          <tr>
               <th scope="col" className="px-6 py-3 border border-black">
                 Ref. No
+                <button onClick={() => handleSort("ref_no")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 Topic
+                <button onClick={() => handleSort("topic")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
-                วันที่เกิดเหตุ
+                Priority
+                <button onClick={() => handleSort("priority")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
+              </th>
+              <th scope="col" className="px-6 py-3 border border-black">
+                วันและเวลาที่เกิดเหตุ
+                <button onClick={() => handleSort("incident_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 วันที่รายงาน
+                <button onClick={() => handleSort("incident_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 ชื่อผู้รายงาน
+                <button onClick={() => handleSort("reporter_name")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 สถานะ
+                <button onClick={() => handleSort("status_report")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 action
@@ -169,23 +224,26 @@ export default function DashboardSubmit() {
           </thead>
           <tbody>
             {
-              Incidentreports.filter((incident) =>
+              sortedReports.filter((incident) =>
                 incident.status_report === "แก้ไขแล้ว"
               ).length == 0 ? (
                 <tr>
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
               ) : (
-                Incidentreports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
+                sortedReports.filter((incident) => incident.status_report === "แก้ไขแล้ว")
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer" onClick={()=>router.push(`/detail_deviation/${incident.id}`)}>
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
+                      <td>
+                        <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
+                      </td>
                       <td className="px-6 py-4 border border-black">
                         {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 border border-black">
-                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
+                        {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit'}) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
                       <td>

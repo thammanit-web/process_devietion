@@ -36,6 +36,14 @@ interface InvestigationMeeting {
 
 export default function dashboardTechnical() {
   const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "ascending" | "descending" }>({
+    key: "ref_no",
+    direction: "ascending",
+  });
+    const [filters, setFilters] = useState({
+      priority: '',
+      status_report: ''
+    });
 
   const router = useRouter()
 
@@ -52,6 +60,31 @@ export default function dashboardTechnical() {
     }
   }
 
+  const handleSort = (key: string) => {
+    let direction: "ascending" | "descending" = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filteredReports = Incidentreports.filter((report) => {
+    const matchesPriority = filters.priority ? report.priority.includes(filters.priority) : true;
+    const matchesStatusReport = filters.status_report ? report.status_report.includes(filters.status_report) : true;
+
+    return matchesPriority && matchesStatusReport;
+  });
+
+  const sortedReports = [...filteredReports].sort((a, b) => {
+    if (a[sortConfig.key as keyof IncidentReport] < b[sortConfig.key as keyof IncidentReport]) {
+      return sortConfig.direction === "ascending" ? -1 : 1;
+    }
+    if (a[sortConfig.key as keyof IncidentReport] > b[sortConfig.key as keyof IncidentReport]) {
+      return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
   return (
     <div className="overflow-x-auto justify-center min-w-screen grid">
       <div className='flex justify-end w-screen mb-4 mt-4'>
@@ -66,33 +99,96 @@ export default function dashboardTechnical() {
       </div>
 
       <div className="relative overflow-x-auto mx-8 mb-16">
-        <div className='text-lg mb-2'>การรายงานความผิดปกติในกระบวนการผลิต</div>
+      <div className='flex gap-4 mb-2'> 
+          <p className='text-lg mt-2'>การรายงานความผิดปกติในกระบวนการผลิต</p>
+          <div className="flex gap-2">
+            <select
+              value={filters.priority}
+              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+              className={`border rounded-xl text-sm ${
+                filters.priority === "Urgent" ? "bg-red-500 text-white" :
+                filters.priority === "Normal" ? "bg-blue-500 text-white" :
+                "bg-white text-black"
+              }`}
+            >
+              <option className='bg-white text-black' value="">Priority</option>
+              <option value="Urgent" className='bg-red-500 text-white'>Urgent</option>
+              <option value="Normal" className='bg-blue-500 text-white'>Normal</option>
+            </select>
+
+            <select
+              value={filters.priority}
+              onChange={(e) => setFilters({ ...filters, status_report: e.target.value })}
+              className={`border rounded-xl text-sm`}
+            >
+              <option value="">สถานะ</option>
+              <option value="รอการประชุม">รอการประชุม</option>
+              <option value="รออนุมัติกำหนดการแก้ไข">รออนุมัติกำหนดการแก้ไข</option>
+              <option value="รอการแก้ไข">รอการแก้ไข</option>
+              <option value="รอตรวจสอบการแก้ไข">รอตรวจสอบการแก้ไข</option>
+              <option value="รออนุมัติการแก้ไข">รออนุมัติการแก้ไข</option>
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+        </div>
         <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
           <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
-            <tr>
+          <tr>
               <th scope="col" className="px-6 py-3 border border-black">
                 Ref. No
+                <button onClick={() => handleSort("ref_no")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 Topic
+                <button onClick={() => handleSort("topic")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 Priority
+                <button onClick={() => handleSort("priority")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 วันและเวลาที่เกิดเหตุ
+                <button onClick={() => handleSort("incident_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 วันที่รายงาน
+                <button onClick={() => handleSort("incident_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
-              <th scope="col" className="px-6 py-3 border border-black">
+              <th  scope="col" className="px-6 py-3 border border-black">
                 วันที่นัดประชุม
+                <button onClick={() => handleSort("investigationMeetings[0].scheduled_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 ชื่อผู้รายงาน
+                <button onClick={() => handleSort("reporter_name")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 สถานะ
+                <button onClick={() => handleSort("status_report")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
+                </svg>
+                </button>
               </th>
               <th scope="col" className="px-6 py-3 border border-black">
                 action
@@ -101,7 +197,7 @@ export default function dashboardTechnical() {
           </thead>
           <tbody>
             {
-              Incidentreports.filter((incident) =>
+              sortedReports.filter((incident) =>
                 incident.status_report !== "แก้ไขแล้ว"
                 && incident.status_report !== "รอยืนยันการตรวจสอบ"
                 && incident.status_report !== "แก้ไขแล้ว"
@@ -112,7 +208,7 @@ export default function dashboardTechnical() {
                   <td colSpan={100} className='text-center py-4'>ไม่มีรายงานความผิดปกติ</td>
                 </tr>
               ) : (
-                Incidentreports.filter((incident) =>
+                sortedReports.filter((incident) =>
                   incident.status_report !== "แก้ไขแล้ว"
                   && incident.status_report !== "รอยืนยันการตรวจสอบ"
                   && incident.status_report !== "แก้ไขแล้ว"
