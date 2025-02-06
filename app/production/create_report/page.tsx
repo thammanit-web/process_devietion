@@ -71,13 +71,33 @@ export default function createReport() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files) {
-            setSelectedFiles((prevFiles) => [
-                ...prevFiles,
-                ...Array.from(files),
-            ]);
+        if (!files) return;
+    
+        const maxSize = 5 * 1024 * 1024; 
+        const allowedTypes = [
+            "image/jpeg", "image/png", "application/pdf", 
+            "video/mp4", "video/quicktime",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"
+        ];
+    
+        const validFiles = Array.from(files).filter((file) => {
+            if (!allowedTypes.includes(file.type)) {
+                alert(`Invalid file type: ${file.name}`);
+                return false;
+            }
+            if (file.size > maxSize) {
+                alert(`File too large: ${file.name} (max 5MB)`);
+                return false;
+            }
+            return true;
+        });
+    
+        if (validFiles.length > 0) {
+            setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
+            alert(null); 
         }
     };
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

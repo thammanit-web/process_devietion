@@ -103,6 +103,7 @@ export default function setSolution() {
     };
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         const { name, value } = e.target;
+        console.log(value)
         setTroubleshoot((prevState) => ({
             ...prevState,
             [name]: value
@@ -110,14 +111,32 @@ export default function setSolution() {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setFile(e.target.files[0]);
+        if (!e.target.files || e.target.files.length === 0) return;
+    
+        const selectedFile = e.target.files[0];
+        const maxSize = 5 * 1024 * 1024;
+        const allowedTypes = ["image/jpeg", "image/png", "application/pdf", "video/mp4", "video/quicktime", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"];
+    
+        if (!allowedTypes.includes(selectedFile.type)) {
+            alert("Invalid file type. Only JPG, PNG, PDF, MP4, MOV, XLSX, and CSV are allowed.");
+            setFile(null);
+            return;
         }
+    
+        if (selectedFile.size > maxSize) {
+            alert("File size must be less than 5MB.");
+            setFile(null);
+            return;
+        }
+    
+        setFile(selectedFile);
+        alert(null);
     };
+    
     const handleTroubleshoot = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file || !troubleShoots.result_troubleshoot || !troubleShoots.finish_date) {
-            alert('All fields are required.');
+            alert('โปรดกรอกข้อมูลให้ครบ!!');
             return;
         }
         const formData = new FormData();
@@ -137,22 +156,40 @@ export default function setSolution() {
             setLoading(false)
             setIsOpen(false);
         } catch (error) {
+            setLoading(false)
             alert('Create Solution error');
             console.error(error);
         }
     };
-    const handleDelete = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleDelete = async (e: React.FormEvent) => { 
+        e.preventDefault();
         try {
-            setLoading(true)
-            await axios.delete(`/api/troubleshoot_solution/${problemSolution?.troubleshootSolutions[0].id}`)
+            setLoading(true);
+            
+            if (problemSolution?.troubleshootSolutions?.length === 0) {
+                await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
+                    status_solution: "รอการแก้ไข", 
+                });
+            } else {
+                await axios.delete(`/api/troubleshoot_solution/${problemSolution?.troubleshootSolutions[0].id}`);
+                
+                if (problemSolution?.troubleshootSolutions.length === 1) {
+                    // If deleting the last one, update status
+                    await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
+                        status_solution: "รอการแก้ไข",
+                    });
+                }
+            }
+    
             fetchMeeting(Number(id));
-            setLoading(false)
+            setLoading(false);
             setOpen(false);
         } catch (error) {
-            console.error("Error Delete report:", error)
+            console.error("Error Delete report:", error);
+            setLoading(false);
         }
-    }
+    };
+    
 
 
     useEffect(() => {

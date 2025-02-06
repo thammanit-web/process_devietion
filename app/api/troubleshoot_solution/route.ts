@@ -17,6 +17,9 @@ export async function GET() {
     return NextResponse.json(solutions);
 }
 
+
+
+
 export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -26,6 +29,15 @@ export async function POST(req: Request) {
 
     if (!file || !solution_id) {
         return NextResponse.json({ error: 'Missing file or solution_id' }, { status: 400 });
+    }
+    const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf', 'mp4', 'mov', 'xlsx', 'csv'];
+    const fileTypes = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!allowedTypes.includes(fileTypes)) {
+        return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
+    }
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        return NextResponse.json({ error: 'File size exceeds 5MB limit' }, { status: 400 });
     }
 
     const fileName = `troubleshoot/${Date.now()}-${file.name}`;
@@ -50,6 +62,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'File uploaded successfully', url: uploadData.fullPath }, { status: 200 });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error: 'File upload failed' }, { status: 500 });
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
 }
