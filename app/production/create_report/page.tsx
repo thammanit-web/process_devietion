@@ -94,7 +94,6 @@ export default function createReport() {
     
         if (validFiles.length > 0) {
             setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
-            alert(null); 
         }
     };
     

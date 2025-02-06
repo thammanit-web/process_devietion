@@ -130,7 +130,6 @@ export default function setSolution() {
         }
     
         setFile(selectedFile);
-        alert(null);
     };
     
     const handleTroubleshoot = async (e: React.FormEvent) => {
