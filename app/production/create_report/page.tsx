@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Modal } from '../../components/modal';
 import { LoadingOverlay } from '@/app/components/loading';
+import { useSession } from "next-auth/react";
 
 interface IncidentForm {
     topic: string;
@@ -42,15 +43,17 @@ export default function createReport() {
     const [incidentReportId, setIncidentReportId] = useState<number | null>(null);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+      const { data: session } = useSession();
 
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0];
         setFormData((prevState) => ({
             ...prevState,
-            report_date: today
+            report_date: today,
+            reporter_name: session?.user?.name || '',
         }));
 
-    }, []);
+    }, [session]);
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedCategory = e.target.value;
@@ -68,6 +71,7 @@ export default function createReport() {
             [name]: value
         }));
     };
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -270,11 +274,12 @@ export default function createReport() {
                         <input
                             type='text'
                             name="reporter_name"
+                            disabled
                             id="reporter_name"
                             required
                             value={formData.reporter_name}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-100"
                         ></input>
                     </div>
 
@@ -290,7 +295,7 @@ export default function createReport() {
                             disabled
                             value={formData.report_date}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-100"
                         ></input>
                     </div>
                 </div>
