@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { cookies } from "next/headers";
@@ -54,7 +54,7 @@ async function refreshAccessToken(token: JWT) {
   }
 }
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID as string,
@@ -87,8 +87,6 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-};
-
-const handler = NextAuth(authOptions);
+});
 
 export { handler as GET, handler as POST };
