@@ -43,7 +43,7 @@ export default function createReport() {
     const [incidentReportId, setIncidentReportId] = useState<number | null>(null);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-      const { data: session } = useSession();
+    const { data: session } = useSession();
 
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0];
@@ -76,14 +76,14 @@ export default function createReport() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
-    
-        const maxSize = 5 * 1024 * 1024; 
+
+        const maxSize = 5 * 1024 * 1024;
         const allowedTypes = [
-            "image/jpeg", "image/png", "application/pdf", 
+            "image/jpeg", "image/png", "application/pdf",
             "video/mp4", "video/quicktime",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"
         ];
-    
+
         const validFiles = Array.from(files).filter((file) => {
             if (!allowedTypes.includes(file.type)) {
                 alert(`Invalid file type: ${file.name}`);
@@ -95,12 +95,12 @@ export default function createReport() {
             }
             return true;
         });
-    
+
         if (validFiles.length > 0) {
             setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
         }
     };
-    
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
