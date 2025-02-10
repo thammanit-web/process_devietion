@@ -1,12 +1,7 @@
+'use client';
 import "./globals.css";
-import Navbar  from "./components/navBar";
-
-export const metadata={
-  title: 'Process Deviation',
-  icons:{
-    icon:['/favicon.ico']
-  }
-}
+import Navbar from "./components/navBar";
+import { SessionProvider } from "next-auth/react";
 
 export default function RootLayout({
   children,
@@ -15,9 +10,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>        
-      <Navbar/>
-        {children}
+      <body>
+        <SessionProvider>
+          <Navbar />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

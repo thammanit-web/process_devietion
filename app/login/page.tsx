@@ -2,6 +2,7 @@
 import React, { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { LoginButton } from "../login-azure/page";
 
 function LoginCardContent() {
   const [employee_email, setEmail] = useState("");
@@ -104,7 +105,7 @@ function LoginCardContent() {
 export default function LoginCard() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <LoginCardContent />
+      <LoginButton />
     </Suspense>
   );
 }

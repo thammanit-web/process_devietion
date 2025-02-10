@@ -1,13 +1,20 @@
 'use client'
 import React, { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
 
 export default function FirstPage() {
+  const { data: session } = useSession();
   useEffect(() => {
   }, []);
 
   return (
     <div className="overflow-x-auto mt-16 py-4">
       <div className='grid justify-center items-center'>
+      <div className='grid justify-center items-center'>
+          <p>email: {session?.user?.email}</p>
+          <p>username: {session?.user?.name}</p>
+          <p>expires: {session?.expires ? new Date(session?.expires.toString()).toLocaleDateString('en-GB') : ''}</p>
+        </div>
         <div className="flex justify-center gap-10 mb-6" >
           <a
             href="/production"
