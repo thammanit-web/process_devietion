@@ -13,6 +13,12 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@auth/core": "^0.34.2",
+    "@azure/msal-browser": "^4.2.0",
+    "@azure/msal-node": "^3.2.1",
+    "@azure/msal-react": "^3.0.4",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@microsoft/microsoft-graph-types": "^2.40.0",
     "@nextui-org/react": "^2.6.11",
     "@nextui-org/system": "^2.4.6",
     "@nextui-org/table": "^2.2.8",
@@ -34,6 +40,7 @@
     "jspdf-autotable": "^3.8.4",
     "multer": "^1.4.5-lts.1",
     "next": "15.1.4",
+    "next-auth": "^4.24.11",
     "nodemailer": "^6.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
