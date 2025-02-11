@@ -135,9 +135,13 @@ export async function POST(req: Request) {
         `;
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: 'thammanitrinthang@gmail.com',
+            to: 'Thammanit@thainitrate.com',
             subject: `กาารายงานความผิดปกติ: ${topic}`,
             html: emailHTML,
+            replyTo: '', // No reply email address
+            headers: {
+              'X-No-Username': 'true', // Custom header to indicate no username needed
+            },
         };
 
         await transporter.sendMail(mailOptions);

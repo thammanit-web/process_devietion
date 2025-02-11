@@ -27,6 +27,7 @@ interface IncidentReport {
     }[];
 }
 interface InvestigationMeeting {
+    id: string
     incident_report_id: string
     topic_meeting: string
     scheduled_date: string
@@ -41,12 +42,19 @@ interface InvestigationMeeting {
         status_solution: string
     }[]
 }
+interface User {
+    id: string;
+    displayName: string | null;
+    mail: string | null;
+    jobTitle: string | null;
+}
 
 export default function AapproveReport() {
     const { id } = useParams()
     const [report, setReport] = useState<IncidentReport | null>(null)
     const [open, setOpen] = useState<boolean>(false);
     const [Investigation, setInvestigation] = useState<InvestigationMeeting>({
+        id: '',
         incident_report_id: '',
         topic_meeting: '',
         scheduled_date: '',
@@ -55,10 +63,14 @@ export default function AapproveReport() {
         investigation_signature: '',
         manager_approve: '',
         file_meeting: '',
-        problemResolution:[]
+        problemResolution: []
     })
     const [loading, setLoading] = useState(false);
     const router = useRouter()
+    const [users, setUsers] = useState<User[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
     const fetchIncidentReports = async (id: number) => {
         try {
@@ -87,26 +99,90 @@ export default function AapproveReport() {
     };
 
     const CreateMeeting = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+        const selectedUserEmails = users
+            .filter(user => selectedUsers.includes(user.id))
+            .map(user => user.mail);
+
         try {
-            setLoading(true)
-            await axios.put(`/api/incident_report/${id}`, {
-                status_report: "รอการประชุม"
+            setLoading(true);
+
+            if (selectedUserEmails.length > 0) {
+                try {
+                    const res = await axios.post("/api/send_email", {
+                        emails: selectedUserEmails,
+                        scheduled_date: Investigation.scheduled_date,
+                        topic_meeting: Investigation.topic_meeting,
+                    });
+                    if (res.status !== 200) throw new Error("Failed to send emails");
+                } catch (error) {
+                    setError("Error sending emails");
+                    return;
+                }
+            }
+            axios.put(`/api/incident_report/${id}`, {
+                status_report: "รอการประชุม",
             });
-            await axios.post(`/api/investigation_meeting`, {
+        
+             axios.post(`/api/investigation_meeting`, {
                 ...Investigation,
-                incident_report_id: Number(id)
+             
+                incident_report_id: Number(id),
             });
-            router.back()
+            await selectedUsers.map(userId => {
+                return axios.post("/api/selected_users", { 
+                    userId, 
+                    meeting_id: Investigation.id 
+                });
+            });
+            router.back();
             fetchIncidentReports(Number(id));
-        } catch (error) {
+        } catch (error: unknown) {
+            // Handle specific Axios errors and unexpected errors
             if (axios.isAxiosError(error)) {
-                console.error("Error approving report:", error.response?.data || error.message);
+                console.error("Axios error:", error.response?.data || error.message);
             } else {
                 console.error("Unexpected error:", error);
             }
+        } finally {
+            setLoading(false); // Ensure loading is set to false regardless of success/failure
         }
-    }
+    };
+
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("/api/users");
+                if (!res.ok) throw new Error("Failed to fetch users");
+
+                const data = await res.json();
+                setUsers(data.value || []);
+            } catch (error) {
+                setError("Error fetching users");
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+
+    const filteredUsers = users.filter(user =>
+        user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        ["IT Officer",].includes(user.jobTitle ?? "")
+    );
+
+    const handleUserCheckboxChange = (userId: string) => {
+        if (selectedUsers.includes(userId)) {
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        } else {
+            setSelectedUsers([...selectedUsers, userId]);
+        }
+    };
+
+    const handleUserDelete = (userId: string) => {
+        setSelectedUsers(selectedUsers.filter(id => id !== userId));
+    };
 
     if (!report) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
@@ -152,7 +228,7 @@ export default function AapproveReport() {
 
                     <div className='w-full'>
                         <p className='lg:text-lg md:text-sm sm:text-sm'>วันและเวลาที่เกิดเหตุ</p>
-                        <p className='border rounded-lg px-4 py-2'>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
+                        <p className='border rounded-lg px-4 py-2'>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                     </div>
 
                 </div>
@@ -206,7 +282,7 @@ export default function AapproveReport() {
                     </div>
                     <div className='lg:flex md:flex sm:flex lg:text-lg md:text-lg sm:text-sm'>
                         <p className='border px-4 py-2 underline'>วันที่รายงาน</p>
-                        <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
+                        <p className='border px-4 py-2 text-red-600'>{report.report_date ? new Date(report.report_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</p>
                     </div>
                 </div>
             </form>
@@ -257,6 +333,58 @@ export default function AapproveReport() {
                             onChange={handleCreateMeeting}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         ></input>
+                    </div>
+
+                    <div className='select-name'>
+                        <div className="mb-4">
+                            <h3 className="font-semibold mb-2">เลือกผู้มีส่วนเกี่ยวข้อง:</h3>
+                            <ul className="list-disc pl-5 border py-2 px-4 rounded-lg">
+                                {selectedUsers.map(userId => {
+                                    const user = users.find(u => u.id === userId);
+                                    return user ? (
+                                        <li key={userId} className="flex justify-between">
+                                            {user.displayName}
+                                            <button
+                                                onClick={() => handleUserDelete(userId)}
+                                                className="text-red-500 ml-2 border boer-red-500 px-2"
+                                            >
+                                                X
+                                            </button>
+                                        </li>
+                                    ) : null;
+                                })}
+                            </ul>
+                        </div>
+                        <div className="mb-4 px-4">
+                            <input
+                                type="text"
+                                placeholder="ค้นหาชื่อ"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="border px-4 py-1 rounded-lg w-full"
+                            />
+                        </div>
+
+                        <div className="flex flex-col mb-4 max-h-60 overflow-y-auto">
+                            {filteredUsers.map(user => (
+                                <div key={user.id} className="flex items-center mb-2 gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id={`user-${user.id}`}
+                                        value={user.id}
+                                        checked={selectedUsers.includes(user.id)}
+                                        onChange={() => handleUserCheckboxChange(user.id)}
+                                        className="mr-2"
+                                    />
+                                    <label htmlFor={`user-${user.id}`} className="text-sm">
+                                        {user.displayName}
+                                    </label>
+                                    <span className="text-xs text-gray-500">
+                                        ({user.jobTitle})
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <hr className="border-t-solid border-1 border-grey" />

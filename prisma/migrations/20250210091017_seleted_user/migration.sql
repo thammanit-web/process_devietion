@@ -1,14 +1,10 @@
 -- CreateTable
-CREATE TABLE "Employee" (
+CREATE TABLE "SelectedUser" (
     "id" SERIAL NOT NULL,
-    "employee_name" TEXT NOT NULL,
-    "employee_email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "department" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Employee_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SelectedUser_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -97,9 +93,6 @@ CREATE TABLE "ManagerApprove" (
 
     CONSTRAINT "ManagerApprove_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "Employee_employee_email_key" ON "Employee"("employee_email");
 
 -- AddForeignKey
 ALTER TABLE "ReportFile" ADD CONSTRAINT "ReportFile_incident_report_id_fkey" FOREIGN KEY ("incident_report_id") REFERENCES "IncidentReport"("id") ON DELETE CASCADE ON UPDATE CASCADE;

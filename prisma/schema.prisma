@@ -8,16 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Employee {
-  id             Int      @id @default(autoincrement())
-  employee_name  String
-  employee_email String   @unique
-  password       String
-  department     String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
 model IncidentReport {
   id                   Int       @id @default(autoincrement())
   ref_no               String
@@ -58,6 +48,14 @@ model InvestigationMeeting {
   problemResolutions      ProblemSolution[]
   meetingFiles            MeetingFile[]
   managerApproves         ManagerApprove[]
+  SelectedUser            SelectedUser[]
+}
+
+model SelectedUser {
+  id                   Int                   @id @default(autoincrement())
+  userId               String
+  meeting_id           Int?
+  investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
 }
 
 model MeetingFile {

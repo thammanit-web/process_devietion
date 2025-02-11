@@ -1,10 +1,15 @@
-import NextAuth from "next-auth";
+import { user } from "@nextui-org/theme";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { cookies } from "next/headers";
-
 declare module "next-auth" {
   interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      oid?: string;
+    };
     accessToken?: string;
     idToken?: string;
     expiresAt?: number;
@@ -40,12 +45,11 @@ async function refreshAccessToken(token: JWT) {
     if (!response.ok) {
       throw new Error("Failed to refresh token");
     }
-
     return {
       ...token,
       accessToken: data.access_token,
       idToken: data.id_token,
-      refreshToken: data.refresh_token ?? token.refreshToken, 
+      refreshToken: data.refresh_token ?? token.refreshToken,
       expiresAt: Date.now() + data.expires_in * 1000,
     };
   } catch (error) {
@@ -54,7 +58,7 @@ async function refreshAccessToken(token: JWT) {
   }
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions ={
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID as string,
@@ -69,24 +73,35 @@ const handler = NextAuth({
       if (account) {
         token.accessToken = account.access_token as string;
         token.idToken = account.id_token as string;
-        token.refreshToken = account.refresh_token as string; 
+        token.refreshToken = account.refresh_token as string;
         token.expiresAt = Date.now() + Number(account.expires_in || 3600) * 1000;
       }
-
+      console.log(user)
       if (token.expiresAt && Date.now() > token.expiresAt) {
         return await refreshAccessToken(token);
       }
 
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }) 
+    {
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
       session.expiresAt = token.expiresAt;
+      if (token.idToken) {
+        const userInfo = JSON.parse(Buffer.from(token.idToken.split(".")[1], "base64").toString());
+        session.user = {
+          name: userInfo.name,
+          email: userInfo.email,
+          oid: userInfo.oid, 
+        };
+      }
       (await cookies()).set("idToken", session.idToken);
       return session;
-    },
+    }
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
