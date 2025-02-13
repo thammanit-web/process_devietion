@@ -20,7 +20,7 @@ export async function GET(
       include: {
         incidentReport: true, problemResolutions: {
           include: { troubleshootSolutions: true }
-        }, meetingFiles: true, managerApproves: true
+        }, meetingFiles: true, managerApproves: true,SelectedUser:true
       }
     });
     if (!investigation_meeting) {

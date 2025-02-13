@@ -30,7 +30,21 @@ interface InvestigationMeeting {
         manager_approve: string
         status_solution: string
     }[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
+interface User {
+    id: string;
+    displayName: string | null;
+    mail: string | null;
+    jobTitle: string | null;
+}
+
+
 
 export default function investigationMeeting() {
     const { id } = useParams()
@@ -45,30 +59,21 @@ export default function investigationMeeting() {
         investigation_signature: '',
         manager_approve: '',
         meetingFiles: [],
-        problemResolution: []
+        problemResolution: [],
+        SelectedUser: []
     })
     const [open, setOpen] = useState<boolean>(false);
     const [openDetail, setOpenDetail] = useState(false);
     const [openMeeting, setOpenMeeting] = useState(false);
-    const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState(false);
+    const [investigationMeetings, setInvestigationMeetings] = useState<InvestigationMeeting[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [users, setUsers] = useState<User[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
     const router = useRouter()
-
-    const fetchMeeting = async (meetingId: number) => {
-        try {
-            const respone = await fetch(`/api/investigation_meeting/${meetingId}`)
-            const data = await respone.json()
-            setMeetingDetail({
-                ...data,
-                meetingFiles: data.meetingFiles || [],
-                problemResolution: data.problemResolution || []
-            });
-        } catch (error) {
-            console.error('Error fetching report:', error)
-        }
-    }
 
     const fetchIncidentReports = async (id: number) => {
         try {
@@ -79,8 +84,6 @@ export default function investigationMeeting() {
             console.error('Error fetching report:', error)
         }
     }
-
-
     useEffect(() => {
         if (id) {
             fetchIncidentReports(Number(id))
@@ -89,11 +92,57 @@ export default function investigationMeeting() {
             ...prevState
         }));
     }, [id])
+
+
     useEffect(() => {
-        if (meetingDetail?.id) {
-            fetchMeeting(Number(meetingDetail?.id))
+        const fetchInvestigationMeetings = async () => {
+            try {
+                const response = await axios.get('/api/investigation_meeting');
+                setInvestigationMeetings(response.data);
+                setLoading(false);
+            } catch (err) {
+                setError('Failed to fetch investigation meetings');
+                setLoading(false);
+            }
+        };
+
+        fetchInvestigationMeetings();
+    }, []);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("/api/users");
+                if (!res.ok) throw new Error("Failed to fetch users");
+
+                const data = await res.json();
+                setUsers(data.value || []);
+            } catch (error) {
+                setError("Error fetching users");
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    const filteredUsers = users.filter(user =>
+        user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase())
+        &&
+        !['', 'Service'].includes(user.jobTitle ?? "")
+    );
+
+    const handleUserCheckboxChange = (userId: string) => {
+        if (selectedUsers.includes(userId)) {
+            setSelectedUsers(selectedUsers.filter(id => id !== userId));
+        } else {
+            setSelectedUsers([...selectedUsers, userId]);
         }
-    }, [])
+    };
+
+    const handleUserDelete = (userId: string) => {
+        setSelectedUsers(selectedUsers.filter(id => id !== userId));
+    };
+
 
     const handleCreateMeeting = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -105,12 +154,37 @@ export default function investigationMeeting() {
 
     const CreateMeeting = async (e: React.FormEvent) => {
         e.preventDefault()
+        const selectedUserEmails = users
+            .filter(user => selectedUsers.includes(user.id))
+            .map(user => user.mail);
+
+        setLoading(true);
         try {
-            setLoading(true)
-            await axios.post(`/api/investigation_meeting`, {
-                ...Investigation,
-                incident_report_id: Number(id),
-            })
+            if (selectedUserEmails.length > 0) {
+                await axios.post("/api/send_email", {
+                    to: selectedUserEmails.join(','),
+                    subject: `Process Deviation ${Investigation.topic_meeting}`,
+                    html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
+                <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
+                <br><a href="${`http://localhost:3000/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
+                });
+            }
+            await Promise.all(
+                selectedUsers.map(userId => {
+                    const user = users.find(u => u.id === userId);
+                    if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
+
+                    return axios.post(`/api/investigation_meeting`, {
+                        ...Investigation,
+                        userId,
+                        display_name: user.displayName,
+                        email: user.mail,
+                        incident_report_id: Number(id),
+                    });
+                })
+            );
+
+
             setLoading(false)
             setOpen(false)
             fetchIncidentReports(Number(id))
@@ -206,7 +280,7 @@ export default function investigationMeeting() {
                     <button onClick={() => setOpen(true)} className='border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>+ เพิ่มการประชุม</button>
                 </div>
                 <div>
-                    <a href={`/detail_deviation/${meetingDetail?.incident_report_id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
+                    <a href={`/detail_deviation/${id}`} className='flex gap-2 border px-4 py-2 border-gray-400 rounded-md hover:bg-gray-300'>
                         <svg className="w-6 h-6 text-gray-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" d="M9 2.221V7H4.221a2 2 0 0 1 .365-.5L8.5 2.586A2 2 0 0 1 9 2.22ZM11 2v5a2 2 0 0 1-2 2H4v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-7ZM8 16a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1-5a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clipRule="evenodd" />
                         </svg>
@@ -231,10 +305,10 @@ export default function investigationMeeting() {
                             report?.investigationMeetings?.map((meeting) => (
                                 <tr key={meeting.id} className="border border-black text-center text-md">
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {meeting.scheduled_date ? new Date(meeting.scheduled_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">
-                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td className="px-6 py-2 border border-black">{meeting.topic_meeting}</td>
                                     <td className="px-6 py-2 border border-black">
@@ -346,7 +420,57 @@ export default function investigationMeeting() {
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         ></input>
                     </div>
+                    <div className='select-name'>
+                        <div className="mb-4">
+                            <h3 className="font-semibold mb-2">เลือกผู้มีส่วนเกี่ยวข้อง:</h3>
+                            <ul className="list-disc pl-5 border py-2 px-4 rounded-lg">
+                                {selectedUsers.map(userId => {
+                                    const user = users.find(u => u.id === userId);
+                                    return user ? (
+                                        <li key={userId} className="flex justify-between">
+                                            {user.displayName}
+                                            <button
+                                                onClick={() => handleUserDelete(userId)}
+                                                className="text-red-500 ml-2 border boer-red-500 px-2"
+                                            >
+                                                X
+                                            </button>
+                                        </li>
+                                    ) : null;
+                                })}
+                            </ul>
+                        </div>
+                        <div className="mb-4 px-4">
+                            <input
+                                type="text"
+                                placeholder="ค้นหาชื่อ"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="border px-4 py-1 rounded-lg w-full"
+                            />
+                        </div>
 
+                        <div className="flex flex-col mb-4 max-h-40 overflow-y-auto">
+                            {filteredUsers.map(user => (
+                                <div key={user.id} className="flex items-center mb-2 gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id={`user-${user.id}`}
+                                        value={user.id}
+                                        checked={selectedUsers.includes(user.id)}
+                                        onChange={() => handleUserCheckboxChange(user.id)}
+                                        className="ms-2 mt-2 rounded-sm"
+                                    />
+                                    <label htmlFor={`user-${user.id}`} className="text-sm">
+                                        {user.displayName}
+                                    </label>
+                                    <span className="text-xs text-gray-500">
+                                        ({user.jobTitle})
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                     <hr className="border-t-solid border-1 border-grey" />
                     <div className="flex flex-row justify-center gap-2">
                         <button
@@ -369,13 +493,32 @@ export default function investigationMeeting() {
                     {Investigation && (
                         <>
                             <div>
+                                <div className="w-full mb-4">
+                                    <div>
+                                        <label className="underline block text-sm font-medium text-gray-700">
+                                            ผู้มีส่วนเกี่ยวข้อง
+                                        </label>
+                                        {investigationMeetings.map((meeting) => (
+                                            <div key={meeting.id} className="rounded-md mt-2 border border-black px-4 py-2">
+                                                <ul>
+                                                    {meeting.SelectedUser?.map((user) => (
+                                                        <li key={user.id}>
+                                                            {user.display_name}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className='w-full mb-4'>
                                     <label htmlFor="meeting_date" className="underline block text-sm font-medium text-gray-700">
                                         วันที่ประชุม
                                     </label>
                                     <div
                                         className="rounded-md mt-2 border border-black px-4 py-2"
-                                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ""}</div>
+                                    >{Investigation.meeting_date ? new Date(Investigation.meeting_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ""}</div>
                                 </div>
                                 <div className='w-full mb-4'>
                                     <label htmlFor="summary_meeting" className="block text-sm underline font-medium text-gray-700">

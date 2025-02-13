@@ -22,12 +22,23 @@ interface InvestigationMeeting {
     }[]
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
+interface IncidentReport {
+    topic: String
+}
+
 interface ProblemResolution {
     id: string
     meeting_id: string
     topic_solution: string
     assign_to: string
+    email_assign: string
     target_finish: string
     status_solution: string
     manager_approve: string
@@ -54,6 +65,9 @@ export default function SetSolution() {
     const { id } = useParams()
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
+    const [Incidentreports, setIncidentreport] = useState<IncidentReport>({
+        topic: ''
+    });
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
     const [open, setOpen] = useState<boolean>(false);
     const [managerApproves, setManagerApprove] = useState<ManagerApprove>({
@@ -109,6 +123,7 @@ export default function SetSolution() {
                 meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
+            
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "อนุมัติแล้ว"
@@ -121,6 +136,15 @@ export default function SetSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "แก้ไขแล้ว",
             })
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                <p><strong>อนุมัติแล้ว</strong></p>
+               `
+            });
             fetchMeeting(Number(id));
             router.back()
         } catch (error) {
@@ -150,6 +174,16 @@ export default function SetSolution() {
                     })
                 )
             );
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                <p><strong>ไม่อนุมัติ</strong></p>
+                    <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                 <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
+               `
+            });
             fetchMeeting(Number(id));
             router.push('/')
         } catch (error) {
@@ -161,7 +195,7 @@ export default function SetSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
-             {loading && <LoadingOverlay />}
+            {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <p className='text-2xl font-semibold'>อนุมัติกำหนดการแก้ไข</p>
                 <div className='w-full flex gap-2 '>
@@ -204,9 +238,9 @@ export default function SetSolution() {
                                 <tr key={resolution.id} className="border border-black text-center text-md">
                                     <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
                                     <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
-                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-6 py-2">
-                                        {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
@@ -251,7 +285,7 @@ export default function SetSolution() {
                             <div>
                                 <h1>แสดงความคิดเห็น</h1>
                                 <input
-                                    value={managerApproves.comment_solution}
+                                    value={managerApproves.comment_troubleshoot}
                                     type="text"
                                     name='comment_solution'
                                     id='comment_solution'
@@ -329,7 +363,7 @@ export default function SetSolution() {
                                                     {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                 </a></p>
                                             <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</p>
                                         </form>
                                     ))}
                                 </div>

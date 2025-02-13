@@ -40,10 +40,10 @@ export default function dashboardTechnical() {
     key: "ref_no",
     direction: "ascending",
   });
-    const [filters, setFilters] = useState({
-      priority: '',
-      status_report: ''
-    });
+  const [filters, setFilters] = useState({
+    priority: '',
+    status_report: ''
+  });
 
   const router = useRouter()
 
@@ -99,17 +99,16 @@ export default function dashboardTechnical() {
       </div>
 
       <div className="relative overflow-x-auto mx-8 mb-16">
-      <div className='flex gap-4 mb-2'> 
+        <div className='flex gap-4 mb-2'>
           <p className='text-lg mt-2'>การรายงานความผิดปกติในกระบวนการผลิต</p>
           <div className="flex gap-2">
             <select
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className={`border rounded-xl text-sm ${
-                filters.priority === "Urgent" ? "bg-red-500 text-white" :
-                filters.priority === "Normal" ? "bg-blue-500 text-white" :
-                "bg-white text-black"
-              }`}
+              className={`border rounded-xl text-sm ${filters.priority === "Urgent" ? "bg-red-500 text-white" :
+                  filters.priority === "Normal" ? "bg-blue-500 text-white" :
+                    "bg-white text-black"
+                }`}
             >
               <option className='bg-white text-black' value="">Priority</option>
               <option value="Urgent" className='bg-red-500 text-white'>Urgent</option>
@@ -133,7 +132,7 @@ export default function dashboardTechnical() {
         </div>
         <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
           <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
-          <tr>
+            <tr>
               <th scope="col" className="px-6 py-3 border border-black">
                 Ref. No
                 <button onClick={() => handleSort("ref_no")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -169,7 +168,7 @@ export default function dashboardTechnical() {
                 </svg>
                 </button>
               </th>
-              <th  scope="col" className="px-6 py-3 border border-black">
+              <th scope="col" className="px-6 py-3 border border-black">
                 วันที่นัดประชุม
                 <button onClick={() => handleSort("investigationMeetings[0].scheduled_date")}><svg className="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
@@ -216,31 +215,32 @@ export default function dashboardTechnical() {
                 )
                   .map((incident) => (
                     <tr key={incident.id} className="hover:bg-gray-100 border border-black text-center cursor-pointer"
-                    onClick={() => {
-                      const approvedMeeting = incident.investigationMeetings?.find(
-                        (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
-                      );
-                    
-                      if (incident.status_report === 'รอตรวจสอบการแก้ไข') {
-                        router.push(`/technical/check_maintenance/${approvedMeeting?.id || incident.investigationMeetings[0]?.id}`);
-                      } else if (incident.status_report === 'รออนุมัติการแก้ไข' || approvedMeeting) {
-                        router.push(`/technical/investigation/${incident.id}`);
-                      } else {
-                        router.push(`/technical/investigation/${incident.id}`);
-                      }
-                    }}
+                      onClick={() => {
+                        const approvedMeeting = incident.investigationMeetings?.find(
+                          (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
+                        );
+
+                        if (incident.status_report === 'รอตรวจสอบการแก้ไข') {
+                          router.push(`/technical/check_maintenance/${approvedMeeting?.id || incident.investigationMeetings[0]?.id}`);
+                        } else if (incident.status_report === 'รออนุมัติการแก้ไข' || approvedMeeting) {
+                          router.push(`/technical/investigation/${incident.id}`);
+                        } else {
+                          router.push(`/technical/investigation/${incident.id}`);
+                        }
+                      }}
                     >
                       <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                       <td className="px-6 py-4 border border-black">{incident.topic}</td>
                       <td>
                         <p className={`py-2 rounded-xl text-white ${incident.priority === 'Urgent' ? 'bg-red-500' : 'bg-blue-500'}`}>{incident.priority}</p>
                       </td>
-                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</td>
-                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</td>
+                      <td className="px-6 py-4 border border-black">{incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                       <td className="px-6 py-4 border border-black">
-                        {incident.investigationMeetings.length > 0 && incident.investigationMeetings[0].scheduled_date
-                          ? new Date(incident.investigationMeetings[0].scheduled_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' })
+                        {incident.investigationMeetings.length > 0 && incident.investigationMeetings[incident.investigationMeetings.length - 1].scheduled_date
+                          ? new Date(incident.investigationMeetings[incident.investigationMeetings.length - 1].scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })
                           : ''}
+
                       </td>
                       <td className="px-6 py-4 border border-black">{incident.reporter_name}</td>
                       <td>
@@ -262,7 +262,7 @@ export default function dashboardTechnical() {
                             const approvedMeeting = incident.investigationMeetings?.find(
                               (meeting) => meeting.manager_approve === 'อนุมัติแล้ว'
                             );
-                          
+
                             if (incident.status_report === 'รอตรวจสอบการแก้ไข') {
                               router.push(`/technical/check_maintenance/${approvedMeeting?.id || incident.investigationMeetings[0]?.id}`);
                             } else if (incident.status_report === 'รออนุมัติการแก้ไข' || approvedMeeting) {

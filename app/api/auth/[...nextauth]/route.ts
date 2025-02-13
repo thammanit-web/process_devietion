@@ -1,8 +1,8 @@
-import { user } from "@nextui-org/theme";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { cookies } from "next/headers";
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -36,7 +36,7 @@ async function refreshAccessToken(token: JWT) {
         client_secret: process.env.AZURE_AD_CLIENT_SECRET as string,
         grant_type: "refresh_token",
         refresh_token: token.refreshToken as string,
-        scope: "openid profile user.Read email",
+        scope: "openid profile User.Read email",
       }),
     });
 
@@ -58,45 +58,44 @@ async function refreshAccessToken(token: JWT) {
   }
 }
 
-export const authOptions: NextAuthOptions ={
+export const authOptions: NextAuthOptions = {
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID as string,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET as string,
       tenantId: process.env.AZURE_AD_TENANT_ID as string,
-      authorization: { params: { scope: "openid profile user.Read email offline_access" } },
+      authorization: {
+        params: {
+          scope: "openid profile User.Read email offline_access",
+          redirect_uri: process.env.NEXTAUTH_URL + "/api/auth/callback/azure-ad",
+        }
+      },
     }),
   ],
+  session: {
+    strategy: "jwt",
+  },
   secret: process.env.NEXTAUTH_SECRET as string,
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token as string;
         token.idToken = account.id_token as string;
-        token.refreshToken = account.refresh_token as string;
-        token.expiresAt = Date.now() + Number(account.expires_in || 3600) * 1000;
+        // token.refreshToken = account.refresh_token as string;
+        // token.expiresAt = Date.now() + Number(account.expires_in) * 1000;
       }
-      console.log(user)
       if (token.expiresAt && Date.now() > token.expiresAt) {
         return await refreshAccessToken(token);
       }
-
       return token;
     },
-    async session({ session, token }) 
-    {
+    async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
       session.expiresAt = token.expiresAt;
-      if (token.idToken) {
-        const userInfo = JSON.parse(Buffer.from(token.idToken.split(".")[1], "base64").toString());
-        session.user = {
-          name: userInfo.name,
-          email: userInfo.email,
-          oid: userInfo.oid, 
-        };
-      }
-      (await cookies()).set("idToken", session.idToken);
+      // const cookie = await cookies();
+
+      // cookie.set('accessToken', session.accessToken);
       return session;
     }
   },

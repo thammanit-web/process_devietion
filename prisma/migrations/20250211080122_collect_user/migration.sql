@@ -1,13 +1,4 @@
 -- CreateTable
-CREATE TABLE "SelectedUser" (
-    "id" SERIAL NOT NULL,
-    "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "SelectedUser_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "IncidentReport" (
     "id" SERIAL NOT NULL,
     "ref_no" TEXT NOT NULL,
@@ -48,6 +39,18 @@ CREATE TABLE "InvestigationMeeting" (
     "manager_approve" TEXT,
 
     CONSTRAINT "InvestigationMeeting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SelectedUser" (
+    "id" SERIAL NOT NULL,
+    "userId" TEXT NOT NULL,
+    "displayName" TEXT NOT NULL,
+    "mail" TEXT NOT NULL,
+    "jobTitle" TEXT NOT NULL,
+    "meeting_id" INTEGER,
+
+    CONSTRAINT "SelectedUser_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -99,6 +102,9 @@ ALTER TABLE "ReportFile" ADD CONSTRAINT "ReportFile_incident_report_id_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "InvestigationMeeting" ADD CONSTRAINT "InvestigationMeeting_incident_report_id_fkey" FOREIGN KEY ("incident_report_id") REFERENCES "IncidentReport"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SelectedUser" ADD CONSTRAINT "SelectedUser_meeting_id_fkey" FOREIGN KEY ("meeting_id") REFERENCES "InvestigationMeeting"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MeetingFile" ADD CONSTRAINT "MeetingFile_meeting_id_fkey" FOREIGN KEY ("meeting_id") REFERENCES "InvestigationMeeting"("id") ON DELETE CASCADE ON UPDATE CASCADE;

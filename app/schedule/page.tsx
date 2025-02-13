@@ -52,16 +52,6 @@ export default function dashboardTechnical() {
         }
     }
 
-    const handleLogout = async () => {
-        const response = await fetch('/api/auth/logout', { method: 'POST' });
-
-        if (response.ok) {
-            router.push('/');
-        } else {
-            console.error('Failed to logout');
-        }
-    };
-
     return (
         <div className="overflow-x-auto justify-center min-w-screen grid">
             <div className='flex justify-end w-screen mb-4 mt-4'>

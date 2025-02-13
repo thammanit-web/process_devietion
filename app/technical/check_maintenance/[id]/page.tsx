@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import investigationMeeting from '../../investigation/[id]/page'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import { report } from 'process'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -14,21 +15,27 @@ interface InvestigationMeeting {
     summary_meeting: string
     investigation_signature: string
     manager_approve: Boolean
-    incidentReport:
-    {
-        id: number
-        priority: string
-        ref_no: string
-        topic: string
-    }[]
+    incidentReport: { id: number;
+        priority: string;
+        ref_no: string;
+        topic: string;}[];
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
+
+
 interface ProblemResolution {
     id: string
     meeting_id: string
     topic_solution: string
     assign_to: string
+    email_assign: string
     target_finish: string
     status_solution: string
     manager_approve: string
@@ -86,6 +93,15 @@ export default function setSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
             },);
+            await axios.post(`/api/send_email`, {
+                to: ['Thammanit@thainitrate.com',meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                   <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                <p><strong>ดำเนินการเสร็จแล้ว</strong></p>
+              <a href="${`http://localhost:3000/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+               `
+            });
             router.back()
         } catch (error) {
             alert('Create Solution error');
@@ -103,6 +119,15 @@ export default function setSolution() {
             await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
                 status_solution: "รอการแก้ไข",
             })
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                        <p><strong>ยังต้องแก้ไขเพิ่มเติม</strong></p>
+              <a href="${`http://localhost:3000/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+               `
+            });
             console.log('Problem Resolution IDs:', problemResolutionIds);
             fetchMeeting(Number(id));
             router.back()
@@ -174,9 +199,9 @@ export default function setSolution() {
                                 <tr key={problemSolution.id} className="hover:bg-gray-50 text-center items-center border border-black">
                                     <td className="border border-black px-4 py-2">{problemSolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{problemSolution.assign_to}</td>
-                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit'}) : ''}</td>
+                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-4 py-2">
-                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td
                                         className={`border border-black px-4 py-2 ${problemSolution.status_solution === 'รอแก้ไข' ? 'bg-yellow-300' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
@@ -229,7 +254,7 @@ export default function setSolution() {
                                                     {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                 </a></p>
                                             <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</p>
                                         </form>
                                     ))}
                                 </div>

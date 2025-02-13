@@ -7,14 +7,12 @@ export async function GET(request: NextRequest, { params }: { params: { id?: str
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = params;
-    const url = id
-        ? `https://graph.microsoft.com/v1.0/users/${id}`
-        : `https://graph.microsoft.com/v1.0/users`;
-
+    const url = `https://graph.microsoft.com/v1.0/users/${id}`
+       
     try {
         const res = await fetch(url, {
             headers: {
-                Authorization: `Bearer ${token.accessToken}`,
+                Authorization: `Bearer ${token?.accessToken}`,
             },
         });
 

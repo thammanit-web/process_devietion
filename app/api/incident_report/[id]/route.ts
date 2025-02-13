@@ -18,7 +18,7 @@ export async function GET(
       include: { investigationMeetings: {
         include: { problemResolutions: {
           include: { troubleshootSolutions: true }
-        },meetingFiles:true }
+        },meetingFiles:true ,SelectedUser:true}
       }, ReportFiles: true },
       where: { id: Number(id) },
     });

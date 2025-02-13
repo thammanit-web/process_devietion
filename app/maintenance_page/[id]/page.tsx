@@ -22,12 +22,19 @@ interface InvestigationMeeting {
     }[]
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
 interface ProblemResolution {
     id: string
     meeting_id: string
     topic_solution: string
     assign_to: string
+    email_assign: string
     target_finish: string
     status_solution: string
     manager_approve: string
@@ -151,6 +158,13 @@ export default function setSolution() {
             await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
                 status_solution: "แก้ไขสำเร็จ",
             })
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                <p>ตรวจสอบการแก้ไข</p>
+                <a href="${`http://localhost:3000/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+            });
             fetchMeeting(Number(id));
             setLoading(false)
             setIsOpen(false);

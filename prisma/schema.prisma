@@ -53,7 +53,9 @@ model InvestigationMeeting {
 
 model SelectedUser {
   id                   Int                   @id @default(autoincrement())
-  userId               String
+  userId               String?
+  display_name         String?
+  email                String?
   meeting_id           Int?
   investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
 }
@@ -70,6 +72,7 @@ model ProblemSolution {
   meeting_id            Int?
   topic_solution        String
   assign_to             String?
+  email_assign          String?
   target_finish         DateTime?
   status_solution       String?
   manager_approve       String?

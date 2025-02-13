@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { createTransport } from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 
 const prisma = new PrismaClient();
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
             }
         }
 
-        const transporter = createTransport({
+        const transporter =  nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER,
@@ -138,9 +138,8 @@ export async function POST(req: Request) {
             to: 'Thammanit@thainitrate.com',
             subject: `กาารายงานความผิดปกติ: ${topic}`,
             html: emailHTML,
-            replyTo: '', // No reply email address
             headers: {
-              'X-No-Username': 'true', // Custom header to indicate no username needed
+              'X-No-Username': 'true', 
             },
         };
 

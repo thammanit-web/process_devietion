@@ -16,6 +16,7 @@ export async function POST(req: Request) {
             target_finish,
             status_solution,
             manager_approve,
+            email_assign
         } = await req.json()
         const newResolution = await prisma.problemSolution.create({
             include: { investigationMeeting: true },
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
                 target_finish: new Date(target_finish),
                 status_solution,
                 manager_approve,
+                email_assign
             },
         })
         return Response.json(newResolution)

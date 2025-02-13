@@ -7,6 +7,7 @@ import { LoadingOverlay } from '@/app/components/loading'
 import investigationMeeting from '@/app/technical/investigation/[id]/page'
 
 interface IncidentReport {
+    id: string;
     ref_no: string;
     topic: string;
     machine_code: string;
@@ -100,55 +101,52 @@ export default function AapproveReport() {
 
     const CreateMeeting = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const selectedUserEmails = users
             .filter(user => selectedUsers.includes(user.id))
             .map(user => user.mail);
-
+        setLoading(true);
         try {
-            setLoading(true);
-
             if (selectedUserEmails.length > 0) {
-                try {
-                    const res = await axios.post("/api/send_email", {
-                        emails: selectedUserEmails,
-                        scheduled_date: Investigation.scheduled_date,
-                        topic_meeting: Investigation.topic_meeting,
-                    });
-                    if (res.status !== 200) throw new Error("Failed to send emails");
-                } catch (error) {
-                    setError("Error sending emails");
-                    return;
-                }
+                await axios.post("/api/send_email", {
+                    to: selectedUserEmails.join(','),
+                    subject: `Process Deviation ${Investigation.topic_meeting}`,
+                    html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
+                    <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
+                    <br><a href="${`http://localhost:3000/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
+                });
             }
-            axios.put(`/api/incident_report/${id}`, {
+
+            await axios.put(`/api/incident_report/${id}`, {
                 status_report: "รอการประชุม",
             });
-        
-             axios.post(`/api/investigation_meeting`, {
-                ...Investigation,
-             
-                incident_report_id: Number(id),
-            });
-            await selectedUsers.map(userId => {
-                return axios.post("/api/selected_users", { 
-                    userId, 
-                    meeting_id: Investigation.id 
-                });
-            });
+            await Promise.all(
+                selectedUsers.map(userId => {
+                    const user = users.find(u => u.id === userId);
+                    if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
+
+                    return axios.post(`/api/investigation_meeting`, {
+                        ...Investigation,
+                        userId,
+                        display_name: user.displayName,
+                        email: user.mail,
+                        incident_report_id: Number(id),
+                    });
+                })
+            );
+
             router.back();
             fetchIncidentReports(Number(id));
         } catch (error: unknown) {
-            // Handle specific Axios errors and unexpected errors
             if (axios.isAxiosError(error)) {
                 console.error("Axios error:", error.response?.data || error.message);
             } else {
                 console.error("Unexpected error:", error);
             }
         } finally {
-            setLoading(false); // Ensure loading is set to false regardless of success/failure
+            setLoading(false);
         }
     };
-
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -168,8 +166,9 @@ export default function AapproveReport() {
 
 
     const filteredUsers = users.filter(user =>
-        user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        ["IT Officer",].includes(user.jobTitle ?? "")
+        user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase())
+        &&
+        !['', 'Service'].includes(user.jobTitle ?? "")
     );
 
     const handleUserCheckboxChange = (userId: string) => {
@@ -303,7 +302,7 @@ export default function AapproveReport() {
             </div>
 
             <Modal open={open} onClose={() => setOpen(false)}>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 overflow-y-auto">
                     <h1 className="text-2xl justify-center">กำหนดวันประชุม</h1>
                     <div className='w-full'>
                         <label htmlFor="scheduled_date" className="block text-sm font-medium text-gray-700">
@@ -365,7 +364,7 @@ export default function AapproveReport() {
                             />
                         </div>
 
-                        <div className="flex flex-col mb-4 max-h-60 overflow-y-auto">
+                        <div className="flex flex-col mb-4 max-h-40 overflow-y-auto">
                             {filteredUsers.map(user => (
                                 <div key={user.id} className="flex items-center mb-2 gap-2">
                                     <input
@@ -374,7 +373,7 @@ export default function AapproveReport() {
                                         value={user.id}
                                         checked={selectedUsers.includes(user.id)}
                                         onChange={() => handleUserCheckboxChange(user.id)}
-                                        className="mr-2"
+                                        className="ms-2 mt-2 rounded-sm"
                                     />
                                     <label htmlFor={`user-${user.id}`} className="text-sm">
                                         {user.displayName}

@@ -13,6 +13,7 @@ interface InvestigationMeeting {
     summary_meeting: string
     investigation_signature: string
     manager_approve: Boolean
+    SelectedUser: Array<{ userId: string }>;
     incidentReport:
     {
         id: number
@@ -28,6 +29,7 @@ interface ProblemResolution {
     meeting_id: string
     topic_solution: string
     assign_to: string
+    email_assign: string
     target_finish: string
     status_solution: string
     manager_approve: string
@@ -49,6 +51,13 @@ interface ManagerApprove {
     comment_troubleshoot: string
 }
 
+interface User {
+    id: string;
+    displayName: string | null;
+    mail: string | null;
+    jobTitle: string | null;
+}
+
 export default function setSolution() {
     const { id } = useParams()
     const router = useRouter()
@@ -58,6 +67,7 @@ export default function setSolution() {
         meeting_id: '',
         topic_solution: '',
         assign_to: '',
+        email_assign: '',
         target_finish: '',
         status_solution: '',
         manager_approve: '',
@@ -66,6 +76,8 @@ export default function setSolution() {
     const [open, setOpen] = useState<boolean>(false);
     const [Isopen, setIsOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [selectedUser, setSelectedUser] = useState<string | "">("");
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -101,12 +113,32 @@ export default function setSolution() {
         }));
     }, [id]);
 
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("/api/users");
+                if (!res.ok) throw new Error("Failed to fetch users");
+
+                const data = await res.json();
+                setUsers(data.value || []);
+            } catch (error) {
+                alert("Error fetching users");
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
     const CreateSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const user = users.find((u) => u.id === selectedUser);
+            if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
             setLoading(true)
             await axios.post(`/api/problem_resolution`, {
                 ...problemResolution,
+                assign_to: user.displayName,
+                email_assign: user.mail,
                 meeting_id: Number(id),
                 status_solution: "รอการแก้ไข"
             });
@@ -120,18 +152,14 @@ export default function setSolution() {
         }
     };
 
+    const filteredUsers = users.filter(
+        (user) =>
+            ["IT Officer"].includes(user.jobTitle ?? "")
+    );
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true)
-            if (meetingDetail?.problemResolutions && meetingDetail.problemResolutions.length > 0) {
-                console.log("Problem Resolution:", meetingDetail.problemResolutions);
-                console.log("Meeting ID:", meetingDetail.problemResolutions[0].meeting_id);
-                console.log("Solution ID:", meetingDetail.problemResolutions[0].id);
-            } else {
-                console.log("No problem resolutions found.");
-            }
-
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "รออนุมัติกำหนดการแก้ไข",
@@ -149,6 +177,15 @@ export default function setSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติกำหนดการแก้ไข"
             })
+
+            await axios.post(`/api/send_email`, {
+                to: ['Thammanit@thainitrate.com', problemResolution.email_assign],
+                subject: `Process Deviation ${meetingDetail?.topic_meeting}`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+<p style="margin-bottom: 10px;">หัวข้อ: ${meetingDetail?.topic_meeting}</p>
+<a href="${`http://localhost:3000/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>
+`
+            });
             console.log(problemResolution.meeting_id, problemResolution.id);
             router.back()
         } catch (error) {
@@ -193,10 +230,12 @@ export default function setSolution() {
                             {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="hover:bg-gray-50 text-center items-center">
                                     <td className="border border-black px-4 py-2">{resolution.topic_solution}</td>
-                                    <td className="border border-black px-4 py-2">{resolution.assign_to}</td>
-                                    <td className="border border-black px-4 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit', }) : ''}</td>
                                     <td className="border border-black px-4 py-2">
-                                        {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {resolution.assign_to}
+                                    </td>
+                                    <td className="border border-black px-4 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', }) : ''}</td>
+                                    <td className="border border-black px-4 py-2">
+                                        {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
@@ -256,21 +295,18 @@ export default function setSolution() {
                         <label htmlFor="assign_to" className="block text-sm font-medium text-gray-700">
                             เลือกผู้รับผิดชอบ
                         </label>
-                        <div className="relative">
+                        <div className="w-full">
                             <select
-
+                                value={selectedUser}
+                                onChange={(e) => setSelectedUser(e.target.value)}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                name='assign_to'
-
-                                onChange={handleChange}
-                                required
                             >
-                                <option></option>
-                                <option value="นาย A">นาย A</option>
-                                <option value="นาย A">นาย A</option>
-                                <option value="นาย A">นาย A</option>
-                                <option value="นาย A">นาย A</option>
-                                <option value="นาย A">นาย A</option>
+                                <option value="">-- เลือกผู้ใช้ --</option>
+                                {filteredUsers.map((user) => (
+                                    <option key={user.id} value={user.id}>
+                                        {user.displayName} ({user.jobTitle})
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>

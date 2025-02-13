@@ -9,7 +9,7 @@ export async function GET(request: NextRequest,) {
     try {
         const res = await fetch("https://graph.microsoft.com/v1.0/me", {
             headers: {
-                Authorization: `Bearer ${token.accessToken}`,
+                Authorization: `Bearer ${token?.accessToken}`,
             },
         });
         if (!res.ok) {

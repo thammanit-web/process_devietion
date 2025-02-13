@@ -17,7 +17,7 @@ export default function Nav() {
   }
 
   const handleSignOut = async () => {
-    const result = await signOut();
+    const result = await signOut({ redirect: false, callbackUrl: "/" });
     if (result) {
       router.push('/login');
     }

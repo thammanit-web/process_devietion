@@ -34,6 +34,7 @@ export async function PUT(
       assign_to,
       status_solution,
       manager_approve,
+      email_assign,
      } = await req.json()
     return Response.json(await prisma.problemSolution.update({
       where: { id: Number(id) },
@@ -43,6 +44,7 @@ export async function PUT(
         assign_to,
         status_solution,
         manager_approve,
+        email_assign
        },
     }))
   } catch (error) {

@@ -42,6 +42,12 @@ interface InvestigationMeeting {
     }[];
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
 interface ProblemResolution {
     id: string
@@ -301,6 +307,17 @@ export default function detailVerify() {
                                                     </li>
                                                 )
                                                 )}</p>
+                                        </div>
+
+                                        <div className='grid gap-4'>
+                                        <p className='font-semibold'>ผู้มีส่วนเกี่ยวข้อง</p>
+                                        <div>  {
+                                                meeting.SelectedUser?.map((user) => (
+                                                    <p key={user.id}>
+                                                        {user.display_name}
+                                                    </p>
+                                                )
+                                                )}</div>
                                         </div>
                                     </div>
                                 </div>

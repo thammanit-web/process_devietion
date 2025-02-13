@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import { assign } from 'nodemailer/lib/shared'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -22,12 +23,19 @@ interface InvestigationMeeting {
     }[]
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
 interface ProblemResolution {
     id: string
     meeting_id: string
     topic_solution: string
     assign_to: string
+    email_assign: string
     target_finish: string
     status_solution: string
     manager_approve: string
@@ -98,6 +106,14 @@ export default function SetSolution() {
                 meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                <p>โปรดตรวจสอบและแก้ไช</p>
+                <p>Commet: ${managerApproves.comment_solution? managerApproves.comment_solution : "ไม่มี comment"}</p>
+                <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+            });
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "อนุมัติแล้ว",
@@ -136,9 +152,17 @@ export default function SetSolution() {
                         "Content-Type": "multipart/form-data",
                     },
                 });
-                await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
-                    status_report: "รอการประชุม",
-                })
+            await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
+                status_report: "รอการประชุม",
+            })
+            await axios.post(`/api/send_email`, {
+                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                    <p>โปรดตรวจสอบและแก้ไช</p>
+                    <p>Commet: ${managerApproves.comment_solution? managerApproves.comment_solution : "ไม่มี comment"}</p>
+                    <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+            });
             router.push('/')
         } catch (error) {
             alert('Create Solution error');
@@ -150,7 +174,7 @@ export default function SetSolution() {
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
-             {loading && <LoadingOverlay />}
+            {loading && <LoadingOverlay />}
             <div className="gap-4 grid mb-4">
                 <p className='text-2xl font-semibold'>อนุมัติกำหนดการแก้ไข</p>
                 <div className='w-full flex gap-2 '>
@@ -177,29 +201,29 @@ export default function SetSolution() {
                 </div>
 
                 <div className="solution">
-                <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
-                                    <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
+                    <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
+                                <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
+                                <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {meetingDetail?.problemResolutions?.map((resolution) => (
+                                <tr key={resolution.id} className="border border-black text-center text-md">
+                                    <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
+                                    <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
+                                    <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
+                                        {resolution.status_solution}
+                                    </td>
+
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {meetingDetail?.problemResolutions?.map((resolution) => (
-                                    <tr key={resolution.id} className="border border-black text-center text-md">
-                                        <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
-                                        <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
-                                        <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
-                                        <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
-                                            {resolution.status_solution}
-                                        </td>
-                                       
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
 
 
