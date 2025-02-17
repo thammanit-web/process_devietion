@@ -78,9 +78,6 @@ export default function detailVerify() {
     const { id } = useParams()
     const [report, setReport] = useState<IncidentReport | null>(null)
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
-    const [open, setOpen] = useState<boolean>(false);
-    const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
-    const [openDetail, setOpenDetail] = useState(false);
     const router = useRouter()
     const reportRef = useRef<HTMLFormElement>(null);
 
@@ -103,7 +100,8 @@ export default function detailVerify() {
                 ...data,
                 incidentReport: data?.incidentReport ? [data.incidentReport] : [],
                 meetingDetail: data.meetingDetail || [],
-                managerApproves: data.managerApproves || []
+                managerApproves: data.managerApproves || [],
+                problemResolutions: data.problemResolutions || []
             });
         } catch (error) {
             console.error('Error fetching report:', error)
@@ -120,12 +118,12 @@ export default function detailVerify() {
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
                 let heightLeft = imgHeight;
-                let position = 10;
+                let position = 5;
 
                 pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
 
-                while (heightLeft >= 0) {
+                while (heightLeft > 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
                     pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
@@ -137,8 +135,6 @@ export default function detailVerify() {
         }
     };
 
-
-
     useEffect(() => {
         if (id) {
             fetchIncidentReports(Number(id))
@@ -146,10 +142,20 @@ export default function detailVerify() {
     }, [id])
 
     useEffect(() => {
-        if (report?.investigationMeetings[0]?.id) {
-            fetchMeeting(Number(report?.investigationMeetings[0]?.id));
+        const meetingToFetch = report?.investigationMeetings.find(meeting => {
+            return (
+                meeting.manager_approve === 'อนุมัติแล้ว' ||
+                meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข'
+            );
+        });
+
+        if (meetingToFetch?.id) {
+            fetchMeeting(Number(meetingToFetch.id));
         }
-    }, [report?.investigationMeetings[0]?.id]);
+    }, [report?.investigationMeetings]);
+
+
+
 
     if (!report) {
         return <div className='grid justify-center items-center h-screen'><div className='flex justify-center text-center items-center w-screen text-3xl font-bold'>Loading...</div></div>
@@ -204,7 +210,7 @@ export default function detailVerify() {
 
                 <div className='w-full flex gap-4 lg:text-base md:text-base sm:text-sm'>
                     <p className='font-semibold'>วันและเวลาที่เกิดเหตุ</p>
-                    <p className=''>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
+                    <p className=''>{report.incident_date ? new Date(report.incident_date.toString()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                 </div>
 
 
@@ -264,10 +270,10 @@ export default function detailVerify() {
                 <hr className="border-t-solid border-1 border-gray-300" />
                 <h1 className="lg:text-xl md:text-xl sm:text-lg mb-4 underline">รายละเอียดการประชุม</h1>
                 {
-                    report?.investigationMeetings?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว' || meeting.manager_approve==='รออนุมัติกำหนดการแก้ไข').length === 0
+                    report?.investigationMeetings?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว' || meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข').length === 0
                         ? <p>ยังไม่ประชุม</p>
                         : report?.investigationMeetings
-                            ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว'||meeting.manager_approve==='รออนุมัติกำหนดการแก้ไข')
+                            ?.filter((meeting) => meeting.manager_approve === 'อนุมัติแล้ว' || meeting.manager_approve === 'รออนุมัติกำหนดการแก้ไข')
                             .map((meeting) => (
                                 <div key={meeting.id}>
                                     <div className='ms-4 gap-6 grid lg:text-base md:text-base sm:text-sm'>
@@ -277,7 +283,7 @@ export default function detailVerify() {
                                         </div>
                                         <div className='flex gap-4'>
                                             <p className='font-semibold'>วันที่ประชุม</p>
-                                            <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
+                                            <p>{meeting.meeting_date ? new Date(meeting.meeting_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                         </div>
                                         <div className='flex gap-4'>
                                             <p className='font-semibold'>หัวข้อการประชุม</p>
@@ -310,8 +316,8 @@ export default function detailVerify() {
                                         </div>
 
                                         <div className='grid gap-4'>
-                                        <p className='font-semibold'>ผู้มีส่วนเกี่ยวข้อง</p>
-                                        <div>  {
+                                            <p className='font-semibold'>ผู้มีส่วนเกี่ยวข้อง</p>
+                                            <div>  {
                                                 meeting.SelectedUser?.map((user) => (
                                                     <p key={user.id}>
                                                         {user.display_name}
@@ -329,8 +335,8 @@ export default function detailVerify() {
                     meetingDetail?.problemResolutions && meetingDetail.problemResolutions.length === 0
                         ? <p>ยังไม่กำหนดการแก้ไข</p>
                         : meetingDetail?.problemResolutions?.map((resolution) => (
-                            <div key={resolution.id} className='ms-4 gap-6 grid border border-gray-600 justify-center py-4'>
-                                <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-sm sm:text-sm'>
+                            <div key={resolution.id} className='ms-4 gap-6 grid border border-gray-600 justify-center py-4 px-4'>
+                                <div className='lg:flex md:flex sm:grid gap-4 lg:text-sm md:text-sm sm:text-sm'>
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">หัวข้อการแก้ไช</p>
                                         <p>{resolution.topic_solution}</p>
@@ -341,16 +347,16 @@ export default function detailVerify() {
                                     </div>
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">วันที่กำหนดแก้ไข</p>
-                                        <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
+                                        <p>{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                     </div>
 
                                     <div className='flex gap-4'>
                                         <p className="font-semibold">วันที่แก้ไข</p>
                                         <p>
-                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
+                                            {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}
                                         </p>
                                     </div>
-                                    <div className='flex gap-4'>    
+                                    <div className='flex gap-4'>
                                         <p className="font-semibold">สถานะการแก้ไข</p>
                                         <p>{resolution.status_solution}</p>
                                     </div>
@@ -362,20 +368,20 @@ export default function detailVerify() {
                                             ? <p className='flex justify-center w-full border border-gray-400 px-2 py-1 text-center'>ยังไม่มีการแก้ไข</p>
                                             : resolution?.troubleshootSolutions?.map((solution) => (
                                                 <div key={solution.id} className=' gap-6 flex border border-gray-600 justify-center py-4 '>
-                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-sm md:text-sm sm:text-sm'>
                                                         <p className='font-semibold'>รายละเอียดการแก้ไข</p>
                                                         <p >{solution.result_troubleshoot}</p>
                                                     </div>
-                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-sm md:text-sm sm:text-sm'>
                                                         <p className='font-semibold'>ไฟล์อัพโหลด</p>
                                                         <p>
                                                             <a href={`${process.env.NEXT_PUBLIC_STORAGE}${solution.file_summary}`} target='_blank' className='underline text-blue-500'>
                                                                 {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                             </a></p>
                                                     </div>
-                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-base md:text-base sm:text-sm'>
+                                                    <div className='lg:flex md:flex sm:grid gap-4 lg:text-sm md:text-sm sm:text-sm'>
                                                         <p className='font-semibold'>วันที่แก้ไข</p>
-                                                        <p>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
+                                                        <p>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : ''}</p>
                                                     </div>
                                                 </div>
                                             ))}

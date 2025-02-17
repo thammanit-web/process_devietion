@@ -41,6 +41,7 @@ async function refreshAccessToken(token: JWT) {
     });
 
     const data = await response.json();
+    console.log("Token refresh response:", data);
 
     if (!response.ok) {
       throw new Error("Failed to refresh token");
@@ -81,15 +82,17 @@ export const authOptions: NextAuthOptions = {
       if (account) {
         token.accessToken = account.access_token as string;
         token.idToken = account.id_token as string;
-        // token.refreshToken = account.refresh_token as string;
-        // token.expiresAt = Date.now() + Number(account.expires_in) * 1000;
+        token.refreshToken = account.refresh_token as string;
+        token.expiresAt = Date.now() + Number(account.expires_in) * 1000;
       }
-      if (token.expiresAt && Date.now() > token.expiresAt) {
+      if (token.expiresAt && Date.now() > token.expiresAt - 5000) {
+        console.log("Token is about to expire, refreshing...");
         return await refreshAccessToken(token);
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback - token:", token);
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
       session.expiresAt = token.expiresAt;
