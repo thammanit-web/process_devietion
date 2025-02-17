@@ -163,7 +163,7 @@ export default function setSolution() {
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p>ตรวจสอบการแก้ไข</p>
-                <a href="${`http://localhost:3000/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+                <a href="${`https://process-devietion-brown.vercel.app/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             fetchMeeting(Number(id));
             setLoading(false)
@@ -187,7 +187,6 @@ export default function setSolution() {
                 await axios.delete(`/api/troubleshoot_solution/${problemSolution?.troubleshootSolutions[0].id}`);
                 
                 if (problemSolution?.troubleshootSolutions.length === 1) {
-                    // If deleting the last one, update status
                     await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
                         status_solution: "รอการแก้ไข",
                     });

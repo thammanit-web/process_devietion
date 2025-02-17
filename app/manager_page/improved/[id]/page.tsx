@@ -188,7 +188,7 @@ export default function SetSolution() {
                 <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                 <p><strong>ไม่อนุมัติ</strong></p>
                     <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
-                 <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
+                 <a href="${`https://process-devietion-brown.vercel.app/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             fetchMeeting(Number(id));
