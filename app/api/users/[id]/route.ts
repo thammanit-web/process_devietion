@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// Export the GET handler
-export async function GET(request: NextRequest, context: { params: { id?: string } }) {
+export async function GET(request: NextRequest, context: { params: { id: string } }) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
