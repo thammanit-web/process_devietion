@@ -93,8 +93,12 @@ export default function setSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
             },);
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: ['Thammanit@thainitrate.com',meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                to: "thammanit@thainitrate.com",
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
@@ -119,8 +123,12 @@ export default function setSolution() {
             await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
                 status_solution: "รอการแก้ไข",
             })
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                to: to,
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>

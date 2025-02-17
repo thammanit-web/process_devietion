@@ -44,7 +44,7 @@ export default function UserList() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">User List</h1>
+            <h1 className="text-2xl font-bold mb-4 mt-4 w-full text-center">User List</h1>
             <div className="flex w-full justify-center">
                 <input
                     type="text"
@@ -65,6 +65,7 @@ export default function UserList() {
                 <table className="min-w-full border-collapse border border-gray-300">
                     <thead>
                         <tr className="bg-gray-200">
+                            <th className="border border-gray-300 px-4 py-2">id</th>
                             <th className="border border-gray-300 px-4 py-2">Name</th>
                             <th className="border border-gray-300 px-4 py-2">Email</th>
                             <th className="border border-gray-300 px-4 py-2">Job Title</th>
@@ -73,8 +74,9 @@ export default function UserList() {
                     <tbody>
                         {filteredUsers
                             .filter(user => user.jobTitle !== null)
-                            .map((user) => (
+                            .map((user,index) => (
                                 <tr key={user.id} className="border border-gray-300">
+                                    <td className="border border-gray-300 px-4 py-2">{index+1}</td>
                                     <td className="border border-gray-300 px-4 py-2">{user.displayName || "N/A"}</td>
                                     <td className="border border-gray-300 px-4 py-2">{user.mail || "N/A"}</td>
                                     <td className="border border-gray-300 px-4 py-2">{user.jobTitle || "N/A"}</td>

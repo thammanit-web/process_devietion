@@ -158,6 +158,12 @@ export default function setSolution() {
     );
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const selectedUserEmails = users
+            .filter(user => selectedUser.includes(user.id))
+            .map(user => user.mail);
+        setLoading(true);
+
         try {
             setLoading(true)
             await axios.put(`/api/investigation_meeting/${id}`, {
@@ -178,15 +184,15 @@ export default function setSolution() {
                 status_report: "รออนุมัติกำหนดการแก้ไข"
             })
 
-            await axios.post(`/api/send_email`, {
-                to: ['Thammanit@thainitrate.com', problemResolution.email_assign],
-                subject: `Process Deviation ${meetingDetail?.topic_meeting}`,
-                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+            if (selectedUserEmails.length > 0) {
+                await axios.post(`/api/send_email`, {
+                    to: ["thammanitrinthang@gmail.com"],
+                    subject: "Process Deviation",
+                    html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
 <p style="margin-bottom: 10px;">หัวข้อ: ${meetingDetail?.topic_meeting}</p>
-<a href="${`http://localhost:3000/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>
-`
-            });
-            console.log(problemResolution.meeting_id, problemResolution.id);
+<a href="${`http://localhost:3000/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>`
+                });
+            }
             router.back()
         } catch (error) {
             setLoading(false)

@@ -106,12 +106,18 @@ export default function SetSolution() {
                 meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
+
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                to: to,
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p>โปรดตรวจสอบและแก้ไช</p>
-                <p>Commet: ${managerApproves.comment_solution? managerApproves.comment_solution : "ไม่มี comment"}</p>
+                <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
+                <p>อนุมัติแล้ว</p>
                 <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             await axios.put(`/api/investigation_meeting/${id}`, {
@@ -127,7 +133,7 @@ export default function SetSolution() {
                 status_report: "รอการแก้ไข",
             })
             fetchMeeting(Number(id));
-            router.back()
+            router.push(`/manager_page`)
         } catch (error) {
             alert('Create Solution error');
             console.error(error);
@@ -155,12 +161,16 @@ export default function SetSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการประชุม",
             })
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                to: to,
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p>โปรดตรวจสอบและแก้ไช</p>
-                    <p>Commet: ${managerApproves.comment_solution? managerApproves.comment_solution : "ไม่มี comment"}</p>
+                    <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
                     <a href="${`http://localhost:3000/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             router.push('/')

@@ -136,8 +136,12 @@ export default function SetSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "แก้ไขแล้ว",
             })
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
+                to: to,
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
@@ -174,9 +178,12 @@ export default function SetSolution() {
                     })
                 )
             );
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email), meetingDetail?.problemResolutions.map(assign => assign.email_assign)],
-                subject: `Process Deviation`,
+                to: to,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                 <p><strong>ไม่อนุมัติ</strong></p>

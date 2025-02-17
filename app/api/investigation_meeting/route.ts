@@ -8,6 +8,13 @@ export async function GET() {
     { include: { problemResolutions: true, incidentReport: true, managerApproves: true,SelectedUser:true } }
   ))
 }
+
+interface User {
+  userId: string;
+  display_name: string;
+  email: string;
+}
+
 export async function POST(req: Request) {
   try {
     const {
@@ -17,16 +24,18 @@ export async function POST(req: Request) {
       summary_meeting,
       investigation_signature,
       manager_approve,
-      userId,
-      display_name,
-      email
+      selectedUsers,
     } = await req.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    if (!selectedUsers || selectedUsers.length === 0) {
+      return NextResponse.json({ error: "At least one user is required" }, { status: 400 });
     }
+    
     const newMeeting = await prisma.investigationMeeting.create({
-      include: { problemResolutions: true, incidentReport: true },
+      include: { 
+        problemResolutions: true, 
+        incidentReport: true 
+      },
       data: {
         incident_report_id,
         topic_meeting,
@@ -36,21 +45,24 @@ export async function POST(req: Request) {
         manager_approve,
       },
     });
-    const newUser = await prisma.selectedUser.create({
-      data: {
-        userId,
-        display_name,
-        email,
-        meeting_id: newMeeting.id
-      },
+
+    const selectedUsersPromises = selectedUsers.map(async (user: User) => {
+      await prisma.selectedUser.create({
+        data: {
+          userId: user.userId,
+          display_name: user.display_name,
+          email: user.email,
+          meeting_id: newMeeting.id,
+        },
+      });
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    await Promise.all(selectedUsersPromises);
 
+    return NextResponse.json(newMeeting, { status: 201 });
   } catch (error) {
     return new Response(JSON.stringify({ error: error }), {
       status: 500,
     });
   }
 }
-

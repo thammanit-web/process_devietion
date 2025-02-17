@@ -13,13 +13,9 @@ export async function POST(request: NextRequest) {
 
         const { subject, to, html } = await request.json();
 
-        const recipients = Array.isArray(to) 
-        ? to.map((email: string) => email.trim()).filter(email => email !== '').map((email: string) => ({ emailAddress: { address: email } })) 
-        : to.split(',').map((email: string) => email.trim()).filter((email: string) => email !== '').map((email: string) => ({ emailAddress: { address: email } }));
-
-        if (recipients.length === 0) {
-            throw new Error("No valid recipients provided.");
-          }
+        const recipients = to.split(',').map((email: string) => ({
+            emailAddress: { address: email.trim() }
+        }));
 
         const sendEmail = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
             method: 'POST',

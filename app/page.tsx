@@ -58,7 +58,7 @@ export default function FirstPage() {
         </div>
         <div className="flex justify-center gap-10" >
           <div className='grid justify-center gap-8'>
-          <a href="/status" className="hover:bg-green-600 md:text-lg sm:text-sm gap-2 py-4 text-white h-14 w-72 md:w-72 sm:w-36 flex  rounded-2xl bg-green-500 shadow-md drop-shadow-md border shadow-gray-200 hover:shadow-white">
+          <a href="/status" className="hover:bg-green-600 md:text-lg sm:text-sm gap-2 py-4 text-white h-14 w-72 flex  rounded-2xl bg-green-500 shadow-md drop-shadow-md border shadow-gray-200 hover:shadow-white">
               <svg className="ms-2 mr-2  w-6 h-6 text-gray-200 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M9 7V2.221a2 2 0 0 0-.5.365L4.586 6.5a2 2 0 0 0-.365.5H9Zm2 0V2h7a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9h5a2 2 0 0 0 2-2Zm-1 9a1 1 0 1 0-2 0v2a1 1 0 1 0 2 0v-2Zm2-5a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Zm4 4a1 1 0 1 0-2 0v3a1 1 0 1 0 2 0v-3Z" clipRule="evenodd" />
               </svg>

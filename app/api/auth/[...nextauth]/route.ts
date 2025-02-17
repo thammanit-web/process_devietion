@@ -36,7 +36,7 @@ async function refreshAccessToken(token: JWT) {
         client_secret: process.env.AZURE_AD_CLIENT_SECRET as string,
         grant_type: "refresh_token",
         refresh_token: token.refreshToken as string,
-        scope: "openid profile User.Read email",
+        scope: "openid profile User.Read email Mail.Send",
       }),
     });
 
@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
       tenantId: process.env.AZURE_AD_TENANT_ID as string,
       authorization: {
         params: {
-          scope: "openid profile User.Read email offline_access",
+          scope: "openid profile User.Read email offline_access Mail.Send User.Read.All",
           redirect_uri: process.env.NEXTAUTH_URL + "/api/auth/callback/azure-ad",
         }
       },
@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = account.refresh_token as string;
         token.expiresAt = Date.now() + Number(account.expires_in) * 1000;
       }
-      if (token.expiresAt && Date.now() > token.expiresAt - 5000) {
+      if (token.expiresAt && Date.now() > token.expiresAt) {
         console.log("Token is about to expire, refreshing...");
         return await refreshAccessToken(token);
       }

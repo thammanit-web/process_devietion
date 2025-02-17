@@ -110,7 +110,7 @@ export default function AapproveReport() {
             if (selectedUserEmails.length > 0) {
                 await axios.post("/api/send_email", {
                     to: selectedUserEmails.join(','),
-                    subject: `Process Deviation ${Investigation.topic_meeting}`,
+                    subject: "Process Deviation",
                     html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                     <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
                     <br><a href="${`http://localhost:3000/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
@@ -120,20 +120,28 @@ export default function AapproveReport() {
             await axios.put(`/api/incident_report/${id}`, {
                 status_report: "รอการประชุม",
             });
-            await Promise.all(
-                selectedUsers.map(userId => {
-                    const user = users.find(u => u.id === userId);
-                    if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
 
-                    return axios.post(`/api/investigation_meeting`, {
-                        ...Investigation,
-                        userId,
-                        display_name: user.displayName,
-                        email: user.mail,
-                        incident_report_id: Number(id),
-                    });
-                })
-            );
+            const userRequests = selectedUsers.map(userId => {
+                const user = users.find(u => u.id === userId);
+                if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
+                
+                return {
+                  userId,
+                  display_name: user.displayName,
+                  email: user.mail,
+                };
+              });
+              
+              try {
+                const response = await axios.post(`/api/investigation_meeting`, {
+                  ...Investigation,
+                  incident_report_id: Number(id),
+                  selectedUsers: userRequests,  
+                });
+              } catch (error) {
+                console.error("Error creating investigation:", error);
+              }
+              
 
             router.back();
             fetchIncidentReports(Number(id));
