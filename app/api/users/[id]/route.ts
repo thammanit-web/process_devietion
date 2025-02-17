@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function GET(request: NextRequest, { params }: { params: { id?: string } }) {
+export async function GET(request: NextRequest, context: { params: { id?: string } }) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { id } = params;
-    const url = `https://graph.microsoft.com/v1.0/users/${id}`
-       
+
+    const { id } = context.params; 
+    if (!id) {
+        return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    }
+
+    const url = `https://graph.microsoft.com/v1.0/users/${id}`;
+
     try {
         const res = await fetch(url, {
             headers: {
