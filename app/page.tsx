@@ -26,13 +26,27 @@ export default function FirstPage() {
     "Maintenance Officer Instrument and Electrical",
     "Maintenance Manager Department",
     "Maintenance Officer",
+    "Warehouse Section Head",
+    "Warehouse and Logistic Officer",
+    "Warehouse and Logistic Section Head",
     "IT Officer"
   ];
   const allowedManager = [
     "Plant Manager",
+    "Maintenance Officer Mechanical",
+    "Maintenance Officer Instrument and Electrical",
+    "Maintenance Manager Department",
+    "Maintenance Officer",
+    "Warehouse Section Head",
+    "Warehouse and Logistic Officer",
+    "Warehouse and Logistic Section Head",
     "IT Officer"
   ];
   const allowedMaintenance = [
+    "Maintenance Officer Mechanical",
+    "Maintenance Officer Instrument and Electrical",
+    "Maintenance Manager Department",
+    "Maintenance Officer",
     "Warehouse Section Head",
     "Warehouse and Logistic Officer",
     "Warehouse and Logistic Section Head",
