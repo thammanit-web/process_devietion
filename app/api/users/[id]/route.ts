@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function GET(request: NextRequest, context: { params: { id?: string } }) {
+interface Params {
+  id?: string;
+}
+
+export async function GET(request: NextRequest, { params }: { params: Params }) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token?.accessToken) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params; 
+    const { id } = params;
     if (!id) {
         return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
