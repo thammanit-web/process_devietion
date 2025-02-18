@@ -6,7 +6,6 @@ export async function GET(request: NextRequest,) {
     if (!token?.accessToken) {
         return NextResponse.json({ error: "Unauthorized" });
     }
-    console.log("Me Token:", token.accessToken);
 
     try {
         const res = await fetch("https://graph.microsoft.com/v1.0/me", {

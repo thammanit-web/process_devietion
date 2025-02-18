@@ -96,9 +96,9 @@ const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
       session.expiresAt = token.expiresAt;
-      const cookie = await cookies();
+      // const cookie = await cookies();
 
-      cookie.set('accessToken', session.accessToken);
+      // cookie.set('accessToken', session.accessToken, { maxAge: 3600 });
       return session;
     }
   },
