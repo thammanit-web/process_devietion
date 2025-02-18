@@ -11,7 +11,7 @@ export const Modal: React.FC<propTypes> = ({ open, onClose, children }) => {
       className={`fixed inset-0 flex justify-center items-center 
     transition-colors ${open ? "visible bg-black/20" : "invisible"}
     `}
-      onClick={onClose}
+
     >
       <div
         className={`bg-white rounded-lg shadow p-6

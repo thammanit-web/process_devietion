@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
 
 
 const prisma = new PrismaClient();
@@ -83,6 +84,11 @@ export async function POST(req: Request) {
             const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'video/mp4'];
             const maxSize = 5 * 1024 * 1024;
 
+            const uploadDir = path.join(process.cwd(), '/public/uploads/');
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
             for (const file of files) {
                 if (!allowedTypes.includes(file.type)) {
                     return new Response(JSON.stringify({ error: "Invalid file type." }), { status: 400 });
@@ -92,18 +98,15 @@ export async function POST(req: Request) {
                     return new Response(JSON.stringify({ error: "File size exceeds the 5MB limit." }), { status: 400 });
                 }
 
-                const fileName = `uploads/${Date.now()}-${file.name}`;
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('reference_file')
-                    .upload(fileName, file);
+                const fileName = `incident_report/${Date.now()}-${file.name}`;
+                const filePath = path.join(uploadDir, fileName);
 
-                if (uploadError) {
-                    return new Response(JSON.stringify({ error: `Upload failed: ${uploadError.message}` }), { status: 500 });
-                }
+                const fileBuffer = Buffer.from(await file.arrayBuffer());
+                fs.writeFileSync(filePath, fileBuffer);
 
                 const newFile = await prisma.reportFile.create({
                     data: {
-                        file_url: uploadData.path,
+                        file_url: fileName,
                         incident_report_id: incidentReportId
                     },
                 });
@@ -111,39 +114,6 @@ export async function POST(req: Request) {
                 uploadedFiles.push(newFile);
             }
         }
-
-        const transporter =  nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-        const incidentUrl = `https://process-devietion-brown.vercel.app/head_verify/${newIncident.id}`;
-        const emailHTML = `
-        <h2>การรายงานความผิดปกติ</h2>
-        <p><strong>หัวข้อการรายงาน:</strong> ${topic}</p>
-        <p><strong>รหัสเครื่องจักร:</strong> ${machine_code}</p>
-        <p><strong>ชื่อเครื่องจักร/อุปกรณ์:</strong> ${machine_name}</p>
-        <p><strong>วันเวลาที่เกิดเหตุ:</strong> ${new Date(incident_date).toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}</p>
-        <p><strong>เหตุการณ์:</strong> ${incident_description}</p>
-        <p><strong>สาเหตุความผิดปกติเบื้องต้น:</strong> ${summary_incident}</p>
-        <p><strong>ชื่อผู้รายงาน:</strong> ${reporter_name}</p>
-        <p><strong>วันที่รายงาน:</strong> ${new Date(report_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        ${uploadedFiles.length > 0 ? `<p><strong>ไฟล์ประกอบการรายงาน:</strong> ${uploadedFiles.map(file => `<a href="${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}" target="_blank">${file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}</a>`).join('<br>')}</p>` : ''}
-        <p><strong>อนุมัติการรายงาน:</strong> <a href="${incidentUrl}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>
-        `;
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: 'Thammanit@thainitrate.com',
-            subject: `กาารายงานความผิดปกติ: ${topic}`,
-            html: emailHTML,
-            headers: {
-              'X-No-Username': 'true', 
-            },
-        };
-
-        await transporter.sendMail(mailOptions);
 
         return NextResponse.json({ success: true, incidentReport: newIncident, fileReports: uploadedFiles }, { status: 200 });
 

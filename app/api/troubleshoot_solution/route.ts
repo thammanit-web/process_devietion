@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -16,9 +18,6 @@ export async function GET() {
     });
     return NextResponse.json(solutions);
 }
-
-
-
 
 export async function POST(req: Request) {
     const formData = await req.formData();
@@ -40,28 +39,25 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'File size exceeds 5MB limit' }, { status: 400 });
     }
 
-    const fileName = `troubleshoot/${Date.now()}-${file.name}`;
-    try {
-        const { data: uploadData, error } = await supabase.storage
-            .from('reference_file')
-            .upload(fileName, file);
-
-        if (error) {
-            throw error;
-        }
-
-        await prisma.troubleshootSolution.create({
-            data: {
-                solution_id,
-                result_troubleshoot, 
-                finish_date: new Date(finish_date),
-                file_summary: uploadData.path,
-            },
-        });
-
-        return NextResponse.json({ message: 'File uploaded successfully', url: uploadData.fullPath }, { status: 200 });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    const uploadDir = path.join(process.cwd(), '/public/uploads/');
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
     }
+
+    const fileName = `troubleshoot/${Date.now()}-${file.name}`;
+    const filePath = path.join(uploadDir, fileName);
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    fs.writeFileSync(filePath, fileBuffer);
+
+    await prisma.troubleshootSolution.create({
+        data: {
+            solution_id,
+            result_troubleshoot,
+            finish_date: new Date(finish_date),
+            file_summary: fileName,
+        },
+    });
+
+    return NextResponse.json({ message: 'File uploaded successfully', url: fileName }, { status: 200 });
 }

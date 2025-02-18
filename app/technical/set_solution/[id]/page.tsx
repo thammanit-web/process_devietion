@@ -190,7 +190,7 @@ export default function setSolution() {
                     subject: "Process Deviation",
                     html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
 <p style="margin-bottom: 10px;">หัวข้อ: ${meetingDetail?.topic_meeting}</p>
-<a href="${`${process.env.URL}/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>`
+<a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>`
                 });
             }
             router.back()

@@ -49,7 +49,7 @@ async function refreshAccessToken(token: JWT) {
     return {
       ...token,
       accessToken: data.access_token,
-      idToken: data.id_token,
+      idToken: data.id_token ?? token.idToken, 
       refreshToken: data.refresh_token ?? token.refreshToken,
       expiresAt: Date.now() + data.expires_in * 1000,
     };
@@ -96,9 +96,9 @@ const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
       session.expiresAt = token.expiresAt;
-      // const cookie = await cookies();
+      const cookie = await cookies();
 
-      // cookie.set('accessToken', session.accessToken);
+      cookie.set('accessToken', session.accessToken);
       return session;
     }
   },

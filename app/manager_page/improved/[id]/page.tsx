@@ -145,12 +145,13 @@ export default function SetSolution() {
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                           <p><strong>อนุมัติการแก้ไขสำเร็จ</strong></p>
                 <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
-                <p><strong>อนุมัติแล้ว</strong></p>
+         
                `
             });
             fetchMeeting(Number(id));
-            router.back()
+            router.push(`/manager_page`)
         } catch (error) {
             alert('Create Solution error');
             setLoading(false)
@@ -188,11 +189,11 @@ export default function SetSolution() {
                 <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                 <p><strong>ไม่อนุมัติ</strong></p>
                     <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
-                 <a href="${`https://process-devietion-brown.vercel.app/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
+                 <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             fetchMeeting(Number(id));
-            router.push('/')
+            router.push(`/manager_page`)
         } catch (error) {
             alert('Create Solution error');
             setLoading(false)
@@ -294,8 +295,8 @@ export default function SetSolution() {
                                 <input
                                     value={managerApproves.comment_troubleshoot}
                                     type="text"
-                                    name='comment_solution'
-                                    id='comment_solution'
+                                    name='comment_troubleshoot'
+                                    id='comment_troubleshoot'
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     onChange={handleChange}
                                 />

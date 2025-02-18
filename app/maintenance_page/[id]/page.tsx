@@ -102,6 +102,18 @@ export default function setSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอตรวจสอบการแก้ไข",
             })
+            const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
+            const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
+
+            const to = [...selectedUserEmails].join(',');
+
+            await axios.post(`/api/send_email`, {
+                to: to,
+                subject: `Process Deviation`,
+                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                <p>ตรวจสอบการแก้ไข</p>
+                <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+            });
             router.push('/maintenance_page')
         } catch (error) {
             alert('ส่งรีวิว error');
@@ -158,13 +170,6 @@ export default function setSolution() {
             await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
                 status_solution: "แก้ไขสำเร็จ",
             })
-            await axios.post(`/api/send_email`, {
-                to: [meetingDetail?.SelectedUser.map(user => user.email)],
-                subject: `Process Deviation`,
-                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-                <p>ตรวจสอบการแก้ไข</p>
-                <a href="${`${process.env.URL}/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
-            });
             fetchMeeting(Number(id));
             setLoading(false)
             setIsOpen(false);

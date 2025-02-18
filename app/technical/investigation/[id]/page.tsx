@@ -166,30 +166,30 @@ export default function investigationMeeting() {
                     subject: `Process Deviation ${Investigation.topic_meeting}`,
                     html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                 <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
-                <br><a href="${`${process.env.URL}/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
+                <br><a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
                 });
             }
             const userRequests = selectedUsers.map(userId => {
                 const user = users.find(u => u.id === userId);
                 if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
-                
+
                 return {
-                  userId,
-                  display_name: user.displayName,
-                  email: user.mail,
+                    userId,
+                    display_name: user.displayName,
+                    email: user.mail,
                 };
-              });
-              
-              try {
+            });
+
+            try {
                 const response = await axios.post(`/api/investigation_meeting`, {
-                  ...Investigation,
-                  incident_report_id: Number(id),
-                  selectedUsers: userRequests,  
+                    ...Investigation,
+                    incident_report_id: Number(id),
+                    selectedUsers: userRequests,
                 });
-              } catch (error) {
+            } catch (error) {
                 console.error("Error creating investigation:", error);
-              }
-              
+            }
+
 
 
             setLoading(false)
@@ -531,8 +531,13 @@ export default function investigationMeeting() {
                                     <label htmlFor="summary_meeting" className="block text-sm underline font-medium text-gray-700">
                                         สรุปการประชุม
                                     </label>
-                                    <div className="rounded-md mt-2 border border-black px-4 py-2"
-                                    >{Investigation.summary_meeting}</div>
+                                    <textarea
+                                        id="summary_meeting"
+                                        className="rounded-md mt-2 border border-black px-4 py-2 resize-y w-full"
+                                        value={Investigation.summary_meeting}
+                                        rows={8}
+                                        readOnly
+                                    />
                                 </div>
 
                                 <p className='text-sm underline'>ไฟล์ที่เกี่ยวข้อง</p>

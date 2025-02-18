@@ -118,7 +118,7 @@ export default function SetSolution() {
                 <p>โปรดตรวจสอบและแก้ไช</p>
                 <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
                 <p>อนุมัติแล้ว</p>
-                <a href="${`https://process-devietion-brown.vercel.app/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+                <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
@@ -171,9 +171,9 @@ export default function SetSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p>โปรดตรวจสอบและแก้ไช</p>
                     <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
-                    <a href="${`https://process-devietion-brown.vercel.app/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+                    <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
-            router.push('/')
+            router.push(`/manager_page`)
         } catch (error) {
             alert('Create Solution error');
             console.error(error);

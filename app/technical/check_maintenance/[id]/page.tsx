@@ -103,10 +103,10 @@ export default function setSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                 <p><strong>ดำเนินการเสร็จแล้ว</strong></p>
-              <a href="${`${process.env.URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+              <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
-            router.back()
+            router.push('/')
         } catch (error) {
             alert('Create Solution error');
             console.error(error);
@@ -133,7 +133,7 @@ export default function setSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                         <p><strong>ยังต้องแก้ไขเพิ่มเติม</strong></p>
-              <a href="${`${process.env.URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+              <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             console.log('Problem Resolution IDs:', problemResolutionIds);

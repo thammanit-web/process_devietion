@@ -1,12 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 
@@ -18,7 +20,7 @@ export async function GET(
     const { id } = await params
     const troubleshoot = await prisma.troubleshootSolution.findUnique({
       where: { id: Number(id) },
-      include: { problemSolution: true}
+      include: { problemSolution: true }
     });
     if (!troubleshoot) {
       return NextResponse.json({ error: 'ManagerApprove not found' }, { status: 404 });
@@ -39,15 +41,13 @@ export async function DELETE(
     const deletedManagerApprove = await prisma.troubleshootSolution.delete({
       where: { id: Number(id) },
     });
-    const fileUrl = deletedManagerApprove.file_summary;
-    if (fileUrl) {
-      const { data, error } = await supabase
-      .storage
-      .from('reference_file')
-      .remove([fileUrl]);
+    if (deletedManagerApprove.file_summary) {
+    const fullPath = path.join(process.cwd(), 'public', 'uploads', deletedManagerApprove.file_summary);
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
     }
-
-    return Response.json({message: "Manager approve successfully deleted",deletedManagerApprove}); 
+  }
+    return Response.json({ message: "Manager approve successfully deleted", deletedManagerApprove });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: 'An unknown error occurred' }),

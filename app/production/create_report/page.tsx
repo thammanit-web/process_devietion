@@ -133,6 +133,23 @@ export default function createReport() {
                     'Content-Type': 'multipart/form-data',
                 }
             });
+            await axios.post("/api/send_email", {
+                to: "thammanit@thainitrate.com",
+                subject: "Process Deviation",
+                html: `
+        <h2>การรายงานความผิดปกติ</h2>
+        <p><strong>หัวข้อการรายงาน:</strong> ${formData.topic}</p>
+        <p><strong>รหัสเครื่องจักร:</strong> ${formData.machine_code}</p>
+        <p><strong>ชื่อเครื่องจักร/อุปกรณ์:</strong> ${formData.machine_name}</p>
+        <p><strong>วันเวลาที่เกิดเหตุ:</strong> ${new Date(formData.incident_date).toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' })}</p>
+        <p><strong>เหตุการณ์:</strong> ${formData.incident_description}</p>
+        <p><strong>สาเหตุความผิดปกติเบื้องต้น:</strong> ${formData.summary_incident}</p>
+        <p><strong>ชื่อผู้รายงาน:</strong> ${formData.reporter_name}</p>
+        <p><strong>วันที่รายงาน:</strong> ${new Date(formData.report_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        ${formData.ReportFiles.length > 0 ? `<p><strong>ไฟล์ประกอบการรายงาน:</strong> ${formData.ReportFiles.map(file => `<a href="${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}" target="_blank">${file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}</a>`).join('<br>')}</p>` : ''}
+        <p><strong>อนุมัติการรายงาน:</strong> <a href="${process.env.NEXT_PUBLIC_BASE_URL}/head_verify/${response.data.incidentReport.id}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>
+        `
+            });
 
             setIncidentReportId(response.data.incidentReport.id);
             router.back();

@@ -1,12 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function GET(
   req: NextRequest,
@@ -15,11 +13,15 @@ export async function GET(
   try {
     const { id } = await params
     const incident_report = await prisma.incidentReport.findUnique({
-      include: { investigationMeetings: {
-        include: { problemResolutions: {
-          include: { troubleshootSolutions: true }
-        },meetingFiles:true ,SelectedUser:true}
-      }, ReportFiles: true },
+      include: {
+        investigationMeetings: {
+          include: {
+            problemResolutions: {
+              include: { troubleshootSolutions: true }
+            }, meetingFiles: true, SelectedUser: true
+          }
+        }, ReportFiles: true
+      },
       where: { id: Number(id) },
     });
 
@@ -79,13 +81,13 @@ export async function DELETE(
 
     if (reportRelations.ReportFiles) {
       for (const file of reportRelations.ReportFiles) {
-        const fileUrl = file.file_url;
-        if (fileUrl) {
-           await supabase
-            .storage
-            .from('reference_file')
-            .remove([fileUrl]);
-        }
+        if (file.file_url) { 
+          const fullPath = path.join(process.cwd(), 'public', 'uploads', file.file_url); 
+
+          if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+          } 
+        } 
       }
     }
     const deletedReport = await prisma.incidentReport.delete({
@@ -98,12 +100,21 @@ export async function DELETE(
 
     return new Response(
       JSON.stringify({ message: "Delete success", deletedReport }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
-  } catch (error) {
-    console.error("Error deleting incident report:", error);
-    return new Response(
-      JSON.stringify({ error: "An unknown error occurred" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('An error occurred during DELETE operation:', error.message);
+      return new Response(
+        JSON.stringify({ error: 'An unknown error occurred', details: error.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    } else {
+      console.error('An unknown error occurred:', error);
+      return new Response(
+        JSON.stringify({ error: 'An unknown error occurred', details: 'Unknown error type' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
   }
 }

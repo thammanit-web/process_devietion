@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "sqlserver"
-  url       = env("DATABASE_URL")
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
 }
 
 model IncidentReport {
@@ -96,5 +96,5 @@ model ManagerApprove {
   comment_solution     String?
   comment_troubleshoot String?
   investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  problemSolution      ProblemSolution? @relation(fields: [solution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  problemSolution      ProblemSolution?      @relation(fields: [solution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

@@ -113,7 +113,7 @@ export default function AapproveReport() {
                     subject: "Process Deviation",
                     html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                     <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
-                    <br><a href="${`${process.env.URL}/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
+                    <br><a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
                 });
             }
 
