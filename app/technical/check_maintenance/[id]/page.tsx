@@ -103,7 +103,7 @@ export default function setSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                 <p><strong>ดำเนินการเสร็จแล้ว</strong></p>
-              <a href="${`https://process-devietion-brown.vercel.app/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+              <a href="${`${process.env.URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             router.back()
@@ -133,7 +133,7 @@ export default function setSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                         <p><strong>ยังต้องแก้ไขเพิ่มเติม</strong></p>
-              <a href="${`http://localhost:3000/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+              <a href="${`${process.env.URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             console.log('Problem Resolution IDs:', problemResolutionIds);

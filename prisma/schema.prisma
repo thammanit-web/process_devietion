@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider  = "sqlserver"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model IncidentReport {
@@ -44,7 +43,7 @@ model InvestigationMeeting {
   summary_meeting         String?
   investigation_signature String?
   manager_approve         String?
-  incidentReport          IncidentReport?   @relation(fields: [incident_report_id], references: [id], onDelete: Cascade)
+  incidentReport          IncidentReport?   @relation(fields: [incident_report_id], references: [id], onDelete: NoAction)
   problemResolutions      ProblemSolution[]
   meetingFiles            MeetingFile[]
   managerApproves         ManagerApprove[]
@@ -96,6 +95,6 @@ model ManagerApprove {
   solution_id          Int?
   comment_solution     String?
   comment_troubleshoot String?
-  investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
-  problemSolution      ProblemSolution?      @relation(fields: [solution_id], references: [id], onDelete: Cascade)
+  investigationMeeting InvestigationMeeting? @relation(fields: [meeting_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  problemSolution      ProblemSolution? @relation(fields: [solution_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

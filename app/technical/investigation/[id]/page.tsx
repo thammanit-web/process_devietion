@@ -166,23 +166,30 @@ export default function investigationMeeting() {
                     subject: `Process Deviation ${Investigation.topic_meeting}`,
                     html: `<p> <strong>กำหนดวันประชุม:</strong> ${Investigation.scheduled_date ? new Date(Investigation.scheduled_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                 <br><strong>หัวข้อการประชุม:</strong> ${Investigation.topic_meeting}
-                <br><a href="${`http://localhost:3000/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
+                <br><a href="${`${process.env.URL}/technical/investigation/${id}`}" target="_blank">คลิก Link ตรวจสอบและอนุมัติ</a></p>`,
                 });
             }
-            await Promise.all(
-                selectedUsers.map(userId => {
-                    const user = users.find(u => u.id === userId);
-                    if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
-
-                    return axios.post(`/api/investigation_meeting`, {
-                        ...Investigation,
-                        userId,
-                        display_name: user.displayName,
-                        email: user.mail,
-                        incident_report_id: Number(id),
-                    });
-                })
-            );
+            const userRequests = selectedUsers.map(userId => {
+                const user = users.find(u => u.id === userId);
+                if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
+                
+                return {
+                  userId,
+                  display_name: user.displayName,
+                  email: user.mail,
+                };
+              });
+              
+              try {
+                const response = await axios.post(`/api/investigation_meeting`, {
+                  ...Investigation,
+                  incident_report_id: Number(id),
+                  selectedUsers: userRequests,  
+                });
+              } catch (error) {
+                console.error("Error creating investigation:", error);
+              }
+              
 
 
             setLoading(false)

@@ -163,7 +163,7 @@ export default function setSolution() {
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p>ตรวจสอบการแก้ไข</p>
-                <a href="${`https://process-devietion-brown.vercel.app/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+                <a href="${`${process.env.URL}/technical/check_maintenance/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             fetchMeeting(Number(id));
             setLoading(false)
