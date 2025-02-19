@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import { useSession } from "next-auth/react";
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -38,6 +39,7 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
+    techincal_comments: string
     managerApproves: ManagerApprove[]
     troubleshootSolutions: Troubleshoot[]
 }
@@ -58,6 +60,7 @@ interface ManagerApprove {
 }
 
 export default function setSolution() {
+    const { data: session, status } = useSession();
     const { id } = useParams()
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
@@ -71,10 +74,8 @@ export default function setSolution() {
         result_troubleshoot: '',
         file_summary: '',
         finish_date: '',
-
     })
     const [loading, setLoading] = useState(false);
-
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -131,26 +132,26 @@ export default function setSolution() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
-    
+
         const selectedFile = e.target.files[0];
         const maxSize = 5 * 1024 * 1024;
         const allowedTypes = ["image/jpeg", "image/png", "application/pdf", "video/mp4", "video/quicktime", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"];
-    
+
         if (!allowedTypes.includes(selectedFile.type)) {
             alert("Invalid file type. Only JPG, PNG, PDF, MP4, MOV, XLSX, and CSV are allowed.");
             setFile(null);
             return;
         }
-    
+
         if (selectedFile.size > maxSize) {
             alert("File size must be less than 5MB.");
             setFile(null);
             return;
         }
-    
+
         setFile(selectedFile);
     };
-    
+
     const handleTroubleshoot = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file || !troubleShoots.result_troubleshoot || !troubleShoots.finish_date) {
@@ -179,25 +180,25 @@ export default function setSolution() {
             console.error(error);
         }
     };
-    const handleDelete = async (e: React.FormEvent) => { 
+    const handleDelete = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true);
-            
+
             if (problemSolution?.troubleshootSolutions?.length === 0) {
                 await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
-                    status_solution: "รอการแก้ไข", 
+                    status_solution: "รอการแก้ไข",
                 });
             } else {
                 await axios.delete(`/api/troubleshoot_solution/${problemSolution?.troubleshootSolutions[0].id}`);
-                
+
                 if (problemSolution?.troubleshootSolutions.length === 1) {
                     await axios.put(`/api/problem_resolution/${problemSolution?.id}`, {
                         status_solution: "รอการแก้ไข",
                     });
                 }
             }
-    
+
             fetchMeeting(Number(id));
             setLoading(false);
             setOpen(false);
@@ -206,15 +207,11 @@ export default function setSolution() {
             setLoading(false);
         }
     };
-    
-
-
     useEffect(() => {
         if (id) {
             fetchMeeting(Number(id));
         }
     }, [id]);
-
 
     return (
         <div className='max-w-6xl mx-auto px-4 py-8'>
@@ -249,21 +246,23 @@ export default function setSolution() {
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
                             <tr className="bg-gray-300 text-center">
                                 <th className="border border-black  px-4 py-2">ผู้รับผิดชอบ</th>
-                                <th className="border border-black  px-4 py-2">หัวข้อการแก้ไช</th>
+                                <th className="border border-black  px-4 py-2">วิธีการแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่กำหนดแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
                                 <th className="border border-black  px-4 py-2">สถานะการแก้ไข</th>
-                                <th className="border border-black  px-4 py-2">action</th>
+                                <th className="border border-black  px-4 py-2">แก้ไข</th>
+                                <th className="border border-black  px-4 py-2">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
                             {meetingDetail?.problemResolutions.map((problemSolution) => (
                                 <tr key={problemSolution.id} className="hover:bg-gray-50 text-center items-center border border-black">
-                                    <td className="border border-black px-4 py-2">{problemSolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{problemSolution.assign_to}</td>
-                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[20ch]'>{problemSolution.topic_solution}</p></td>
+
+                                    <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-4 py-2">
-                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}
+                                        {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
                                     <td className={`border border-black px-4 py-2 text-white ${problemSolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {problemSolution.status_solution}
@@ -272,6 +271,7 @@ export default function setSolution() {
                                         {problemSolution.troubleshootSolutions.length === 0 ? (
                                             <a onClick={() => {
                                                 setIsOpen(true);
+                                                setProblemSolution(problemSolution);
                                             }} className='cursor-pointer underline font-black'>
                                                 เพิ่มการแก้ไข
                                             </a>
@@ -283,6 +283,9 @@ export default function setSolution() {
                                                 ดูการแก้ไช
                                             </a>
                                         )}
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                        {problemSolution.techincal_comments}
                                     </td>
                                 </tr>
                             ))}
@@ -328,7 +331,7 @@ export default function setSolution() {
                                                     {solution.file_summary?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                                 </a></p>
                                             <p className='mt-4'>วันที่แก้ไข</p>
-                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit' }) : ''}</p>
+                                            <p className='ms-2 underline'>{solution.finish_date ? new Date(solution.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</p>
                                             <div className='flex justify-end w-full'>
                                                 <a onClick={handleDelete} className='cursor-pointer font-medium justify-end text-red-500 px-2 rounded-sm'>
                                                     ลบ
@@ -337,11 +340,11 @@ export default function setSolution() {
                                         </form>
                                     ))}
                                     <div className='flex w-full justify-end mt-4'>
-                                    <a onClick={() => {
-                                        setIsOpen(true);
-                                    }} className='cursor-pointer font-medium text-blue-500 border px-4 py-1'>
-                                        เพิ่ม
-                                    </a>
+                                        <a onClick={() => {
+                                            setIsOpen(true);
+                                        }} className='cursor-pointer font-medium text-blue-500 border px-4 py-1'>
+                                            เพิ่ม
+                                        </a>
                                     </div>
                                 </div>
                             </>
@@ -352,51 +355,55 @@ export default function setSolution() {
 
             <Modal open={IsOpen} onClose={() => setIsOpen(false)}>
                 <div>
-                    <div >
-                        <h1>รายละเอียดการแก้ไข</h1>
-                        <textarea
-                            value={troubleShoots.result_troubleshoot}
-                            onChange={handleChange}
-                            rows={6}
-                            required
-                            id='result_troubleshoot'
-                            name='result_troubleshoot'
-                            className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                        >
-                        </textarea>
-                    </div>
-                    <div className='mt-4'>
-                        <h1>วันที่แก้ไข</h1>
-                        <input
-                            type='date'
-                            value={troubleShoots.finish_date}
-                            onChange={handleChange}
-                            required
-                            id='finish_date'
-                            name='finish_date'
-                            className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm '
-                        >
-                        </input>
-                    </div>
-                    <div className='mt-4'>
-                        <h1>ไฟล์อัพโหลด</h1>
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            required
-                            accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
-                            className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                        >
-                        </input>
-                    </div>
-                    <div className='w-full justify-end flex'>
-                        <a
-                            onClick={handleTroubleshoot}
-                            className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-400 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            บันทึก
-                        </a>
-                    </div>
+                    {problemSolution && (
+                        <>
+                            <div>
+                                <h1>รายละเอียดการแก้ไข</h1>
+                                <textarea
+                                    value={troubleShoots.result_troubleshoot}
+                                    onChange={handleChange}
+                                    rows={6}
+                                    required
+                                    id='result_troubleshoot'
+                                    name='result_troubleshoot'
+                                    className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                >
+                                </textarea>
+                            </div>
+                            <div className='mt-4'>
+                                <h1>วันที่แก้ไข</h1>
+                                <input
+                                    type='date'
+                                    value={troubleShoots.finish_date}
+                                    onChange={handleChange}
+                                    required
+                                    id='finish_date'
+                                    name='finish_date'
+                                    className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm '
+                                >
+                                </input>
+                            </div>
+                            <div className='mt-4'>
+                                <h1>ไฟล์อัพโหลด</h1>
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    required
+                                    accept=".jpg,.jpeg,.png,.pdf,.xls,.xlsx,.mp4"
+                                    className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                                >
+                                </input>
+                            </div>
+                            <div className='w-full justify-end flex'>
+                                <a
+                                    onClick={handleTroubleshoot}
+                                    className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-400 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    บันทึก
+                                </a>
+                            </div>
+                        </>
+                    )}
                 </div>
             </Modal>
 

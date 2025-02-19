@@ -123,7 +123,7 @@ export default function SetSolution() {
                 meeting_id: Number(id),
                 solution_id: meetingDetail?.problemResolutions[0]?.id,
             });
-            
+
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "อนุมัติแล้ว"
@@ -144,9 +144,9 @@ export default function SetSolution() {
                 to: to,
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
+                <p><strong>อนุมัติการแก้ไขแล้ว</strong></p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
-                           <p><strong>อนุมัติการแก้ไขสำเร็จ</strong></p>
-                <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                <p>Commet: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
          
                `
             });
@@ -187,8 +187,8 @@ export default function SetSolution() {
                 to: to,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
-                <p><strong>ไม่อนุมัติ</strong></p>
-                    <p>Commet: ${managerApproves.comment_troubleshoot? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                    <p><strong>ไม่อนุมัติการแก้ไข</strong></p>
+                    <p>Commet: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
                  <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
@@ -233,7 +233,7 @@ export default function SetSolution() {
                     <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
                             <tr>
-                                <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
+                                <th scope="col" className="px-6 py-3 border border-black">วิธีการแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
                                 <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">วันที่แก้ไข</th>
@@ -244,7 +244,7 @@ export default function SetSolution() {
                         <tbody>
                             {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="border border-black text-center text-md">
-                                    <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[30ch]'>{resolution.topic_solution}</p></td>
                                     <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
                                     <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-6 py-2">
@@ -324,7 +324,7 @@ export default function SetSolution() {
                 <div className="flex flex-col gap-4">
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
-                    <div className="flex flex-col justify-center gap-2">
+                    <div className="grid justify-center gap-2">
                         <div className='comment'>
                             <div>
                                 <h1>แสดงความคิดเห็น</h1>

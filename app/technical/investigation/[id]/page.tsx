@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import { split } from 'postcss/lib/list'
 
 interface IncidentReport {
     id: string
@@ -350,34 +351,12 @@ export default function investigationMeeting() {
                                     </td>
                                     <td className="px-6 py-2 border border-black" >{meeting?.manager_approve}</td>
                                     <td className="px-6 py-2 border flex items-center text-center justify-center gap-2">
-                                        <div className="relative group">
-                                            <a href={`/technical/set_solution/${meeting.id}`} className="cursor-pointer px-1">
-                                                <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                </svg>
 
-                                            </a>
-                                            <div className="absolute left-1/2 w-52 transform -translate-x-1/2 bottom-full mb-2 hidden group-hover:block bg-gray-500 text-white text-xs rounded-md px-3 py-1">
-                                                เพิ่มกำหนดการแก้ไข
-                                                <div className="absolute left-1/2 transform -translate-x-1/2 w-3 h-3">
-                                                    <svg
-                                                        className="w-6 h-6 text-gray-500 dark:text-white"
-                                                        aria-hidden="true"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        width="24"
-                                                        height="24"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <a href={`/technical/set_solution/${meeting.id}`} className="cursor-pointer px-1 underline font-semibold text-black hover:text-gray-600">
+                                            เพิ่มการแก้ไข
+                                        </a>
+
+
                                     </td>
                                 </tr>
                             ))
@@ -505,17 +484,7 @@ export default function investigationMeeting() {
                                         <label className="underline block text-sm font-medium text-gray-700">
                                             ผู้มีส่วนเกี่ยวข้อง
                                         </label>
-                                        {investigationMeetings.map((meeting) => (
-                                            <div key={meeting.id} className="rounded-md mt-2 border border-black px-4 py-2">
-                                                <ul>
-                                                    {meeting.SelectedUser?.map((user) => (
-                                                        <li key={user.id}>
-                                                            {user.display_name}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ))}
+                                        <p className='ms-2'>{Investigation.SelectedUser[0]?.display_name}</p>
                                     </div>
                                 </div>
 
@@ -535,7 +504,7 @@ export default function investigationMeeting() {
                                         id="summary_meeting"
                                         className="rounded-md mt-2 border border-black px-4 py-2 resize-y w-full"
                                         value={Investigation.summary_meeting}
-                                        rows={8}
+                                        rows={6}
                                         readOnly
                                     />
                                 </div>
@@ -575,14 +544,14 @@ export default function investigationMeeting() {
                                         วันที่ประชุม
                                     </label>
                                     <input
-                                        type='date'
+                                        type="date"
                                         name="meeting_date"
                                         id="meeting_date"
-                                        value={Investigation.meeting_date || ""}
+                                        value={Investigation.meeting_date ? new Date(Investigation.meeting_date).toISOString().split("T")[0] : ""}
                                         onChange={handleChange}
                                         required
                                         className="mt-1 block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    ></input>
+                                    />
                                 </div>
                                 <div className='w-full mb-4'>
                                     <label htmlFor="summary_meeting" className="block text-sm font-medium text-gray-700">
@@ -596,7 +565,7 @@ export default function investigationMeeting() {
                                         value={Investigation.summary_meeting || ""}
                                         onChange={handleChange}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    ></textarea>
+                                    />
                                 </div>
 
                                 <p>อัพโหลดไฟล์ที่เกี่ยวข้อง</p>

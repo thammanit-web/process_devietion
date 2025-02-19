@@ -4,7 +4,6 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
-import { assign } from 'nodemailer/lib/shared'
 
 interface InvestigationMeeting {
     incident_report_id: string
@@ -13,7 +12,7 @@ interface InvestigationMeeting {
     meeting_date: string
     summary_meeting: string
     investigation_signature: string
-    manager_approve: Boolean
+    manager_approve: string
     incidentReport:
     {
         id: number
@@ -22,7 +21,6 @@ interface InvestigationMeeting {
         topic: string
     }[]
     problemResolutions: ProblemResolution[]
-    managerApproves: ManagerApprove[]
     SelectedUser: {
         id: string;
         userId: string;
@@ -39,30 +37,17 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
-    managerApproves: ManagerApprove[]
 }
-interface ManagerApprove {
-    id: string
-    meeting_id: string
-    solution_id: string
-    comment_solution: string
-    comment_troubleshoot: string
-}
+
 
 export default function SetSolution() {
     const { id } = useParams()
     const router = useRouter()
     const [meetingDetail, setMeetingDetail] = useState<InvestigationMeeting | null>(null)
-    const [managerApproves, setManagerApprove] = useState<ManagerApprove>({
-        id: '',
-        meeting_id: '',
-        solution_id: '',
-        comment_solution: '',
-        comment_troubleshoot: ''
-    })
     const [openApprove, setOpenApprove] = useState<boolean>(false);
     const [openReject, setOpenReject] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
+    const [editedApprovals, setEditedApprovals] = useState<Record<string, string>>({});
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -80,32 +65,25 @@ export default function SetSolution() {
             console.error('Error fetching report:', error)
         }
     }
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setManagerApprove((prevState) => ({
-            ...prevState,
-            [name]: value
+
+    const handleApprovalChange = (id: string, value: string) => {
+        setEditedApprovals(prev => ({
+            ...prev,
+            [id]: value,
         }));
     };
+
 
     useEffect(() => {
         if (id) {
             fetchMeeting(Number(id));
         }
-        setManagerApprove((prevState) => ({
-            ...prevState,
-        }));
     }, [id]);
 
     const handleManagerApprove = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
-                ...managerApproves,
-                meeting_id: Number(id),
-                solution_id: meetingDetail?.problemResolutions[0]?.id,
-            });
 
             const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
             const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
@@ -113,13 +91,18 @@ export default function SetSolution() {
             const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
                 to: to,
-                subject: `Process Deviation`,
-                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-                <p>โปรดตรวจสอบและแก้ไช</p>
-                <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
-                <p>อนุมัติแล้ว</p>
+                subject: "asad",
+                html: `<p>อนุมัติ</p>
+                <p><strong>โปรดตรวจสอบและแก้ไช</strong></p>
+                <p><strong>อนุมัติการกำหนดการแก้ไแล้ว</strong></p>
                 <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
+
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_approve: approval })
+            );
+            await Promise.all(updatePromises);
+
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "อนุมัติแล้ว",
@@ -129,6 +112,7 @@ export default function SetSolution() {
                         "Content-Type": "multipart/form-data",
                     },
                 });
+
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการแก้ไข",
             })
@@ -144,11 +128,6 @@ export default function SetSolution() {
         e.preventDefault();
         try {
             setLoading(true)
-            await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
-                ...managerApproves,
-                meeting_id: Number(id),
-                solution_id: meetingDetail?.problemResolutions[0]?.id,
-            });
             await axios.put(`/api/investigation_meeting/${id}`, {
                 ...meetingDetail,
                 manager_approve: "ไม่อนุมัติ",
@@ -158,20 +137,27 @@ export default function SetSolution() {
                         "Content-Type": "multipart/form-data",
                     },
                 });
+
+
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_approve: approval })
+            );
+            await Promise.all(updatePromises);
+
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการประชุม",
             })
             const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
             const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
-
             const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
+
             await axios.post(`/api/send_email`, {
                 to: to,
                 subject: `Process Deviation`,
-                html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-                    <p>โปรดตรวจสอบและแก้ไช</p>
-                    <p>Commet: ${managerApproves.comment_solution ? managerApproves.comment_solution : "ไม่มี comment"}</p>
-                    <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>`
+                html: `<p>ไม่อนุมัติ</p>
+                <p><strong>โปรดตรวจสอบและแก้ไช</strong></p>
+                <p><strong>ไม่อนุมัติการกำหนดการประชุม</strong></p>
+                <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/technical/set_solution/${id}`}">คลิกเพื่อตรวจสอบ</a>`
             });
             router.push(`/manager_page`)
         } catch (error) {
@@ -214,20 +200,30 @@ export default function SetSolution() {
                     <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
                             <tr>
-                                <th scope="col" className="px-6 py-3 border border-black">หัวข้อการแก้ไช</th>
+                                <th scope="col" className="px-6 py-3 border border-black">วิธีการแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
                                 <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
                             {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="border border-black text-center text-md">
-                                    <td className="border border-black px-6 py-2">{resolution.topic_solution}</td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[30ch]'>{resolution.topic_solution}</p></td>
                                     <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
                                     <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
+                                    </td>
+                                    <td className="border border-black px-6 py-2 flex justify-center">
+                                        <input
+                                            type="text"
+                                            value={editedApprovals[resolution.id] ?? resolution.manager_approve}
+                                            onChange={(e) => handleApprovalChange(resolution.id, e.target.value)}
+                                            className="border p-1 rounded-lg border-gray-600 text-center"
+                                            placeholder='หมายเหตุ...'
+                                        />
                                     </td>
 
                                 </tr>
@@ -255,73 +251,46 @@ export default function SetSolution() {
 
             <Modal open={openApprove} onClose={() => setOpenApprove(false)}>
                 <div className="flex flex-col gap-4">
-                    <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
+                    <h1 className="text-2xl justify-center text-center"> อนุมัติกำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
-                    <div className="grid justify-center gap-2">
-                        <div className='comment'>
-                            <div>
-                                <h1>แสดงความคิดเห็น</h1>
-                                <input
-                                    value={managerApproves.comment_solution}
-                                    type="text"
-                                    name='comment_solution'
-                                    id='comment_solution'
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        </div>
 
-                        <div className='button mt-4 gap-2 flex'>
-                            <button
-                                className="border border-neutral-300 rounded-lg py-1.5 px-10
+                    <div className='button mt-4 gap-2 flex justify-center'>
+                        <button
+                            className="border border-neutral-300 rounded-lg py-1.5 px-10
                            bg-blue-500 hover:bg-blue-600 text-white"
-                                onClick={() => setOpenApprove(false)}
-                            >
-                                ยกเลิก
-                            </button>
-                            <button className="border border-green-300 rounded-lg py-1.5 px-10
-                           bg-green-400 hover:bg-green-600 text-white" onClick={handleManagerApprove}>
-                                อนุมัติ
-                            </button>
-                        </div>
+                            onClick={() => setOpenApprove(false)}
+                        >
+                            ยกเลิก
+                        </button>
+                        <button className="border border-green-300 rounded-lg py-1.5 px-10
+                           bg-green-400 hover:bg-green-600 text-white"  onClick={handleManagerApprove}>
+                            อนุมัติ
+                        </button>
                     </div>
                 </div>
+
             </Modal>
 
             <Modal open={openReject} onClose={() => setOpenReject(false)}>
                 <div className="flex flex-col gap-4">
-                    <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
+                    <h1 className="text-2xl justify-center text-center">ไม่อนุมัติกำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
-                    <div className="flex flex-col justify-center gap-2">
-                        <div className='comment'>
-                            <div>
-                                <h1>แสดงความคิดเห็น</h1>
-                                <input
-                                    value={managerApproves.comment_solution}
-                                    type="text"
-                                    name='comment_solution'
-                                    id='comment_solution'
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        </div>
-                        <div className='button mt-4 gap-2 flex'>
-                            <button
-                                className="border border-neutral-300 rounded-lg py-1.5 px-10
+
+                    <div className='button mt-4 gap-2 flex justify-center'>
+                        <button
+                            className="border border-neutral-300 rounded-lg py-1.5 px-10
                            bg-blue-500 hover:bg-blue-600 text-white"
-                                onClick={() => setOpenReject(false)}
-                            >
-                                ยกเลิก
-                            </button>
-                            <button className="border border-red-300 rounded-lg py-1.5 px-10
+                            onClick={() => setOpenReject(false)}
+                        >
+                            ยกเลิก
+                        </button>
+                        <button className="border border-red-300 rounded-lg py-1.5 px-10
                            bg-red-500 hover:bg-red-600 text-white" onClick={handleManagerReject}>
-                                อนุมัติ
-                            </button>
-                        </div>
+                            ไม่อนุมัติ
+                        </button>
                     </div>
                 </div>
+
             </Modal>
         </div>
     )

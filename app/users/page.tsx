@@ -32,8 +32,7 @@ export default function UserList() {
 
     useEffect(() => {
         const filtered = users.filter(user =>
-            (user.displayName?.toLowerCase().includes(search.toLowerCase()) || search === "") &&
-            (user.jobTitle?.toLowerCase().includes(searchJob.toLowerCase()) || searchJob === "")
+            (user.displayName?.toLowerCase().includes(search.toLowerCase()) || search === "") 
         );
         setFilteredUsers(filtered);
     }, [search, searchJob, users]);

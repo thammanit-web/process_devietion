@@ -337,7 +337,7 @@ export default function detailVerify() {
                         : meetingDetail?.problemResolutions?.map((resolution) => (
                             <div key={resolution.id} className='gap-4 grid justify-center py-4 px-4'>
                                 <div className='flex gap-4'>
-                                    <p className="font-semibold">หัวข้อการแก้ไช</p>
+                                    <p className="font-semibold">วิธีการแก้ไข</p>
                                     <p style={{ width: '60ch', wordWrap: 'break-word' }}>{resolution.topic_solution}</p>
                                 </div>
                                 <div className='lg:flex md:flex sm:grid gap-4 lg:text-sm md:text-sm sm:text-sm'>

@@ -34,6 +34,7 @@ export async function PUT(
       assign_to,
       status_solution,
       manager_approve,
+      techincal_comments,
       email_assign,
      } = await req.json()
     return Response.json(await prisma.problemSolution.update({
@@ -44,6 +45,7 @@ export async function PUT(
         assign_to,
         status_solution,
         manager_approve,
+        techincal_comments,
         email_assign
        },
     }))

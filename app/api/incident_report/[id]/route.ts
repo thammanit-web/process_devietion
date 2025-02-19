@@ -90,6 +90,7 @@ export async function DELETE(
         } 
       }
     }
+
     const deletedReport = await prisma.incidentReport.delete({
       where: { id: Number(id) },
       include: {

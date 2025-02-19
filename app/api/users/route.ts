@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const res = await fetch("https://graph.microsoft.com/v1.0/users", {
+        const res = await fetch("https://graph.microsoft.com/v1.0/users?$top=999", {
             headers: {
                 Authorization: `Bearer ${token?.accessToken}`,
             },
@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
         if (!res.ok) {
             return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });
         }
+        
         const data = await res.json();
         return NextResponse.json(data);
     } catch (error) {

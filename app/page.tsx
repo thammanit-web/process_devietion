@@ -9,17 +9,23 @@ export default function FirstPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/me");
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch("/api/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!res.ok) throw new Error("Failed to fetch users");
         const data = await res.json();
-        setUsers(data)
+        setUsers(data);
       } catch (error) {
         console.log("Error fetching users");
       }
     };
-
+ 
     fetchUsers();
   }, []);
+ 
 
   const allowedTechnical = [
     "Maintenance Officer Mechanical",
@@ -88,7 +94,7 @@ export default function FirstPage() {
               ตรวจสอบและกำหนดวันประชุม
             </a>
             <a href="/maintenance_page"className={`md:text-lg sm:text-sm py-4 text-white h-14 w-72 flex items-center rounded-2xl 
-              ${isAllowedMaintenance ? 'bg-yellow-300 hover:bg-yellow-400' : 'bg-green-500 cursor-not-allowed opacity-50'}`}
+              ${isAllowedMaintenance ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-green-500 cursor-not-allowed opacity-50'}`}
             style={{ pointerEvents: isAllowedMaintenance ? 'auto' : 'none' }}>
               <svg className="ms-2 mr-2  w-6 h-6 text-gray-200 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z" clipRule="evenodd" />
@@ -106,7 +112,7 @@ export default function FirstPage() {
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3M3.22302 14C4.13247 18.008 7.71683 21 12 21c4.9706 0 9-4.0294 9-9 0-4.97056-4.0294-9-9-9-3.72916 0-6.92858 2.26806-8.29409 5.5M7 9H3V5" />
               </svg>
 
-              ประวัติ Deviation
+              ประวัติ Deviation ที่แก้ไขแล้ว
             </a>
             <a href="/technical" className={`md:text-lg sm:text-sm py-4 text-white h-14 w-72 flex items-center rounded-2xl 
               ${isAllowed ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 cursor-not-allowed opacity-50'}`}

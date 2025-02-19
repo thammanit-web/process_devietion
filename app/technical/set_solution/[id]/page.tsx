@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
-import investigationMeeting from '../../investigation/[id]/page'
 import { LoadingOverlay } from '@/app/components/loading'
 interface InvestigationMeeting {
     incident_report_id: string
@@ -189,7 +188,8 @@ export default function setSolution() {
                     to: ["thammanitrinthang@gmail.com"],
                     subject: "Process Deviation",
                     html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-<p style="margin-bottom: 10px;">หัวข้อ: ${meetingDetail?.topic_meeting}</p>
+                 <p><strong>อนุมัติการกำหนดการแก้ไข</strong></p>
+<p style="margin-bottom: 10px;">หัวข้อการประชุม: ${meetingDetail?.topic_meeting}</p>
 <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/schedule/${id}`}">คลิกเพื่ออนุมัติ</a>`
                 });
             }
@@ -198,6 +198,18 @@ export default function setSolution() {
             setLoading(false)
             alert('ส่งอนุมัติ error');
             console.error(error);
+        }
+    };
+
+    const handleDelete = async (resolutionId: string) => {
+        setLoading(true);
+        try {
+            await axios.delete(`/api/problem_resolution/${resolutionId}`);
+            fetchMeeting(Number(id));
+        } catch (err) {
+            alert('Failed to delete resolution');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -225,26 +237,32 @@ export default function setSolution() {
                     <table className="table-auto min-w-max w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border border-black">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
                             <tr className="border border-black text-center text-md">
-                                <th className="border border-black px-4 py-2">หัวข้อการแก้ไช</th>
+                                <th className="border border-black px-4 py-2">วิธีการแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">ผู้รับผิดชอบ</th>
                                 <th className="border border-black  px-4 py-2">วันที่กำหนดแก้ไข</th>
-                                <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
                                 <th className="border border-black  px-4 py-2">สถานะการแก้ไข</th>
+                                <th className="border border-black  px-4 py-2">การอนุมัติ</th>
+                                <th className="border border-black  px-4 py-2"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="hover:bg-gray-50 text-center items-center">
-                                    <td className="border border-black px-4 py-2">{resolution.topic_solution}</td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[30ch]'>{resolution.topic_solution}</p></td>
                                     <td className="border border-black px-4 py-2">
                                         {resolution.assign_to}
                                     </td>
                                     <td className="border border-black px-4 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', }) : ''}</td>
-                                    <td className="border border-black px-4 py-2">
-                                        {resolution.troubleshootSolutions && resolution.troubleshootSolutions.length > 0 && resolution.troubleshootSolutions[0].finish_date ? new Date(resolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
-                                    </td>
                                     <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {resolution.status_solution}
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                      {resolution.manager_approve}
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                    <button onClick={() => handleDelete(resolution.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
+                                    ลบ
+                                </button>
                                     </td>
                                 </tr>
                             ))}
@@ -256,7 +274,7 @@ export default function setSolution() {
             </div>
             <div className='gap-2 flex justify-end'>
                 <a
-                    onClick={router.back}
+                    href={`/technical/investigation/${meetingDetail?.incident_report_id}`}
                     className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     กลับ
@@ -274,15 +292,15 @@ export default function setSolution() {
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <div className='w-full'>
                         <label htmlFor="topic_solution" className="block text-sm font-medium text-gray-700">
-                            หัวข้อการแก้ไข
+                            วิธีการแก้ไข
                         </label>
-                        <input
-                            type='text'
+                        <textarea
+                          rows={2}
                             name="topic_solution"
                             onChange={handleChange}
                             required
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        ></input>
+                        ></textarea>
                     </div>
                     <div className='w-full'>
                         <label htmlFor="target_finish" className="block text-sm font-medium text-gray-700">

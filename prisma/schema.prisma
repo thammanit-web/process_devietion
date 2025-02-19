@@ -75,6 +75,7 @@ model ProblemSolution {
   target_finish         DateTime?
   status_solution       String?
   manager_approve       String?
+  techincal_comments    String?
   investigationMeeting  InvestigationMeeting?  @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
   troubleshootSolutions TroubleshootSolution[]
   managerApproves       ManagerApprove[]

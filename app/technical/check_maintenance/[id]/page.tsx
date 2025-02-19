@@ -15,10 +15,12 @@ interface InvestigationMeeting {
     summary_meeting: string
     investigation_signature: string
     manager_approve: Boolean
-    incidentReport: { id: number;
+    incidentReport: {
+        id: number;
         priority: string;
         ref_no: string;
-        topic: string;}[];
+        topic: string;
+    }[];
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
     SelectedUser: {
@@ -39,6 +41,7 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
+    techincal_comments: string
     managerApproves: ManagerApprove[]
     troubleshootSolutions: Troubleshoot[]
 }
@@ -66,6 +69,7 @@ export default function setSolution() {
     const [problemSolution, setProblemSolution] = useState<ProblemResolution | null>(null)
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
+    const [editedApprovals, setEditedApprovals] = useState<Record<string, string>>({});
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -86,10 +90,24 @@ export default function setSolution() {
             console.error('Error fetching report:', error)
         }
     }
+
+    const handleApprovalChange = (id: string, value: string) => {
+        setEditedApprovals(prev => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
     const handleSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true)
+
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { techincal_comments: approval })
+            );
+            await Promise.all(updatePromises);
+
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
             },);
@@ -101,10 +119,11 @@ export default function setSolution() {
                 to: "thammanit@thainitrate.com",
                 subject: `Process Deviation`,
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-                   <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
-                <p><strong>ดำเนินการเสร็จแล้ว</strong></p>
-              <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
-               `
+                     <p><strong>อนุมัติการการแก้ไข</strong></p>
+                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                    <p><strong>ดำเนินการเสร็จแล้ว</strong></p>
+                <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
+                `
             });
             router.push('/')
         } catch (error) {
@@ -120,26 +139,33 @@ export default function setSolution() {
                 status_report: "รอการแก้ไข",
             })
             const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id);
-            await axios.put(`/api/problem_resolution/${problemResolutionIds}`, {
-                status_solution: "รอการแก้ไข",
-            })
+
+            if (problemResolutionIds?.length) {
+                await Promise.all(problemResolutionIds.map(id =>
+                    axios.put(`/api/problem_resolution/${id}`, {
+                        status_solution: "รอการแก้ไข",
+                    })
+                ));
+            }
+
             const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
             const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
 
             const to = [...selectedUserEmails, ...problemResolutionEmails].join(',');
             await axios.post(`/api/send_email`, {
                 to: to,
-                subject: `Process Deviation`,
+                subject: "Process Deviation",
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
-                    <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
-                        <p><strong>ยังต้องแก้ไขเพิ่มเติม</strong></p>
-              <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/manager_page/improved/${id}`}">คลิกเพื่อตรวจสอบ</a>
-               `
+                        <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
+                            <p><strong>ยังต้องแก้ไขเพิ่มเติม</strong></p>
+                <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
+                `
             });
             console.log('Problem Resolution IDs:', problemResolutionIds);
             fetchMeeting(Number(id));
-            router.back()
+            router.push('/')
         } catch (error) {
+            setLoading(false)
             alert('Create Solution error');
             console.error(error);
         }
@@ -195,34 +221,38 @@ export default function setSolution() {
                         <thead className="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400 text-center">
                             <tr className="bg-gray-300 text-center">
                                 <th className="border border-black  px-4 py-2">ผู้รับผิดชอบ</th>
-                                <th className="border border-black  px-4 py-2">หัวข้อการแก้ไช</th>
+                                <th className="border border-black  px-4 py-2">วิธีการแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่กำหนดแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
-                                <th className="border border-black  px-4 py-2">สถานะการแก้ไข</th>
-                                <th className="border border-black  px-4 py-2">action</th>
+                                <th className="border border-black  px-4 py-2">การแก้ไช</th>
+                                <th className="border border-black  px-4 py-2">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
                             {meetingDetail?.problemResolutions.map((problemSolution) => (
                                 <tr key={problemSolution.id} className="hover:bg-gray-50 text-center items-center border border-black">
-                                    <td className="border border-black px-4 py-2">{problemSolution.topic_solution}</td>
                                     <td className="border border-black px-4 py-2">{problemSolution.assign_to}</td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[20ch]'>{problemSolution.topic_solution}</p></td>
                                     <td className="border border-black px-4 py-2">{problemSolution.target_finish ? new Date(problemSolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-4 py-2">
                                         {problemSolution.troubleshootSolutions && problemSolution.troubleshootSolutions.length > 0 && problemSolution.troubleshootSolutions[0].finish_date ? new Date(problemSolution.troubleshootSolutions[0].finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
                                     </td>
-                                    <td
-                                        className={`border border-black px-4 py-2 ${problemSolution.status_solution === 'รอแก้ไข' ? 'bg-yellow-300' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-300' : ''}`}
-                                    >
-                                        {problemSolution.status_solution}
-                                    </td>
-                                    <td className=" px-4 py-2 items-center flex justify-center">
+                                    <td className=" px-4 py-2 items-center flex justify-center border ">
                                         <a onClick={() => {
                                             setOpen(true);
                                             setProblemSolution(problemSolution);
                                         }} className='cursor-pointer underline font-black'>
                                             ดูการแก้ไช
                                         </a>
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                        <input
+                                            type="text"
+                                            value={editedApprovals[problemSolution.id] ?? problemSolution.techincal_comments ?? ""}
+                                            onChange={(e) => handleApprovalChange(problemSolution.id, e.target.value)}
+                                            className="border p-1 rounded-lg border-gray-600 text-center"
+                                            placeholder='หมายเหตุ...'
+                                        />
                                     </td>
                                 </tr>
                             ))}
