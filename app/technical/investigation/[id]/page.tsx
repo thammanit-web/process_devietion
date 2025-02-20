@@ -450,9 +450,6 @@ export default function investigationMeeting() {
                                     <label htmlFor={`user-${user.id}`} className="text-sm">
                                         {user.displayName}
                                     </label>
-                                    <span className="text-xs text-gray-500">
-                                        ({user.jobTitle})
-                                    </span>
                                 </div>
                             ))}
                         </div>
@@ -484,7 +481,9 @@ export default function investigationMeeting() {
                                         <label className="underline block text-sm font-medium text-gray-700">
                                             ผู้มีส่วนเกี่ยวข้อง
                                         </label>
-                                        <p className='ms-2'>{Investigation.SelectedUser[0]?.display_name}</p>
+                                        {Investigation.SelectedUser?.map(user => (
+                                            <p key={user.id} className='ms-2'>{user.display_name}</p>
+                                        ))}
                                     </div>
                                 </div>
 

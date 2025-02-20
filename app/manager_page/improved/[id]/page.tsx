@@ -288,6 +288,18 @@ export default function SetSolution() {
                 <div className="flex flex-col gap-4">
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
+                    <div>
+                    <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
+                        {meetingDetail?.SelectedUser?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.display_name}</li>
+                        ))}
+                   </div>
+                   <div>
+                    <p><strong>ผู้รับผิดชอบ</strong></p>
+                        {meetingDetail?.problemResolutions?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.assign_to}</li>
+                        ))}
+                   </div>
                     <div className="grid justify-center gap-2">
                         <div className='comment'>
                             <div>
@@ -324,6 +336,18 @@ export default function SetSolution() {
                 <div className="flex flex-col gap-4">
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
+                    <div>
+                    <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
+                        {meetingDetail?.SelectedUser?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.display_name}</li>
+                        ))}
+                   </div>
+                   <div>
+                    <p><strong>ผู้รับผิดชอบ</strong></p>
+                        {meetingDetail?.problemResolutions?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.assign_to}</li>
+                        ))}
+                   </div>
                     <div className="grid justify-center gap-2">
                         <div className='comment'>
                             <div>

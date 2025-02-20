@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
+import investigationMeeting from '../../investigation/[id]/page'
 interface InvestigationMeeting {
     incident_report_id: string
     topic_meeting: string
@@ -12,7 +13,6 @@ interface InvestigationMeeting {
     summary_meeting: string
     investigation_signature: string
     manager_approve: Boolean
-    SelectedUser: Array<{ userId: string }>;
     incidentReport:
     {
         id: number
@@ -22,6 +22,12 @@ interface InvestigationMeeting {
     }[]
     problemResolutions: ProblemResolution[]
     managerApproves: ManagerApprove[]
+    SelectedUser: {
+        id: string;
+        userId: string;
+        display_name: string;
+        email: string;
+    }[];
 }
 interface ProblemResolution {
     id: string
@@ -153,7 +159,10 @@ export default function setSolution() {
 
     const filteredUsers = users.filter(
         (user) =>
-            ["IT Officer"].includes(user.jobTitle ?? "")
+            ["Maintenance Officer Mechanical",
+                "Maintenance Officer Instrument and Electrical",
+                "Maintenance Manager Department",
+                "Maintenance Officer", "Maintenance Officer Instrument and electrical"].includes(user.jobTitle ?? "")
     );
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -257,12 +266,12 @@ export default function setSolution() {
                                         {resolution.status_solution}
                                     </td>
                                     <td className="border border-black px-4 py-2">
-                                      {resolution.manager_approve}
+                                        {resolution.manager_approve}
                                     </td>
                                     <td className="border border-black px-4 py-2">
-                                    <button onClick={() => handleDelete(resolution.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
-                                    ลบ
-                                </button>
+                                        <button onClick={() => handleDelete(resolution.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">
+                                            ลบ
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -295,7 +304,7 @@ export default function setSolution() {
                             วิธีการแก้ไข
                         </label>
                         <textarea
-                          rows={2}
+                            rows={2}
                             name="topic_solution"
                             onChange={handleChange}
                             required
@@ -328,7 +337,7 @@ export default function setSolution() {
                                 <option value="">-- เลือกผู้ใช้ --</option>
                                 {filteredUsers.map((user) => (
                                     <option key={user.id} value={user.id}>
-                                        {user.displayName} ({user.jobTitle})
+                                        {user.displayName}
                                     </option>
                                 ))}
                             </select>
@@ -354,8 +363,18 @@ export default function setSolution() {
             <Modal open={Isopen} onClose={() => setIsOpen(false)}>
                 <div className="flex flex-col gap-4 px-4 py-4">
                     <h1 className="text-2xl justify-center">ยืนยันการกำหนดการแก้ไข</h1>
-                    <p>
-                    </p>
+                    <div>
+                    <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
+                        {meetingDetail?.SelectedUser?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.display_name}</li>
+                        ))}
+                   </div>
+                   <div>
+                    <p><strong>ผู้รับผิดชอบ</strong></p>
+                        {meetingDetail?.problemResolutions?.map(user => (
+                            <li key={user.id} className='ms-2'>{user.assign_to}</li>
+                        ))}
+                   </div>
                     <hr className="border-t-solid border-1 border-grey" />
                     <div className="flex flex-row justify-center gap-2">
                         <button

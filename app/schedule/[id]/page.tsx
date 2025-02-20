@@ -386,9 +386,6 @@ export default function AapproveReport() {
                                     <label htmlFor={`user-${user.id}`} className="text-sm">
                                         {user.displayName}
                                     </label>
-                                    <span className="text-xs text-gray-500">
-                                        ({user.jobTitle})
-                                    </span>
                                 </div>
                             ))}
                         </div>

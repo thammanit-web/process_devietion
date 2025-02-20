@@ -27,6 +27,7 @@ export default function FirstPage() {
   }, []);
  
 
+  const allowedNames = ["Pongjuta@thainitrate.com", "Weerapan@thainitrate.com","Jaroonrote@thainitrate.com","Thammanit@thainitrate.com"];
   const allowedTechnical = [
     "Maintenance Officer Mechanical",
     "Maintenance Officer Instrument and Electrical",
@@ -35,33 +36,23 @@ export default function FirstPage() {
     "Warehouse Section Head",
     "Warehouse and Logistic Officer",
     "Warehouse and Logistic Section Head",
-    "IT Officer"
+    // "IT Officer"
   ];
   const allowedManager = [
     "Plant Manager",
-    "Maintenance Officer Mechanical",
-    "Maintenance Officer Instrument and Electrical",
-    "Maintenance Manager Department",
-    "Maintenance Officer",
-    "Warehouse Section Head",
-    "Warehouse and Logistic Officer",
-    "Warehouse and Logistic Section Head",
-    "IT Officer"
+    // "IT Officer"
   ];
   const allowedMaintenance = [
     "Maintenance Officer Mechanical",
     "Maintenance Officer Instrument and Electrical",
     "Maintenance Manager Department",
     "Maintenance Officer",
-    "Warehouse Section Head",
-    "Warehouse and Logistic Officer",
-    "Warehouse and Logistic Section Head",
-    "IT Officer"
+    // "IT Officer"
   ];
 
-  const isAllowed = allowedTechnical.includes(userDetails?.jobTitle);
-  const isAllowedManager = allowedManager.includes(userDetails?.jobTitle);
-  const isAllowedMaintenance = allowedMaintenance.includes(userDetails?.jobTitle);
+  const isAllowed =   allowedTechnical.includes(userDetails?.jobTitle) || allowedNames.includes(userDetails?.mail);
+  const isAllowedManager = allowedManager.includes(userDetails?.jobTitle) || allowedNames.includes(userDetails?.mail);;
+  const isAllowedMaintenance = allowedMaintenance.includes(userDetails?.jobTitle) || allowedNames.includes(userDetails?.mail);
 
   return (
     <div className="overflow-x-auto mt-16 py-4">
