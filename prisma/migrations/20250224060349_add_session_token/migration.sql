@@ -1,0 +1,25 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- CreateTable
+CREATE TABLE [dbo].[SessionToken] (
+    [id] NVARCHAR(1000) NOT NULL,
+    [token] NVARCHAR(1000) NOT NULL,
+    [expiresAt] DATETIME2 NOT NULL,
+    CONSTRAINT [SessionToken_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [SessionToken_token_key] UNIQUE NONCLUSTERED ([token])
+);
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH
