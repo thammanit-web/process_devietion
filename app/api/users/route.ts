@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { refreshAccessToken } from "@/app/utils/auth";
 
 export async function GET(request: NextRequest) {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-    if (!token?.accessToken) {
-        return NextResponse.json({ error: "Unauthorized" });
-    }
-
+    let token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+     if (!token?.accessToken) {
+         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+     }
+     if (token.expiresAt && Date.now() > (token.expiresAt as number) - 5000) {
+         console.log("Access token expired, attempting refresh...");
+         token = await refreshAccessToken(token);
+         if (token.error) {
+             return NextResponse.json({ error: "Failed to refresh token" }, { status: 401 });
+         }
+     }
     try {
         const res = await fetch("https://graph.microsoft.com/v1.0/users?$top=999", {
             headers: {
                 Authorization: `Bearer ${token?.accessToken}`,
             },
         });
+        if (!res.ok) {
+            return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });
+        }
+
         if (!res.ok) {
             return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });
         }

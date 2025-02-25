@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
 import { split } from 'postcss/lib/list'
+import Username from '@/app/components/username'
 
 interface IncidentReport {
     id: string
@@ -125,6 +126,8 @@ export default function investigationMeeting() {
 
         fetchUsers();
     }, []);
+
+
 
     const filteredUsers = users.filter(user =>
         user.displayName && user.displayName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -482,7 +485,9 @@ export default function investigationMeeting() {
                                             ผู้มีส่วนเกี่ยวข้อง
                                         </label>
                                         {Investigation.SelectedUser?.map(user => (
-                                            <p key={user.id} className='ms-2'>{user.display_name}</p>
+                                            <div key={user.id}>
+                                                <Username id={user.userId} />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>

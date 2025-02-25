@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model SessionToken {
-  id        String  @id @default(uuid())
-  token     String  @db.Text
-  expiresAt DateTime
-}
-
 model IncidentReport {
   id                   Int       @id @default(autoincrement())
   ref_no               String
