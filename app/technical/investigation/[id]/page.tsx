@@ -111,21 +111,28 @@ export default function investigationMeeting() {
         fetchInvestigationMeetings();
     }, []);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const res = await fetch("/api/users");
-                if (!res.ok) throw new Error("Failed to fetch users");
-
-                const data = await res.json();
-                setUsers(data.value || []);
-            } catch (error) {
-                setError("Error fetching users");
-            }
-        };
-
-        fetchUsers();
-    }, []);
+       useEffect(() => {
+           const fetchUsers = async () => {
+               try {
+                   const res = await fetch("/api/users");
+                   if (!res.ok) throw new Error("Failed to fetch users");
+                   const data = await res.json();
+                   setUsers(data.value || []);
+       
+                   const meRes = await fetch("/api/me");
+                   const meData = await meRes.json();
+       
+                   if (meData?.id && !selectedUsers.includes(meData.id)) {
+                       setSelectedUsers(prev => [...prev, meData.id]);
+                   }
+       
+               } catch (error) {
+                   setError("Error fetching users");
+               }
+           };
+       
+           fetchUsers();
+       }, []);
 
 
 
@@ -247,13 +254,31 @@ export default function investigationMeeting() {
     };
 
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files) {
-            setSelectedFiles((prevFiles) => [
-                ...prevFiles,
-                ...Array.from(files),
-            ]);
+        if (!files) return;
+
+        const maxSize = 5 * 1024 * 1024;
+        const allowedTypes = [
+            "image/jpeg", "image/png", "application/pdf",
+            "video/mp4", "video/quicktime",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv"
+        ];
+
+        const validFiles = Array.from(files).filter((file) => {
+            if (!allowedTypes.includes(file.type)) {
+                alert(`Invalid file type: ${file.name}`);
+                return false;
+            }
+            if (file.size > maxSize) {
+                alert(`File too large: ${file.name} (max 5MB)`);
+                return false;
+            }
+            return true;
+        });
+
+        if (validFiles.length > 0) {
+            setSelectedFiles((prevFiles) => [...prevFiles, ...validFiles]);
         }
     };
 

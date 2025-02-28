@@ -41,7 +41,10 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
-    techincal_comments: string
+    technical_comments: string
+    technical_status: string
+    manager_status: string
+    manager_comments: string
     managerApproves: ManagerApprove[]
     troubleshootSolutions: Troubleshoot[]
 }
@@ -70,6 +73,7 @@ export default function setSolution() {
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [editedApprovals, setEditedApprovals] = useState<Record<string, string>>({});
+    const [technicalStatus, setTechnicalStatus] = useState<Record<string, string>>({});
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -98,15 +102,27 @@ export default function setSolution() {
         }));
     };
 
+    const handleTechnicalStatusChange = (id: string, value: string) => {
+        setTechnicalStatus((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
     const handleSolution = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true)
 
             const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
-                axios.put(`/api/problem_resolution/${resolutionId}`, { techincal_comments: approval })
+                axios.put(`/api/problem_resolution/${resolutionId}`, { technical_comments: approval })
             );
             await Promise.all(updatePromises);
+
+            const updateStatus = Object.entries(technicalStatus).map(([resolutionId, status]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { technical_status: status })
+            );
+            await Promise.all(updateStatus);
 
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รออนุมัติการแก้ไข",
@@ -135,17 +151,32 @@ export default function setSolution() {
         e.preventDefault();
         try {
             setLoading(true)
+
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { technical_comments: approval })
+            );
+            await Promise.all(updatePromises);
+            const updateStatus = Object.entries(technicalStatus).map(([resolutionId, status]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { technical_status: status })
+            );
+            await Promise.all(updateStatus);
+
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการแก้ไข",
             })
-            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id);
+
+            const problemResolutionIds = meetingDetail?.problemResolutions
+                .filter(resolution => technicalStatus[resolution.id] === "ไม่อนุมัติ") 
+                .map(resolution => resolution.id);
 
             if (problemResolutionIds?.length) {
-                await Promise.all(problemResolutionIds.map(id =>
-                    axios.put(`/api/problem_resolution/${id}`, {
-                        status_solution: "รอการแก้ไข",
-                    })
-                ));
+                await Promise.all(
+                    problemResolutionIds.map(id =>
+                        axios.put(`/api/problem_resolution/${id}`, {
+                            status_solution: "รอการแก้ไข",  
+                        })
+                    )
+                );
             }
 
             const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
@@ -161,7 +192,6 @@ export default function setSolution() {
                 <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
                 `
             });
-            console.log('Problem Resolution IDs:', problemResolutionIds);
             fetchMeeting(Number(id));
             router.push('/')
         } catch (error) {
@@ -225,6 +255,7 @@ export default function setSolution() {
                                 <th className="border border-black  px-4 py-2">วันที่กำหนดแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
                                 <th className="border border-black  px-4 py-2">การแก้ไช</th>
+                                <th className="border border-black  px-4 py-2">การอนุมัติ</th>
                                 <th className="border border-black  px-4 py-2">หมายเหตุ</th>
                             </tr>
                         </thead>
@@ -246,9 +277,22 @@ export default function setSolution() {
                                         </a>
                                     </td>
                                     <td className="border border-black px-4 py-2">
+                                        <select
+                                            id="technical-status"
+                                            name="technicalStatus"
+                                            value={technicalStatus[problemSolution.id] ?? problemSolution.technical_status ?? ""}
+                                            onChange={(e) => handleTechnicalStatusChange(problemSolution.id, e.target.value)}
+                                            className="border p-1 rounded-lg border-gray-600 text-center"
+                                        >
+                                            <option value="">เลือกการอนุมัติ</option>
+                                            <option value="อนุมัติ">อนุมัติ</option>
+                                            <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
+                                        </select>
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
                                         <input
                                             type="text"
-                                            value={editedApprovals[problemSolution.id] ?? problemSolution.techincal_comments ?? ""}
+                                            value={editedApprovals[problemSolution.id] ?? problemSolution.technical_comments ?? ""}
                                             onChange={(e) => handleApprovalChange(problemSolution.id, e.target.value)}
                                             className="border p-1 rounded-lg border-gray-600 text-center"
                                             placeholder='หมายเหตุ...'

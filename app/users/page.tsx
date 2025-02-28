@@ -7,6 +7,7 @@ interface User {
     displayName: string | null;
     mail: string | null;
     jobTitle: string | null;
+    department: string | null;
 }
 
 export default function UserList() {
@@ -33,7 +34,7 @@ export default function UserList() {
     useEffect(() => {
         const filtered = users.filter(user =>
             (user.displayName?.toLowerCase().includes(search.toLowerCase()) || search === "") &&
-            (user.jobTitle?.toLowerCase().includes(searchJob.toLowerCase()) || searchJob === "") 
+            (user.department?.toLowerCase().includes(searchJob.toLowerCase()) || searchJob === "") 
         );
         setFilteredUsers(filtered);
     }, [search, searchJob, users]);
@@ -55,7 +56,7 @@ export default function UserList() {
                 />
                 <input
                     type="text"
-                    placeholder="Search by job title..."
+                    placeholder="Search by department..."
                     value={searchJob}
                     onChange={(e) => setSearchJob(e.target.value)}
                     className="mb-4 ml-2 p-2 border border-gray-300 rounded"
@@ -68,18 +69,18 @@ export default function UserList() {
                             <th className="border border-gray-300 px-4 py-2">id</th>
                             <th className="border border-gray-300 px-4 py-2">Name</th>
                             <th className="border border-gray-300 px-4 py-2">Email</th>
-                            <th className="border border-gray-300 px-4 py-2">Job Title</th>
+                            <th className="border border-gray-300 px-4 py-2">department</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredUsers
-                            .filter(user => user.jobTitle !== null)
+                            .filter(user => user.department !== null)
                             .map((user,index) => (
                                 <tr key={user.id} className="border border-gray-300">
                                     <td className="border border-gray-300 px-4 py-2">{index+1}</td>
                                     <td className="border border-gray-300 px-4 py-2">{user.displayName || "N/A"}</td>
                                     <td className="border border-gray-300 px-4 py-2">{user.mail || "N/A"}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{user.jobTitle || "N/A"}</td>
+                                    <td className="border border-gray-300 px-4 py-2">{user.department || "N/A"}</td>
                                 </tr>
                             ))}
 

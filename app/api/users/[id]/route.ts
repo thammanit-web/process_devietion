@@ -8,7 +8,7 @@ export async function GET(request: NextRequest,
     if (!token?.accessToken) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (token.expiresAt && Date.now() > (token.expiresAt as number) - 5000) {
+    if (token.exp && Date.now() > Number(token.exp) - 5000) {
         console.log("Access token expired, attempting refresh...");
         token = await refreshAccessToken(token);
         if (token.error) {
@@ -23,10 +23,7 @@ export async function GET(request: NextRequest,
                 Authorization: `Bearer ${token?.accessToken}`,
             },
         });
-        if (!res.ok) {
-            return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });
-        }
-
+        
         if (!res.ok) {
             return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });
         }

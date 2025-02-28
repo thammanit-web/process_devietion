@@ -1,5 +1,4 @@
 import NextAuth, { NextAuthOptions, Session } from "next-auth";
-import { JWT } from "next-auth/jwt";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { refreshAccessToken } from "@/app/utils/auth";
 
@@ -29,10 +28,10 @@ const authOptions: NextAuthOptions = {
         token.accessToken = access_token;
         token.idToken = id_token;
         token.refreshToken = refresh_token;
-        token.expiresAt = Date.now() + (Number(expires_in) * 1000);
+        token.exp = Date.now() + Number(account.expires_in) * 1000;
       }
       
-      if (token.expiresAt && Date.now() > (token.expiresAt as number) - 5000) {
+      if (token.exp && Date.now() > Number(token.exp) - 5000) {
         console.log("Token is about to expire, refreshing...");
         return await refreshAccessToken(token);
       }
@@ -41,7 +40,6 @@ const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       session.idToken = token.idToken as string;
-      session.expiresAt = token.expiresAt as string;
       return session;
     }
   },

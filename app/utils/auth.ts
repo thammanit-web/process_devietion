@@ -19,8 +19,9 @@ export async function refreshAccessToken(token: JWT) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Failed to refresh token: ${errorData.error_description || "Unknown error"}`);
-    }
+      console.error("Failed to refresh access token:", errorData);
+      return { ...token, error: "RefreshTokenError" }; 
+  }
 
     const data = await response.json();
     if (!data.access_token) {
@@ -32,7 +33,7 @@ export async function refreshAccessToken(token: JWT) {
       accessToken: data.access_token,
       idToken: data.id_token ?? token.idToken,
       refreshToken: data.refresh_token ?? token.refreshToken,
-      expiresAt: Date.now() + data.expires_in * 1000,
+      exp: Date.now() + data.expires_in * 1000,
     };
   } catch (error) {
     console.error("Error refreshing access token", error);

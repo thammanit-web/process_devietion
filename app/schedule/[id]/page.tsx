@@ -72,6 +72,7 @@ export default function AapproveReport() {
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [priority, setPriority] = useState<string>('')
 
     const fetchIncidentReports = async (id: number) => {
         try {
@@ -99,9 +100,16 @@ export default function AapproveReport() {
         }));
     };
 
+    const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setPriority(e.target.value)
+    }
+
     const CreateMeeting = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        if (priority !== 'Normal' && priority !== 'Urgent') {
+            alert('โปรดกำหนด Priority)');
+            return;
+          }
         const selectedUserEmails = users
             .filter(user => selectedUsers.includes(user.id))
             .map(user => user.mail);
@@ -118,30 +126,31 @@ export default function AapproveReport() {
             }
 
             await axios.put(`/api/incident_report/${id}`, {
+                priority: priority,
                 status_report: "รอการประชุม",
             });
 
             const userRequests = selectedUsers.map(userId => {
                 const user = users.find(u => u.id === userId);
                 if (!user) return alert("ไม่พบข้อมูลผู้ใช้");
-                
+
                 return {
-                  userId,
-                  display_name: user.displayName,
-                  email: user.mail,
+                    userId,
+                    display_name: user.displayName,
+                    email: user.mail,
                 };
-              });
-              
-              try {
+            });
+
+            try {
                 const response = await axios.post(`/api/investigation_meeting`, {
-                  ...Investigation,
-                  incident_report_id: Number(id),
-                  selectedUsers: userRequests,  
+                    ...Investigation,
+                    incident_report_id: Number(id),
+                    selectedUsers: userRequests,
                 });
-              } catch (error) {
+            } catch (error) {
                 console.error("Error creating investigation:", error);
-              }
-              
+            }
+
 
             router.back();
             fetchIncidentReports(Number(id));
@@ -161,9 +170,16 @@ export default function AapproveReport() {
             try {
                 const res = await fetch("/api/users");
                 if (!res.ok) throw new Error("Failed to fetch users");
-
                 const data = await res.json();
                 setUsers(data.value || []);
+
+                const meRes = await fetch("/api/me");
+                const meData = await meRes.json();
+
+                if (meData?.id && !selectedUsers.includes(meData.id)) {
+                    setSelectedUsers(prev => [...prev, meData.id]);
+                }
+
             } catch (error) {
                 setError("Error fetching users");
             }
@@ -171,6 +187,7 @@ export default function AapproveReport() {
 
         fetchUsers();
     }, []);
+
 
 
     const filteredUsers = users.filter(user =>
@@ -203,7 +220,16 @@ export default function AapproveReport() {
                 <div className='flex gap-4'>
                     <div className='w-full flex gap-4'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm'>Priority</p>
-                        <p className={`font-bold underline ${report.priority === 'Urgent' ? 'text-red-500' : 'text-blue-500'}`}>{report.priority}</p>
+
+                        <select
+                            className={`border px-4 py-2 rounded-md ${priority === 'Urgent' ? 'bg-red-500 text-white':priority === 'Normal' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                            value={priority}
+                            onChange={handlePriorityChange}
+                        >
+                            <option>กำหนด Priority</option>
+                            <option value="Normal" className='bg-blue-500 text-white'>Normal</option>
+                            <option value="Urgent" className='bg-red-500'>Urgent</option>
+                        </select>
                     </div>
                     <div className='w-full flex gap-4'>
                         <p className='font-bold lg:text-lg md:text-sm sm:text-sm'>Ref. No.</p>

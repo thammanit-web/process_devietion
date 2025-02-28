@@ -39,7 +39,8 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
-    techincal_comments: string
+    technical_comments: string
+    manager_comments: string
     managerApproves: ManagerApprove[]
     troubleshootSolutions: Troubleshoot[]
 }
@@ -251,7 +252,8 @@ export default function setSolution() {
                                 <th className="border border-black  px-4 py-2">วันที่แก้ไข</th>
                                 <th className="border border-black  px-4 py-2">สถานะการแก้ไข</th>
                                 <th className="border border-black  px-4 py-2">แก้ไข</th>
-                                <th className="border border-black  px-4 py-2">หมายเหตุ</th>
+                                <th className="border border-black  px-4 py-2">หมายเหตุ(เทคนิค)</th>
+                                <th className="border border-black  px-4 py-2">หมายเหตุ(ผู้จัดการ)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -267,14 +269,21 @@ export default function setSolution() {
                                     <td className={`border border-black px-4 py-2 text-white ${problemSolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : problemSolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
                                         {problemSolution.status_solution}
                                     </td>
-                                    <td className=" px-4 py-2 items-center flex justify-center">
+                                    <td className="px-4 py-2 items-center flex justify-center">
                                         {problemSolution.troubleshootSolutions.length === 0 ? (
-                                            <a onClick={() => {
-                                                setIsOpen(true);
-                                                setProblemSolution(problemSolution);
-                                            }} className='cursor-pointer underline font-black'>
-                                                เพิ่มการแก้ไข
-                                            </a>
+                                            session?.user?.name !== problemSolution.assign_to ? (
+                                                <span className="text-gray-400">คุณไม่มีส่วนรับผิดชอบ</span>
+                                            ) : (
+                                                <a
+                                                    onClick={() => {
+                                                        setIsOpen(true);
+                                                        setProblemSolution(problemSolution);
+                                                    }}
+                                                    className="cursor-pointer underline font-black"
+                                                >
+                                                    เพิ่มการแก้ไข
+                                                </a>
+                                            )
                                         ) : (
                                             <a onClick={() => {
                                                 setOpen(true);
@@ -285,17 +294,22 @@ export default function setSolution() {
                                         )}
                                     </td>
                                     <td className="border border-black px-4 py-2">
-                                        {problemSolution.techincal_comments}
+                                        {problemSolution.technical_comments}
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                        {problemSolution.manager_comments}
                                     </td>
                                 </tr>
                             ))}
-
                         </tbody>
                     </table>
                 </div>
-
+            </div>
+            <div className='flex w-full justify-center text-center mt-4 text-gray-500 text-sm'>
+                <p>---------- หากแก้ไขสำเร็จครบแล้วอย่าลืมกดส่งรีวิว -----------</p>
             </div>
             <div className='gap-2 flex justify-end'>
+
                 <a
                     onClick={router.back}
                     className="cursor-pointer inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

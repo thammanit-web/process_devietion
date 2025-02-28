@@ -60,7 +60,6 @@ export default function createReport() {
         setFormData((prevState) => ({
             ...prevState,
             category_report: selectedCategory,
-            priority: ['Product quality!', 'Safety!', 'Emergency!'].includes(selectedCategory) ? 'Urgent' : 'Normal'
         }));
     };
 
@@ -169,6 +168,27 @@ export default function createReport() {
             <form className="space-y-6">
                 <div className="flex gap-4">
                     <div className='w-full'>
+                        <label htmlFor="category_report" className="block text-sm font-medium text-gray-700">
+                            ประเภท
+                        </label>
+                        <div className="relative">
+                            <select
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                id="category_report"
+                                value={formData.category_report}
+                                required
+                                onChange={handleCategoryChange}
+                            >
+                                <option>เลือกประเภท</option>
+                                <option value="Product quality!">Product quality</option>
+                                <option value="Equipment failure">Equipment failure</option>
+                                <option value="Safety!">Safety</option>
+                                <option value="Process condition">Process condition</option>
+                                <option value="Emergency!">Emergency</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className='w-full'>
                         <label htmlFor="topic" className="block text-sm font-medium text-gray-700">
                             หัวข้อ
                         </label>
@@ -182,27 +202,7 @@ export default function createReport() {
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         />
                     </div>
-                    <div className='w-full'>
-                        <label htmlFor="category_report" className="block text-sm font-medium text-gray-700">
-                            ประเภท
-                        </label>
-                        <div className="relative">
-                            <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                id="category_report"
-                                value={formData.category_report}
-                                required
-                                onChange={handleCategoryChange}
-                            >
-                                <option>เลือกประเภท</option>
-                                <option value="Product quality!">Product quality!</option>
-                                <option value="Equipment failure">Equipment failure</option>
-                                <option value="Safety!">Safety!</option>
-                                <option value="Process condition">Process condition</option>
-                                <option value="Emergency!">Emergency!</option>
-                            </select>
-                        </div>
-                    </div>
+
                 </div>
 
                 <div className="md:flex sm:grid-col gap-4">

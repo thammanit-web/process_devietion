@@ -70,6 +70,10 @@ CREATE TABLE [dbo].[ProblemSolution] (
     [target_finish] DATETIME2,
     [status_solution] NVARCHAR(1000),
     [manager_approve] NVARCHAR(1000),
+    [technical_comments] NVARCHAR(1000),
+    [technical_status] NVARCHAR(1000),
+    [manager_status] NVARCHAR(1000),
+    [manager_comments] NVARCHAR(1000),
     CONSTRAINT [ProblemSolution_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 

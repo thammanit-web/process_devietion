@@ -1,11 +1,13 @@
+
 'use client'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
 import { Modal } from '@/app/components/modal'
 import { LoadingOverlay } from '@/app/components/loading'
-import investigationMeeting from '../../investigation/[id]/page'
+
 interface InvestigationMeeting {
+    id:string;
     incident_report_id: string
     topic_meeting: string
     scheduled_date: string
@@ -61,6 +63,7 @@ interface User {
     displayName: string | null;
     mail: string | null;
     jobTitle: string | null;
+    department: string | null;
 }
 
 export default function setSolution() {
@@ -159,10 +162,7 @@ export default function setSolution() {
 
     const filteredUsers = users.filter(
         (user) =>
-            ["Maintenance Officer Mechanical",
-                "Maintenance Officer Instrument and Electrical",
-                "Maintenance Manager Department",
-                "Maintenance Officer", "Maintenance Officer Instrument and electrical"].includes(user.jobTitle ?? "")
+            ["Maintenance","IT","Production"].includes(user.department ?? "")
     );
     const handleApprove = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -183,7 +183,7 @@ export default function setSolution() {
                 },
             });
             await axios.post(`/api/manager_approve`, {
-                meeting_id: Number(meetingDetail?.problemResolutions[0].meeting_id),
+                meeting_id: Number(meetingDetail?.id),
                 solution_id: Number(meetingDetail?.problemResolutions[0].id),
                 comment_solution: '',
                 comment_troubleshoot: ''

@@ -28,26 +28,32 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const {              
+    const {
       meeting_id,
       topic_solution,
       assign_to,
       status_solution,
       manager_approve,
-      techincal_comments,
+      technical_comments,
+      technical_status,
+      manager_status,
+      manager_comments,
       email_assign,
-     } = await req.json()
+    } = await req.json()
     return Response.json(await prisma.problemSolution.update({
       where: { id: Number(id) },
-      data: {              
+      data: {
         meeting_id,
         topic_solution,
         assign_to,
         status_solution,
         manager_approve,
-        techincal_comments,
+        technical_comments,
+        technical_status,
+        manager_status,
+        manager_comments,
         email_assign
-       },
+      },
     }))
   } catch (error) {
     return new Response(error as BodyInit, {
@@ -66,7 +72,7 @@ export async function DELETE(
     const deletedResolution = await prisma.problemSolution.delete({
       where: { id: Number(id) },
     });
-    return Response.json({message: "Resolution successfully deleted",deletedResolution}); 
+    return Response.json({ message: "Resolution successfully deleted", deletedResolution });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: 'An unknown error occurred' }),

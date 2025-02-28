@@ -3,6 +3,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
 interface IncidentReport {
     id: number;
     ref_no: String
@@ -23,6 +24,7 @@ interface IncidentReport {
 
 export default function DashboardSubmit() {
     const [Incidentreports, setIncidentreport] = useState<IncidentReport[]>([]);
+    const { data: session } = useSession();
 
     const router = useRouter()
 
@@ -104,10 +106,10 @@ export default function DashboardSubmit() {
                                             <td className="px-6 py-4 border border-black">{incident.ref_no}</td>
                                             <td className="px-6 py-4 border border-black">{incident.topic}</td>
                                             <td className="px-6 py-4 border border-black">
-                                                {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
+                                                {incident.incident_date ? new Date(incident.incident_date.toString()).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 border border-black">
-                                                {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', {day: '2-digit',month: '2-digit',year: '2-digit',hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
+                                                {incident.report_date ? new Date(incident.report_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 border border-black">
                                                 {incident.reporter_name}
@@ -125,9 +127,15 @@ export default function DashboardSubmit() {
                                                     }`}>
                                                     {incident.status_report}</p>
                                             </td>
-                                            <td className="px-6 py-4 border border-black" data-tooltip-target="tooltip-default">
-                                                <Link href={`/detail_deviation/${incident.id}`} className='border border-gray-500 rounded-lg px-2 py-1'>รายละอียด</Link>
-                                                <Link href={`/head_verify/${incident.id}`} className='ms-2 border border-gray-500 rounded-lg px-2 py-1'>ตรวจสอบ</Link>
+                                            <td className="px-6 py-4 border border-black">
+                                                <Link href={`/detail_deviation/${incident.id}`} className="border border-gray-500 rounded-lg px-2 py-1">
+                                                    รายละอียด
+                                                </Link>
+                                                {(session?.user?.email === "worrawut@thainitrate.com" || session?.user?.email === "thammanit@thainitrate.com") && (
+                                                    <Link href={`/head_verify/${incident.id}`} className="ms-2 border border-gray-500 rounded-lg px-2 py-1">
+                                                        ตรวจสอบ
+                                                    </Link>
+                                                )}
                                             </td>
                                         </tr>
                                     )))

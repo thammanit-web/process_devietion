@@ -42,6 +42,8 @@ interface ProblemResolution {
     target_finish: string
     status_solution: string
     manager_approve: string
+    manager_status: string
+    manager_comments: string
     managerApproves: ManagerApprove[]
     troubleshootSolutions: Troubleshoot[]
 }
@@ -75,11 +77,13 @@ export default function SetSolution() {
         meeting_id: '',
         solution_id: '',
         comment_solution: '',
-        comment_troubleshoot: ''
+        comment_troubleshoot: '',
     })
     const [openApprove, setOpenApprove] = useState<boolean>(false);
     const [openReject, setOpenReject] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
+    const [editedApprovals, setEditedApprovals] = useState<Record<string, string>>({});
+    const [managerStatus, setManagerStatus] = useState<Record<string, string>>({});
 
     const fetchMeeting = async (id: number) => {
         try {
@@ -114,10 +118,36 @@ export default function SetSolution() {
         }));
     }, [id]);
 
+    const handleApprovalChange = (id: string, value: string) => {
+        setEditedApprovals(prev => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
+    const handleManagerStatusChange = (id: string, value: string) => {
+        setManagerStatus((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
     const handleManagerApprove = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setLoading(true)
+
+
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_comments: approval })
+            );
+            await Promise.all(updatePromises);
+
+            const updateStatus = Object.entries(managerStatus).map(([resolutionId, status]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_status: status })
+            );
+            await Promise.all(updateStatus);
+
             await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
                 meeting_id: Number(id),
@@ -146,7 +176,7 @@ export default function SetSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p><strong>อนุมัติการแก้ไขแล้ว</strong></p>
                     <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
-                <p>Commet: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                <p>Manager Comment: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
          
                `
             });
@@ -163,6 +193,16 @@ export default function SetSolution() {
         e.preventDefault();
         try {
             setLoading(true)
+            const updatePromises = Object.entries(editedApprovals).map(([resolutionId, approval]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_comments: approval })
+            );
+            await Promise.all(updatePromises);
+
+            const updateStatus = Object.entries(managerStatus).map(([resolutionId, status]) =>
+                axios.put(`/api/problem_resolution/${resolutionId}`, { manager_status: status })
+            );
+            await Promise.all(updateStatus);
+
             await axios.put(`/api/manager_approve/${meetingDetail?.managerApproves[0]?.id}`, {
                 ...managerApproves,
                 meeting_id: Number(id),
@@ -171,14 +211,20 @@ export default function SetSolution() {
             await axios.put(`/api/incident_report/${meetingDetail?.incident_report_id}`, {
                 status_report: "รอการแก้ไข",
             })
-            const problemResolutionIds = meetingDetail?.problemResolutions.map(resolution => resolution.id) || [];
-            await Promise.all(
-                problemResolutionIds.map(problemId =>
-                    axios.put(`/api/problem_resolution/${problemId}`, {
-                        status_solution: "รอการแก้ไข",
-                    })
-                )
-            );
+
+            const problemResolutionIds = meetingDetail?.problemResolutions
+                .filter(resolution => managerStatus[resolution.id] === "ไม่อนุมัติ")
+                .map(resolution => resolution.id);
+
+            if (problemResolutionIds?.length) {
+                await Promise.all(
+                    problemResolutionIds.map(id =>
+                        axios.put(`/api/problem_resolution/${id}`, {
+                            status_solution: "รอการแก้ไข",
+                        })
+                    )
+                );
+            }
             const selectedUserEmails = meetingDetail?.SelectedUser?.map(user => user.email).filter(email => email) || [];
             const problemResolutionEmails = meetingDetail?.problemResolutions?.map(assign => assign.email_assign).filter(email => email) || [];
 
@@ -188,14 +234,14 @@ export default function SetSolution() {
                 html: `<p>รายงานความผิดปกติในกระบวนการผลิต</p>
                 <p><strong>หัวข้อ : </strong>${meetingDetail?.incidentReport[0]?.topic}</p>
                     <p><strong>ไม่อนุมัติการแก้ไข</strong></p>
-                    <p>Commet: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
+                    <p>Manager Comment: ${managerApproves.comment_troubleshoot ? managerApproves.comment_troubleshoot : "ไม่มี comment"}</p>
                  <a href="${`${process.env.NEXT_PUBLIC_BASE_URL}/maintenance_page/${id}`}">คลิกเพื่อตรวจสอบ</a>
                `
             });
             fetchMeeting(Number(id));
             router.push(`/manager_page`)
         } catch (error) {
-            alert('Create Solution error');
+            alert('Reject error');
             setLoading(false)
             console.error(error);
         }
@@ -237,21 +283,19 @@ export default function SetSolution() {
                                 <th scope="col" className="px-6 py-3 border border-black">ผู้รับผิดชอบ</th>
                                 <th scope="col" className="px-6 py-3 border border-black">วันที่กำหนดแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">วันที่แก้ไข</th>
-                                <th scope="col" className="px-6 py-3 border border-black">สถานะการแก้ไข</th>
                                 <th scope="col" className="px-6 py-3 border border-black">การแก้ไข</th>
+                                <th scope="col" className="px-6 py-3 border border-black">การอนุมัติ</th>
+                                <th scope="col" className="px-6 py-3 border border-black">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
                             {meetingDetail?.problemResolutions?.map((resolution) => (
                                 <tr key={resolution.id} className="border border-black text-center text-md">
-                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[30ch]'>{resolution.topic_solution}</p></td>
+                                    <td className="border border-black px-4 py-2 text-start" ><p className='break-words w-[20ch]'>{resolution.topic_solution}</p></td>
                                     <td className="border border-black px-6 py-2">{resolution.assign_to}</td>
                                     <td className="border border-black px-6 py-2">{resolution.target_finish ? new Date(resolution.target_finish.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</td>
                                     <td className="border border-black px-6 py-2">
                                         {resolution.troubleshootSolutions[0]?.finish_date ? new Date(resolution.troubleshootSolutions[0]?.finish_date.toString()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}
-                                    </td>
-                                    <td className={`border border-black px-4 py-2 text-white ${resolution.status_solution === 'รอการแก้ไข' ? 'bg-blue-600' : resolution.status_solution === 'แก้ไขสำเร็จ' ? 'bg-green-400' : ''}`}>
-                                        {resolution.status_solution}
                                     </td>
                                     <td className="px-6 py-2 border border-black">
                                         <a onClick={() => {
@@ -260,6 +304,28 @@ export default function SetSolution() {
                                         }} className='cursor-pointer underline font-black'>
                                             ดูการแก้ไช
                                         </a>
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                        <select
+                                            id="manager_status"
+                                            name="managerStatus"
+                                            value={managerStatus[resolution.id] ?? resolution.manager_status ?? ""}
+                                            onChange={(e) => handleManagerStatusChange(resolution.id, e.target.value)}
+                                            className="border p-1 rounded-lg border-gray-600 text-center"
+                                        >
+                                            <option value="">เลือกการอนุมัติ</option>
+                                            <option value="อนุมัติ">อนุมัติ</option>
+                                            <option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
+                                        </select>
+                                    </td>
+                                    <td className="border border-black px-4 py-2">
+                                        <input
+                                            type="text"
+                                            value={editedApprovals[resolution.id] ?? resolution.manager_comments ?? ""}
+                                            onChange={(e) => handleApprovalChange(resolution.id, e.target.value)}
+                                            className="border p-1 rounded-lg border-gray-600 text-center"
+                                            placeholder='หมายเหตุ...'
+                                        />
                                     </td>
                                 </tr>
                             ))}
@@ -289,17 +355,17 @@ export default function SetSolution() {
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
                     <div>
-                    <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
+                        <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
                         {meetingDetail?.SelectedUser?.map(user => (
                             <li key={user.id} className='ms-2'>{user.display_name}</li>
                         ))}
-                   </div>
-                   <div>
-                    <p><strong>ผู้รับผิดชอบ</strong></p>
+                    </div>
+                    <div>
+                        <p><strong>ผู้รับผิดชอบ</strong></p>
                         {meetingDetail?.problemResolutions?.map(user => (
                             <li key={user.id} className='ms-2'>{user.assign_to}</li>
                         ))}
-                   </div>
+                    </div>
                     <div className="grid justify-center gap-2">
                         <div className='comment'>
                             <div>
@@ -337,26 +403,26 @@ export default function SetSolution() {
                     <h1 className="text-2xl justify-center">กำหนดการแก้ไข</h1>
                     <hr className="border-t-solid border-1 border-grey" />
                     <div>
-                    <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
+                        <p><strong>ผู้มีส่วนเกี่ยวข้อง</strong></p>
                         {meetingDetail?.SelectedUser?.map(user => (
                             <li key={user.id} className='ms-2'>{user.display_name}</li>
                         ))}
-                   </div>
-                   <div>
-                    <p><strong>ผู้รับผิดชอบ</strong></p>
+                    </div>
+                    <div>
+                        <p><strong>ผู้รับผิดชอบ</strong></p>
                         {meetingDetail?.problemResolutions?.map(user => (
                             <li key={user.id} className='ms-2'>{user.assign_to}</li>
                         ))}
-                   </div>
+                    </div>
                     <div className="grid justify-center gap-2">
                         <div className='comment'>
                             <div>
                                 <h1>แสดงความคิดเห็น</h1>
                                 <input
-                                    value={managerApproves.comment_solution}
+                                    value={managerApproves.comment_troubleshoot}
                                     type="text"
-                                    name='comment_solution'
-                                    id='comment_solution'
+                                    name='comment_troubleshoot'
+                                    id='comment_troubleshoot'
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     onChange={handleChange}
                                 />

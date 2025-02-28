@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (token.expiresAt && Date.now() > (token.expiresAt as number) - 5000) {
+    if (token.exp && Date.now() > (token.exp as number) - 5000) {
         console.log("Access token expired, attempting refresh...");
         token = await refreshAccessToken(token);
         if (token.error) {
@@ -20,10 +20,6 @@ export async function GET(request: NextRequest) {
         const res = await fetch("https://graph.microsoft.com/v1.0/me", {
             headers: { Authorization: `Bearer ${token.accessToken}` },
         });
-
-        if (!res.ok) {
-            return refreshAccessToken(token);
-        } 
 
         if (!res.ok) {
             return NextResponse.json({ error: "Failed to fetch users" }, { status: res.status });

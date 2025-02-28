@@ -228,31 +228,20 @@ export default function detailVerify() {
                 <div className="lg:flex md:flex sm:grid gap-4 w-full  lg:text-base md:text-base sm:text-sm">
                     <div className="lg:grid md:grid sm:flex ">
                         <p className="font-semibold">ไฟล์ประกอบการรายงาน</p>
-                        {report.ReportFiles.length == 0 ? (
-                            <div>
-                                <p className="text-center mt-2">
-                                    ไม่มีไฟล์ประกอบการตรวจสอบ!!
-                                </p>
-                            </div>
-                        ) : (
+                        {
                             report.ReportFiles?.map((file) => (
-                                <li key={file.id} className="mt-1 ">
+                                <li key={file.id} className="mt-1 border px-4 py-2">
                                     <a
                                         href={`${process.env.NEXT_PUBLIC_STORAGE}${file.file_url}`}
                                         className="text-blue-500"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {file.file_url
-                                            ?.split("/")
-                                            .pop()
-                                            ?.split("-")
-                                            .slice(1)
-                                            .join("-") ?? ""}
+                                        {file.file_url?.split('/').pop()?.split('-').slice(1).join('-') ?? ''}
                                     </a>
                                 </li>
-                            ))
-                        )}
+                            )
+                            )}
                     </div>
                 </div>
 
